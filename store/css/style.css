@@ -1,0 +1,363 @@
+/* ==========================================================================
+   TOHO ELECTRIC VN - GLASSMORPHISM & ART-TECH THEME (OPTIMIZED LAYOUT & FONT)
+   ========================================================================== */
+
+/* Import Font Inter chuẩn e-commerce */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* ==========================================================================
+   1. ROOT VARIABLES & TYPOGRAPHY SETTINGS
+   ========================================================================== */
+:root {
+    --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --color-primary: #E31837;
+    --color-primary-hover: #C0132C;
+    --glass-bg: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --glass-dark-bg: rgba(18, 18, 18, 0.82);
+}
+
+/* Base Styles & Inter Font Reset */
+body, button, input, select, textarea {
+    font-family: var(--font-main) !important;
+    letter-spacing: normal;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    background-color: #f8fafc;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(227, 24, 55, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(147, 51, 234, 0.04) 0px, transparent 50%);
+    background-attachment: fixed;
+    color: #0f172a;
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: var(--font-heading) !important;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+/* Cấu hình hiển thị Tên & Giá Sản Phẩm */
+.product-title, .line-clamp-2 {
+    font-size: 0.875rem; /* 14px */
+    font-weight: 500;
+    line-height: 1.4;
+    color: #1e293b;
+}
+
+.product-price {
+    font-size: 1rem; /* 16px */
+    font-weight: 700;
+    color: #e11d48;
+}
+
+/* Trang chính sách / Bài viết */
+#policyArticleContent, #policyModalContent {
+    letter-spacing: 0;
+    line-height: 1.8;
+}
+
+.tracking-tight {
+    letter-spacing: normal !important;
+}
+
+/* ==========================================================================
+   2. HEADER & LAYOUT STRUCTURE FIX
+   ========================================================================== */
+header {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+    max-height: 130px;
+}
+
+header > div:first-child {
+    background: var(--glass-dark-bg) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+header .max-w-7xl {
+    box-sizing: border-box;
+}
+
+/* ==========================================================================
+   3. SCROLLBAR ART STYLE
+   ========================================================================== */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(241, 245, 249, 0.8);
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #E31837 0%, #9333ea 100%);
+    border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #E31837;
+}
+
+/* ==========================================================================
+   4. GLASSMORPHISM ELEMENTS
+   ========================================================================== */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(227, 24, 55, 0.3);
+    box-shadow: 0 20px 35px -12px rgba(227, 24, 55, 0.12), 0 0 15px rgba(227, 24, 55, 0.05);
+}
+
+/* ==========================================================================
+   5. CATEGORY MEGA MENU GLASSMORPHISM
+   ========================================================================== */
+.category-dropdown-wrapper {
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.category-menu-container:hover .category-dropdown-wrapper {
+    display: flex !important;
+}
+
+.cat-item-hover {
+    transition: all 0.2s ease;
+}
+
+.cat-item-hover:hover {
+    background: linear-gradient(90deg, rgba(227, 24, 55, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+    color: #E31837;
+    padding-left: 1.25rem !important;
+}
+
+/* ==========================================================================
+   6. SIDE BANNERS AMBIENT GLOW & POSITIONS
+   ========================================================================== */
+.side-banner-left,
+.side-banner-right {
+    position: fixed;
+    top: 145px;
+    z-index: 30;
+    width: 180px;
+    transition: all 0.3s ease;
+}
+
+.side-banner-left { right: calc(50% + 650px); }
+.side-banner-right { left: calc(50% + 650px); }
+
+.side-banner-left:hover, .side-banner-right:hover {
+    transform: translateY(-4px);
+}
+
+@media (max-width: 1600px) {
+    .side-banner-left, .side-banner-right { width: 140px; }
+    .side-banner-left { right: calc(50% + 645px); }
+    .side-banner-right { left: calc(50% + 645px); }
+}
+
+@media (max-width: 1380px) {
+    #sideBannerLeft, #sideBannerRight { display: none !important; }
+}
+
+/* ==========================================================================
+   7. MODALS & ART CARDS
+   ========================================================================== */
+.art-card {
+    border-radius: 20px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.art-card:hover {
+    border-color: #E31837;
+    box-shadow: 0 12px 30px rgba(227, 24, 55, 0.08);
+}
+
+#policyModal, #cartModal, #checkoutModal, #pcBuilderModal, #imageLightboxModal {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+@media (max-width: 768px) {
+    .glass-panel { backdrop-filter: blur(10px); }
+}
+
+/* ==========================================================================
+   8. FLYING PRODUCT EFFECT & BOTTOM CART BAR
+   ========================================================================== */
+.flying-product {
+  position: fixed;
+  z-index: 9999;
+  width: 64px;
+  height: 64px;
+  display: none;
+  pointer-events: none;
+  will-change: left, top, transform;
+}
+
+.flying-product img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 15px rgba(0,0,0,.22));
+}
+
+.cart-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 1000;
+  width: calc(100% - 32px);
+  max-width: 390px;
+  height: 62px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  padding: 7px;
+  border-radius: 40px;
+  background: #10b981;
+  box-shadow: 0 15px 40px rgba(16,185,129,.28);
+  transition: transform .3s ease;
+}
+
+.cart-bar.pulse {
+  animation: cartPulse .45s ease;
+}
+
+@keyframes cartPulse {
+  0% { transform: translateX(-50%) scale(1); }
+  40% { transform: translateX(-50%) scale(1.07); }
+  70% { transform: translateX(-50%) scale(.97); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+
+.cart-thumbnails {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding-left: 2px;
+}
+
+.cart-thumb {
+  width: 43px;
+  height: 43px;
+  margin-left: -6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 3px solid #10b981;
+  border-radius: 50%;
+  background: white;
+  animation: thumbPop .35s cubic-bezier(.16,1,.3,1);
+}
+
+.cart-thumb:first-child { margin-left: 0; }
+.cart-thumb img { width: 100%; height: 100%; object-fit: contain; }
+
+@keyframes thumbPop {
+  0% { opacity: 0; transform: scale(.2) rotate(-20deg); }
+  70% { transform: scale(1.1) rotate(4deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+.empty-cart-icon {
+  width: 43px;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  color: white;
+}
+.empty-cart-icon svg { width: 18px; height: 18px; }
+
+.view-cart-button {
+  flex: 1;
+  height: 100%;
+  margin-left: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+}
+
+.cart-arrow {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #059669;
+  color: white;
+  font-size: 22px;
+}
+
+/* OVERLAY & DRAWER */
+.cart-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 15px;
+  background: rgba(0,0,0,.35);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .3s ease, visibility .3s ease;
+}
+
+.cart-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.cart-drawer {
+  width: 100%;
+  max-width: 480px;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 20px;
+  border-radius: 28px;
+  background: white;
+  transform: translateY(70px) scale(.97);
+  transition: transform .4s cubic-bezier(.16,1,.3,1);
+}
+
+.cart-overlay.open .cart-drawer {
+  transform: translateY(0) scale(1);
+}

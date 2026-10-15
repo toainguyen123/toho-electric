@@ -155,7 +155,7 @@ function parseProductsFromCSV(csvText) {
                 oldPrice: cols[5] || '0',
                 image: gallery[0],
                 images: gallery,
-                badge: cols[7] || '',
+                badge: cols[7] || '', // Cột H (index 7) là Tag/Badge trên Google Sheets
                 isFlashSale: (cols[8] || '').toUpperCase() === 'TRUE',
                 stock: cols[9] || 'Còn hàng',
                 specs: cols[10] || 'Bảo hành chính hãng',
@@ -169,7 +169,6 @@ function parseProductsFromCSV(csvText) {
     }
     return result;
 }
-
 function getGroupedUniqueProducts(productList) {
     const seen = new Set();
     const groupedList = [];
@@ -651,16 +650,15 @@ function renderProductCard(p) {
 
     return `
         <div class="glass-card art-card p-3 flex flex-col justify-between cursor-pointer relative group overflow-hidden" onclick="openProductDetail('${p.id}')">
-            ${hasDiscount ? `<span class="absolute top-3 left-3 bg-starRed text-white text-[10px] font-extrabold px-2 py-0.5 rounded-lg shadow-md z-10 font-heading">-${discount}%</span>` : ''}
+            ${p.badge ? `<span class="absolute top-3 left-3 bg-starRed text-white text-[10px] font-extrabold px-2 py-0.5 rounded-lg shadow-md z-10 font-heading">${p.badge}</span>` : (hasDiscount ? `<span class="absolute top-3 left-3 bg-starRed text-white text-[10px] font-extrabold px-2 py-0.5 rounded-lg shadow-md z-10 font-heading">-${discount}%</span>` : '')}
             
            <div class="w-full h-70 md:h-72 flex items-center justify-center p-2 rounded-xl bg-slate-50 mb-2 overflow-hidden">
-    <img src="${p.image}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'" class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300" alt="${p.name}">
-</div>
+                <img src="${p.image}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'" class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300" alt="${p.name}">
+           </div>
 
             <div class="space-y-1.5 flex-1 flex flex-col justify-between">
                 <div>
                     <h4 class="product-title line-clamp-2 hover:text-starRed transition font-bold text-xs text-slate-800">${p.name}</h4>
-                    
                     <div class="text-[11px] text-slate-500 font-mono mt-1">
                         Mã: <span class="font-bold text-starRed">${p.code}</span>
                     </div>
@@ -681,7 +679,6 @@ function renderProductCard(p) {
         </div>
     `;
 }
-
 function renderFlashSale() {
     const container = document.getElementById('flashSaleGrid');
     if (!container) return;
@@ -1009,9 +1006,23 @@ function removeFromCart(id) {
 
 function toggleCartModal() {
     const modal = document.getElementById('cartModal');
-    if (modal) modal.classList.toggle('hidden');
+    const cartBar = document.getElementById('cartBar');
+    
+    if (modal) {
+        const isHidden = modal.classList.toggle('hidden');
+        
+        // Nếu modal giỏ hàng mở -> ẩn thanh "Xem giỏ hàng" phía dưới đi để không bị đè
+        // Nếu modal đóng -> hiện lại thanh "Xem giỏ hàng"
+        if (cartBar) {
+            if (!isHidden) {
+                cartBar.style.transform = 'translateY(150%)';
+                cartBar.style.transition = 'transform 0.3s ease';
+            } else {
+                cartBar.style.transform = 'translateY(0)';
+            }
+        }
+    }
 }
-
 // --- THANH TOÁN & GỬI ĐƠN HÀNG QUA EMAILJS ---
 function openCheckoutModal() {
     if (cart.length === 0) {
@@ -1022,14 +1033,26 @@ function openCheckoutModal() {
     const modal = document.getElementById('checkoutModal');
     if (modal) modal.classList.remove('hidden');
 
+    // Ẩn thanh xem giỏ hàng cố định ở dưới màn hình mobile khi mở bảng thanh toán
+    const cartBar = document.getElementById('cartBar');
+    if (cartBar) {
+        cartBar.style.transform = 'translateY(150%)';
+        cartBar.style.transition = 'transform 0.3s ease';
+    }
+
     renderCheckoutSummary();
 }
 
 function closeCheckoutModal() {
     const modal = document.getElementById('checkoutModal');
     if (modal) modal.classList.add('hidden');
-}
 
+    // Hiện lại thanh xem giỏ hàng khi đóng bảng thanh toán
+    const cartBar = document.getElementById('cartBar');
+    if (cartBar) {
+        cartBar.style.transform = 'translateY(0)';
+    }
+}
 function renderCheckoutSummary() {
     const summaryContainer = document.getElementById('checkoutSummaryItems');
     const subTotalEl = document.getElementById('checkoutSubTotal');
@@ -1487,4 +1510,83 @@ function openProductDetailWithoutPush(id) {
     history.pushState = function() {}; // Tạm ngắt pushState
     openProductDetail(id);
     history.pushState = originalPush; // Khôi phục lại pushState
+}
+// --- TỐI ƯU HIỂN THỊ DANH MỤC TRÊN MOBILE ---
+function toggleMobileCategoryMenu() {
+    const modal = document.getElementById('mobileCategoryModal');
+    if (!modal) return;
+    
+    const isHidden = modal.classList.contains('hidden');
+    if (isHidden) {
+        renderMobileCategories();
+        modal.classList.remove('hidden');
+    } else {
+        modal.classList.add('hidden');
+    }
+}
+
+function renderMobileCategories() {
+    const container = document.getElementById('mobileCategoryListContent');
+    if (!container) return;
+
+    // Tổng hợp cấu trúc danh mục, danh mục con và danh mục cháu từ mảng sản phẩm
+    const categoryMap = {};
+    products.forEach(p => {
+        if (!p.category) return;
+        if (!categoryMap[p.category]) categoryMap[p.category] = {};
+        if (p.subCategory) {
+            if (!categoryMap[p.category][p.subCategory]) {
+                categoryMap[p.category][p.subCategory] = new Set();
+            }
+            if (p.childCategory) {
+                categoryMap[p.category][p.subCategory].add(p.childCategory);
+            }
+        }
+    });
+
+    let html = `
+        <div onclick="filterByCategory(''); toggleMobileCategoryMenu();" class="p-3 rounded-xl bg-red-50 text-starRed font-bold flex items-center justify-between cursor-pointer">
+            <span><i class="fa-solid fa-list mr-2"></i>Tất cả sản phẩm</span>
+            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </div>
+    `;
+
+    Object.keys(categoryMap).forEach(cat => {
+        const subMap = categoryMap[cat];
+        const subCats = Object.keys(subMap);
+
+        html += `
+            <div class="border border-slate-100 rounded-2xl p-3 space-y-2 bg-slate-50/50">
+                <div onclick="filterByCategory('${cat}'); toggleMobileCategoryMenu();" class="font-extrabold text-slate-900 flex justify-between items-center cursor-pointer">
+                    <span class="uppercase text-starRed">${cat}</span>
+                    <i class="fa-solid fa-arrow-right text-[10px] text-slate-400"></i>
+                </div>
+                ${subCats.length > 0 ? `
+                    <div class="pl-3 space-y-2 pt-2 border-t border-slate-200/60">
+                        ${subCats.map(sub => {
+                            const children = Array.from(subMap[sub]);
+                            return `
+                                <div class="space-y-1">
+                                    <div onclick="filterBySubCategory('${cat}', '${sub}'); toggleMobileCategoryMenu();" class="font-bold text-slate-700 flex justify-between items-center cursor-pointer py-1">
+                                        <span>• ${sub}</span>
+                                    </div>
+                                    ${children.length > 0 ? `
+                                        <div class="pl-3 flex flex-wrap gap-1.5 py-1">
+                                            ${children.map(child => `
+                                                <span onclick="filterByChildCategory('${cat}', '${sub}', '${child}'); toggleMobileCategoryMenu();" class="bg-white border border-slate-200 px-2.5 py-1 rounded-lg text-[11px] text-slate-600 font-medium cursor-pointer shadow-sm">
+                                                    ${child}
+                                                </span>
+                                            `).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
 }

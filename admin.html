@@ -2,163 +2,310 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Quản trị TOHO ELECTRIC VN</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="js/admin-config.js"></script>
+<script>tailwind.config={theme:{extend:{colors:{tohoRed:'#E31837',tohoRedHover:'#C0132C',navy:{900:'#131c28',800:'#16212e',700:'#1c2a3a',600:'#24374d'}}}}};</script>
 <style>
-  body { font-family: 'Segoe UI', sans-serif; }
-  .btn { @apply px-4 py-2 rounded-xl font-bold text-sm transition cursor-pointer; }
+  body{font-family:'Segoe UI',system-ui,sans-serif}
+  .btn{padding:.5rem 1rem;border-radius:.75rem;font-weight:700;font-size:.8rem;transition:all .15s;display:inline-flex;align-items:center;gap:.4rem;cursor:pointer}
+  .nav-item{display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;margin:.15rem .5rem;border-radius:.6rem;font-size:.85rem;font-weight:600;color:#cbd5e1;cursor:pointer;transition:all .15s;border:none;background:transparent;width:calc(100% - 1rem);text-align:left}
+  .nav-item:hover{background:#24374d;color:#fff}
+  .nav-item.active{background:tohoRed;color:#fff;box-shadow:0 4px 12px rgba(227,24,55,.35)}
+  .nav-item i{width:1.25rem;text-align:center;font-size:.95rem}
+  .stat-label{font-size:.78rem;font-weight:700;color:#334155;border-bottom:1px dotted #94a3b8;display:inline-block;padding-bottom:2px;margin-bottom:.6rem}
+  .stat-num{font-size:1.6rem;font-weight:800;color:#1e293b}
+  ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:8px}
 </style>
-<script>
-tailwind.config = { theme: { extend: { colors: { starRed: '#E31837', starRedHover: '#C0132C' } } } };
-</script>
 </head>
 <body class="bg-slate-100 text-slate-800">
 
 <!-- ================= GATE ĐĂNG NHẬP ================= -->
-<div id="loginGate" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur flex items-center justify-center">
+<div id="loginGate" class="fixed inset-0 z-50 bg-navy-800 flex items-center justify-center p-4">
   <div class="bg-white rounded-3xl p-8 w-96 shadow-2xl text-center space-y-4">
-    <img src="images/logo.png" class="h-16 mx-auto" alt="TOHO">
-    <h1 class="text-xl font-black text-starRed uppercase">Quản trị Website</h1>
+    <div class="w-16 h-16 mx-auto rounded-full bg-tohoRed flex items-center justify-center text-white font-black text-lg shadow-lg">TOHO</div>
+    <h1 class="text-xl font-black text-navy-800 uppercase">Quản trị website</h1>
     <p class="text-xs text-slate-500">Nhập mật khẩu admin để tiếp tục</p>
     <input id="passInput" type="password" placeholder="Mật khẩu admin"
-           class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-center focus:outline-none focus:border-starRed">
-    <button onclick="doLogin()" class="w-full bg-starRed hover:bg-starRedHover text-white font-bold py-3 rounded-xl">ĐĂNG NHẬP</button>
+           class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-center focus:outline-none focus:border-tohoRed">
+    <button onclick="doLogin()" class="w-full bg-tohoRed hover:bg-tohoRedHover text-white font-bold py-3 rounded-xl">ĐĂNG NHẬP</button>
     <p id="loginMsg" class="text-xs text-red-600 font-bold hidden"></p>
   </div>
 </div>
 
-<!-- ================= BỐ CỤC CHÍNH ================= -->
+<!-- ================= APP ================= -->
 <div id="adminApp" class="hidden">
-  <header class="bg-white shadow px-6 py-3 flex items-center justify-between sticky top-0 z-20">
-    <div class="flex items-center gap-3">
-      <img src="images/logo.png" class="h-10" alt="logo">
-      <span class="font-black text-starRed uppercase text-lg">Trang quản trị</span>
-      <span class="text-[11px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-lg font-bold">CHẾ ĐỘ LOCAL</span>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-60 bg-navy-800 flex flex-col transition-transform duration-200 -translate-x-full md:translate-x-0">
+    <!-- Logo -->
+    <div class="flex items-center gap-3 px-4 py-4">
+      <div class="w-11 h-11 rounded-full bg-tohoRed flex items-center justify-center text-white font-black text-xs shadow ring-2 ring-navy-600 shrink-0">TOHO</div>
+      <div class="leading-tight">
+        <p class="text-white font-black text-base">TOHO<span class="text-tohoRed">Admin</span></p>
+        <p class="text-slate-400 text-[10px] italic">web control panel</p>
+      </div>
     </div>
-    <div class="flex items-center gap-3 text-sm">
-      <a id="siteLink" target="_blank" class="text-slate-600 hover:text-starRed font-semibold" href="/index.html"><i class="fa-solid fa-globe mr-1"></i>Mở website</a>
+    <!-- Menu -->
+    <nav class="mt-2 flex-1 overflow-y-auto">
+      <button class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-gauge-high"></i>Dashboard</button>
+      <button class="nav-item" data-tab="products" onclick="switchTab('products')"><i class="fa-solid fa-boxes-stacked"></i>Sản Phẩm</button>
+      <button class="nav-item" data-tab="posts" onclick="switchTab('posts')"><i class="fa-solid fa-newspaper"></i>Bài Viết</button>
+      <button class="nav-item" data-tab="sync" onclick="switchTab('sync')"><i class="fa-solid fa-cloud-arrow-down"></i>Đồng Bộ &amp; Xuất</button>
+    </nav>
+    <!-- Hỗ trợ -->
+    <div class="p-3">
+      <a href="tel:0938992785" class="flex items-center justify-center gap-2 bg-navy-600 hover:bg-navy-700 text-teal-300 text-xs font-bold py-2.5 rounded-lg transition">
+        <i class="fa-solid fa-headset"></i>Trung tâm hỗ trợ
+      </a>
     </div>
-  </header>
+  </aside>
+  <!-- overlay mobile -->
+  <div id="sbOverlay" class="hidden fixed inset-0 bg-black/40 z-20 md:hidden" onclick="toggleSidebar()"></div>
 
-  <nav class="px-6 pt-4 flex gap-2">
-    <button data-tab="products" onclick="switchTab('products')" class="tab-btn btn bg-white shadow">📦 Sản phẩm</button>
-    <button data-tab="posts"   onclick="switchTab('posts')"   class="tab-btn btn bg-white shadow">📝 Bài viết</button>
-    <button data-tab="sync"    onclick="switchTab('sync')"    class="tab-btn btn bg-white shadow">🔄 Đồng bộ & Xuất</button>
-  </nav>
-
-  <main class="p-6 max-w-6xl mx-auto">
-    <!-- ============ TAB SẢN PHẨM ============ -->
-    <section id="tab-products" class="hidden space-y-4">
-      <div class="flex gap-2 items-center">
-        <input id="prodSearch" oninput="renderProductRows()" placeholder="Tìm theo mã / tên sản phẩm..."
-               class="flex-1 border border-slate-300 rounded-xl px-4 py-2.5">
-        <button onclick="openProductForm()" class="btn bg-starRed hover:bg-starRedHover text-white font-bold">
-          <i class="fa-solid fa-plus mr-1"></i> Đăng sản phẩm mới
-        </button>
-      </div>
-      <div class="bg-white rounded-2xl shadow overflow-x-auto">
-        <table class="w-full text-xs">
-          <thead class="bg-slate-50 text-left text-slate-500 uppercase">
-            <tr><th class="p-3">Ảnh</th><th class="p-3">Mã</th><th class="p-3">Tên</th><th class="p-3">Giá</th><th class="p-3">Badge</th><th class="p-3">Flash</th><th class="p-3"></th></tr>
-          </thead>
-          <tbody id="prodRows" class="divide-y divide-slate-100"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- ============ TAB BÀI VIẾT ============ -->
-    <section id="tab-posts" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="md:col-span-1 bg-white rounded-2xl shadow p-4 space-y-2">
-        <button onclick="openPostEditor()" class="btn w-full bg-starRed hover:bg-starRedHover text-white font-bold">
-          <i class="fa-solid fa-plus mr-1"></i> Bài viết mới
-        </button>
-        <div id="postList" class="divide-y divide-slate-100 pt-2"></div>
-      </div>
-      <div class="md:col-span-2 bg-white rounded-2xl shadow p-5 space-y-3">
-        <input id="postTitle" placeholder="Tiêu đề bài viết (VD: CHÍNH SÁCH GIAO HÀNG)"
-               class="w-full border border-slate-300 rounded-xl px-4 py-2.5 font-bold uppercase">
-        <textarea id="postContent" rows="16" placeholder="Nội dung bài viết... (xuống dòng tạo nhiều đoạn)"
-                  class="w-full border border-slate-300 rounded-xl px-4 py-3 font-mono text-sm"></textarea>
-        <div class="flex gap-2">
-          <button onclick="savePost()" class="btn bg-starRed hover:bg-starRedHover text-white font-bold"><i class="fa-solid fa-paper-plane mr-1"></i> Đăng / Cập nhật bài</button>
-          <button onclick="deletePost()" class="btn bg-white border border-slate-300 text-slate-600 hover:border-red-400 hover:text-red-600 font-bold"><i class="fa-solid fa-trash mr-1"></i> Xóa bài này</button>
+  <!-- MAIN -->
+  <div class="md:ml-60 flex flex-col min-h-screen">
+    <!-- HEADER -->
+    <header class="sticky top-0 z-20 bg-navy-800 text-white px-4 py-2.5 flex items-center justify-between shadow">
+      <button onclick="toggleSidebar()" class="w-9 h-9 rounded-lg hover:bg-navy-700 md:inline-flex items-center justify-center lg:hidden">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <p class="hidden md:block text-sm font-bold text-slate-300"><i class="fa-solid fa-gauge-high text-tohoRed mr-2"></i>Bảng điều khiển</p>
+      <div class="flex items-center gap-3">
+        <a href="/index.html" target="_blank" class="btn border border-slate-500 text-white hover:bg-navy-700 text-xs">
+          <i class="fa-solid fa-globe"></i>Xem website
+        </a>
+        <div class="flex items-center gap-2 pl-2 border-l border-navy-600">
+          <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center overflow-hidden">
+            <img src="images/logo.png" alt="avatar" class="max-w-full max-h-full object-contain" onerror="this.parentNode.innerHTML='<i class=&quot;fa-solid fa-user text-navy-800&quot;></i>'">
+          </div>
+          <div class="leading-tight hidden sm:block">
+            <p class="text-sm font-bold">Quản Trị Viên</p>
+            <p class="text-[10px] text-slate-400">TOHO ELECTRIC VN</p>
+          </div>
         </div>
       </div>
-    </section>
+    </header>
 
-    <!-- ============ TAB ĐỒNG BỘ ============ -->
-    <section id="tab-sync" class="hidden space-y-4 max-w-3xl">
-      <div class="bg-white rounded-2xl shadow p-6 space-y-4">
-        <h3 class="font-black uppercase text-starRed"><i class="fa-solid fa-cloud-arrow-down mr-2"></i>Cập nhật từ Google Sheets</h3>
-        <p class="text-xs text-slate-600">Kéo toàn bộ dữ liệu sản phẩm + bài viết từ Google Sheet về thư mục <b>data/</b> của website. Ảnh KHÔNG tải về — vẫn chạy từ Google Drive (tiết kiệm dung lượng).</p>
-        <button onclick="runAction('sync.sheets', this)" class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold w-full py-3">
-          <i class="fa-solid fa-rotate mr-2"></i>CẬP NHẬT TỪ SHEETS
-        </button>
-      </div>
-      <div class="bg-white rounded-2xl shadow p-6 space-y-4">
-        <h3 class="font-black uppercase text-starRed"><i class="fa-solid fa-file-export mr-2"></i>Xuất lại trang SEO tĩnh</h3>
-        <p class="text-xs text-slate-600">Sinh lại thư mục <b>san-pham/*</b> (331 trang HTML chuẩn SEO) + <b>sitemap.xml</b> + <b>robots.txt</b> từ dữ liệu source hiện tại.</p>
-        <button onclick="runAction('rebuild.pages', this)" class="btn bg-slate-800 hover:bg-slate-900 text-white font-bold w-full py-3">
-          <i class="fa-solid fa-hammer mr-2"></i>ĐẠM BẢO SEO LÀM MỚI
-        </button>
-      </div>
-      <div class="bg-white rounded-2xl shadow p-4">
-        <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Log tiến trình</p>
-        <pre id="syncLog" class="text-xs bg-slate-900 text-green-400 rounded-xl p-4 overflow-auto max-h-64 whitespace-pre-wrap">Sẵn sàng…</pre>
-      </div>
-    </section>
-  </main>
+    <main class="p-4 lg:p-8 flex-1 max-w-[1400px] w-full mx-auto">
+
+      <!-- ============ DASHBOARD ============ -->
+      <section id="tab-dashboard">
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-5 lg:p-7 grid grid-cols-1 xl:grid-cols-2 gap-7">
+          <!-- Thống kê -->
+          <div>
+            <h3 class="text-lg font-black text-navy-800 mb-4">Thống kê</h3>
+            <div class="grid grid-cols-3 gap-3">
+              <div class="border border-slate-200 rounded-xl p-3">
+                <div class="stat-label">Hôm nay</div>
+                <div class="flex items-center gap-2">
+                  <span class="w-9 h-9 rounded-full bg-teal-50 text-teal-500 flex items-center justify-center shrink-0"><i class="fa-solid fa-users"></i></span>
+                  <span id="stToday" class="stat-num">0</span>
+                </div>
+              </div>
+              <div class="border border-slate-200 rounded-xl p-3">
+                <div class="stat-label">Desktop</div>
+                <div class="flex items-center gap-2">
+                  <span class="w-9 h-9 rounded-full bg-teal-50 text-teal-500 flex items-center justify-center shrink-0"><i class="fa-solid fa-desktop"></i></span>
+                  <span id="stDesk" class="stat-num">0</span>
+                </div>
+              </div>
+              <div class="border border-slate-200 rounded-xl p-3">
+                <div class="stat-label">Mobile</div>
+                <div class="flex items-center gap-2">
+                  <span class="w-9 h-9 rounded-full bg-teal-50 text-teal-500 flex items-center justify-center shrink-0"><i class="fa-solid fa-mobile-screen"></i></span>
+                  <span id="stMob" class="stat-num">0</span>
+                </div>
+              </div>
+            </div>
+            <div class="space-y-3 mt-3">
+              <div class="border border-slate-200 rounded-xl p-3">
+                <div class="stat-label">Hôm qua</div>
+                <div class="flex items-center gap-3 pl-1">
+                  <span class="w-9 h-9 rounded-full bg-teal-50 text-teal-500 flex items-center justify-center shrink-0"><i class="fa-solid fa-user-clock"></i></span>
+                  <span id="stYest" class="stat-num text-xl">0</span>
+                </div>
+              </div>
+              <div class="border border-slate-200 rounded-xl p-3">
+                <div class="stat-label">7 ngày qua</div>
+                <div class="flex items-center gap-3 pl-1">
+                  <span class="w-9 h-9 rounded-full bg-teal-50 text-teal-500 flex items-center justify-center shrink-0"><i class="fa-solid fa-calendar-week"></i></span>
+                  <span id="stWeek" class="stat-num text-xl">0</span>
+                </div>
+              </div>
+              <div class="border border-slate-200 rounded-xl p-3">
+                <div class="stat-label">30 ngày qua</div>
+                <div class="flex items-center gap-3 pl-1">
+                  <span class="w-9 h-9 rounded-full bg-teal-50 text-teal-500 flex items-center justify-center shrink-0"><i class="fa-solid fa-calendar-days"></i></span>
+                  <span id="stMonth" class="stat-num text-xl">0</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-3"><i class="fa-solid fa-circle-info mr-1"></i>Lượt truy cập được thống kê trên máy đang xem (trình duyệt khách riêng lẻ, không gộp nhiều khách cùng lúc).</p>
+          </div>
+          <!-- Biểu đồ -->
+          <div>
+            <h3 class="text-lg font-black text-navy-800 mb-4">Lượt truy cập 7 ngày</h3>
+            <div class="h-64 lg:h-80"><canvas id="visitChart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-5 lg:p-7 grid grid-cols-1 xl:grid-cols-2 gap-7 mt-6">
+          <!-- Dữ liệu website -->
+          <div>
+            <h3 class="text-lg font-black text-navy-800 mb-4">Dữ liệu website</h3>
+            <div class="space-y-3">
+              <div class="border border-slate-200 rounded-xl p-3 flex items-center gap-3">
+                <span class="w-10 h-10 rounded-full bg-red-50 text-tohoRed flex items-center justify-center shrink-0"><i class="fa-solid fa-boxes-stacked"></i></span>
+                <div class="flex-1"><p class="stat-label mb-0 border-none">Tổng sản phẩm</p></div>
+                <span id="dtProducts" class="stat-num">0</span>
+              </div>
+              <div class="border border-slate-200 rounded-xl p-3 flex items-center gap-3">
+                <span class="w-10 h-10 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center shrink-0"><i class="fa-solid fa-bolt"></i></span>
+                <div class="flex-1"><p class="stat-label mb-0 border-none">Đang Flash Sale</p></div>
+                <span id="dtFlash" class="stat-num">0</span>
+              </div>
+              <div class="border border-slate-200 rounded-xl p-3 flex items-center gap-3">
+                <span class="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center shrink-0"><i class="fa-solid fa-newspaper"></i></span>
+                <div class="flex-1"><p class="stat-label mb-0 border-none">Bài viết / chính sách</p></div>
+                <span id="dtPosts" class="stat-num">0</span>
+              </div>
+              <div class="border border-slate-200 rounded-xl p-3 flex items-center gap-3">
+                <span class="w-10 h-10 rounded-full bg-teal-50 text-teal-500 flex items-center justify-center shrink-0"><i class="fa-solid fa-layer-group"></i></span>
+                <div class="flex-1"><p class="stat-label mb-0 border-none">Danh mục</p></div>
+                <span id="dtCats" class="stat-num">0</span>
+              </div>
+            </div>
+          </div>
+          <!-- Bán chạy -->
+          <div>
+            <h3 class="text-lg font-black text-navy-800 mb-4">Sản phẩm bán chạy nhất</h3>
+            <div class="overflow-x-auto rounded-xl border border-slate-100">
+              <table class="w-full text-xs">
+                <thead class="text-left text-slate-400 font-bold">
+                  <tr><th class="p-3">Sản phẩm</th><th class="p-3">Giá</th><th class="p-3 text-center">Đã bán</th><th class="p-3">Tồn kho</th></tr>
+                </thead>
+                <tbody id="topRows" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SẢN PHẨM ============ -->
+      <section id="tab-products" class="hidden space-y-4">
+        <div class="flex gap-2 items-center">
+          <input id="prodSearch" oninput="renderProductRows()" placeholder="Tìm theo mã / tên sản phẩm..."
+                 class="flex-1 border border-slate-300 rounded-xl px-4 py-2.5 text-sm">
+          <button onclick="openProductForm()" class="btn bg-tohoRed hover:bg-tohoRedHover text-white shadow">
+            <i class="fa-solid fa-plus"></i> Đăng sản phẩm mới
+          </button>
+        </div>
+        <div class="bg-white rounded-2xl shadow border border-slate-200 overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead class="bg-navy-800 text-left text-slate-200 uppercase">
+              <tr><th class="p-3">Ảnh</th><th class="p-3">Mã</th><th class="p-3">Tên</th><th class="p-3">Giá</th><th class="p-3">Badge</th><th class="p-3 text-center">Flash</th><th class="p-3"></th></tr>
+            </thead>
+            <tbody id="prodRows" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ BÀI VIẾT ============ -->
+      <section id="tab-posts" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="md:col-span-1 bg-white rounded-2xl shadow border border-slate-200 p-4 space-y-2">
+          <button onclick="openPostEditor()" class="btn w-full bg-tohoRed hover:bg-tohoRedHover text-white shadow justify-center">
+            <i class="fa-solid fa-plus"></i> Bài viết mới
+          </button>
+          <div id="postList" class="divide-y divide-slate-100 pt-2"></div>
+        </div>
+        <div class="md:col-span-2 bg-white rounded-2xl shadow border border-slate-200 p-5 space-y-3">
+          <input id="postTitle" placeholder="Tiêu đề bài viết (VD: CHÍNH SÁCH GIAO HÀNG)"
+                 class="w-full border border-slate-300 rounded-xl px-4 py-2.5 font-bold uppercase text-sm">
+          <textarea id="postContent" rows="16" placeholder="Nội dung bài viết... (xuống dòng tạo nhiều đoạn)"
+                    class="w-full border border-slate-300 rounded-xl px-4 py-3 font-mono text-sm"></textarea>
+          <div class="flex gap-2">
+            <button onclick="savePost()" class="btn bg-tohoRed hover:bg-tohoRedHover text-white shadow"><i class="fa-solid fa-paper-plane"></i> Đăng / Cập nhật bài</button>
+            <button onclick="deletePost()" class="btn bg-white border border-slate-300 text-slate-600 hover:border-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i> Xóa bài này</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ ĐỒNG BỘ ============ -->
+      <section id="tab-sync" class="hidden space-y-4 max-w-3xl">
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-6 space-y-4">
+          <h3 class="font-black uppercase text-navy-800"><i class="fa-solid fa-cloud-arrow-down text-tohoRed mr-2"></i>Cập nhật từ Google Sheets</h3>
+          <p class="text-xs text-slate-600">Kéo toàn bộ dữ liệu sản phẩm + bài viết từ Google Sheet về thư mục <b>data/</b> của website. Ảnh KHÔNG tải về — vẫn chạy từ Google Drive (tiết kiệm dung lượng).</p>
+          <button onclick="runAction('sync.sheets', this)" class="btn bg-blue-600 hover:bg-blue-700 text-white w-full py-3 justify-center rounded-xl shadow">
+            <i class="fa-solid fa-rotate"></i>CẬP NHẬT TỪ SHEETS
+          </button>
+        </div>
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-6 space-y-4">
+          <h3 class="font-black uppercase text-navy-800"><i class="fa-solid fa-file-export text-tohoRed mr-2"></i>Xuất lại trang SEO tĩnh</h3>
+          <p class="text-xs text-slate-600">Sinh lại thư mục <b>san-pham/*</b> (394 trang HTML chuẩn SEO) + <b>sitemap.xml</b> + <b>robots.txt</b> từ dữ liệu source hiện tại.</p>
+          <button onclick="runAction('rebuild.pages', this)" class="btn bg-navy-800 hover:bg-navy-900 text-white w-full py-3 justify-center rounded-xl shadow">
+            <i class="fa-solid fa-hammer"></i>ĐẠM BẢO SEO LÀM MỚI
+          </button>
+        </div>
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-4">
+          <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Log tiến trình</p>
+          <pre id="syncLog" class="text-xs bg-navy-900 text-green-400 rounded-xl p-4 overflow-auto max-h-64 whitespace-pre-wrap">Sẵn sàng…</pre>
+        </div>
+      </section>
+    </main>
+  </div>
 </div>
 
 <!-- ================= FORM SẢN PHẨM (MODAL) ================= -->
-<div id="prodModal" class="hidden fixed inset-0 z-40 bg-slate-900/60 backdrop-blur flex items-start justify-center p-6 overflow-y-auto">
+<div id="prodModal" class="hidden fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center p-6 overflow-y-auto">
   <div class="bg-white rounded-3xl p-6 w-full max-w-3xl shadow-2xl space-y-3 my-8">
     <div class="flex justify-between items-center">
-      <h2 id="prodModalTitle" class="text-xl font-black text-starRed uppercase">Đăng sản phẩm mới</h2>
+      <h2 id="prodModalTitle" class="text-xl font-black text-navy-800 uppercase">Đăng sản phẩm mới</h2>
       <button onclick="closeProductForm()" class="text-slate-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="grid grid-cols-2 gap-3">
       <div><label class="text-[10px] font-bold text-slate-400 uppercase">MÃ SP (ID) *</label>
-        <input id="f_id" class="w-full border rounded-xl px-3 py-2 font-mono"></div>
+        <input id="f_id" class="w-full border border-slate-300 rounded-xl px-3 py-2 font-mono text-sm"></div>
       <div><label class="text-[10px] font-bold text-slate-400 uppercase">Tên sản phẩm *</label>
-        <input id="f_name" class="w-full border rounded-xl px-3 py-2"></div>
+        <input id="f_name" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm"></div>
       <div><label class="text-[10px] font-bold text-slate-400 uppercase">Danh mục</label>
-        <input id="f_category" class="w-full border rounded-xl px-3 py-2" value="Ổ CẮM ĐIỆN"></div>
-      <div><label class="text-[10px] font-bold text-slate-400 uppercase">Danh mục con (danh mục cha / con)</label>
-        <input id="f_sub" class="w-full border rounded-xl px-3 py-2" placeholder="Công Suất Nhỏ 1100W (5A) / Dòng thường"></div>
+        <input id="f_category" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" value="Ổ CẮM ĐIỆN"></div>
+      <div><label class="text-[10px] font-bold text-slate-400 uppercase">Danh mục con (cha / con)</label>
+        <input id="f_sub" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" placeholder="Công Suất Nhỏ 1100W (5A) / Dòng thường"></div>
       <div><label class="text-[10px] font-bold text-slate-400 uppercase">Giá bán (đ)</label>
-        <input id="f_price" type="number" class="w-full border rounded-xl px-3 py-2"></div>
+        <input id="f_price" type="number" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm"></div>
       <div><label class="text-[10px] font-bold text-slate-400 uppercase">Giá gốc trước giảm (đ)</label>
-        <input id="f_oldPrice" type="number" class="w-full border rounded-xl px-3 py-2"></div>
+        <input id="f_oldPrice" type="number" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm"></div>
       <div><label class="text-[10px] font-bold text-slate-400 uppercase">Badge</label>
-        <input id="f_badge" class="w-full border rounded-xl px-3 py-2" placeholder="BEST SELLER"></div>
+        <input id="f_badge" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" placeholder="BEST SELLER"></div>
       <div><label class="text-[10px] font-bold text-slate-400 uppercase">Tình trạng</label>
-        <input id="f_stock" class="w-full border rounded-xl px-3 py-2" value="Còn hàng"></div>
+        <input id="f_stock" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" value="Còn hàng"></div>
       <div><label class="text-[10px] font-bold text-slate-400 uppercase">SKU nhóm phân loại</label>
-        <input id="f_skuGroup" class="w-full border rounded-xl px-3 py-2"></div>
+        <input id="f_skuGroup" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm"></div>
       <div class="flex items-end">
-        <label class="flex items-center gap-2 text-sm font-bold border rounded-xl px-3 py-2 cursor-pointer">
+        <label class="flex items-center gap-2 text-sm font-bold border border-slate-300 rounded-xl px-3 py-2 cursor-pointer">
           <input id="f_flash" type="checkbox" class="accent-red-600 w-4 h-4"> Thêm vào Flash Sale
         </label>
       </div>
     </div>
     <div>
       <label class="text-[10px] font-bold text-slate-400 uppercase">Ảnh (link Google Drive, mỗi dòng 1 link — KHÔNG tải ảnh về máy)</label>
-      <textarea id="f_images" rows="3" class="w-full border rounded-xl px-3 py-2 font-mono text-xs"
+      <textarea id="f_images" rows="3" class="w-full border border-slate-300 rounded-xl px-3 py-2 font-mono text-xs"
         placeholder="https://drive.google.com/file/d/xxxxx/view?usp=sharing&#10;https://drive.google.com/file/d/yyyyy/view"></textarea>
     </div>
     <div>
       <label class="text-[10px] font-bold text-slate-400 uppercase">Thông số / Mô tả</label>
-      <textarea id="f_specs" rows="4" class="w-full border rounded-xl px-3 py-2 text-sm"></textarea>
+      <textarea id="f_specs" rows="4" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm"></textarea>
     </div>
     <div class="flex gap-2 pt-2">
-      <button onclick="saveProduct()" class="btn bg-starRed hover:bg-starRedHover text-white font-bold flex-1 py-3">
-        <i class="fa-solid fa-floppy-disk mr-1"></i> LƯU VÀO SOURCE WEBSITE
+      <button onclick="saveProduct()" class="btn bg-tohoRed hover:bg-tohoRedHover text-white flex-1 py-3 justify-center rounded-xl shadow font-bold">
+        <i class="fa-solid fa-floppy-disk"></i> LƯU VÀO SOURCE WEBSITE
       </button>
-      <button onclick="closeProductForm()" class="btn bg-white border border-slate-300 font-bold">Hủy</button>
+      <button onclick="closeProductForm()" class="btn bg-white border border-slate-300 text-slate-600 font-bold">Hủy</button>
     </div>
     <p id="prodMsg" class="text-sm font-bold hidden"></p>
   </div>

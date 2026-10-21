@@ -1,11 +1,12 @@
 // ============================================================
-// LOGIC TRANG QUẢN TRỊ TOHO ELECTRIC VN
+// LOGIC TRANG QUẢN TRỊ TOHO ELECTRIC VN (giao diện sidebar)
 // ============================================================
 const API = window.ADMIN_CONFIG.apiUrl;
 const PASS = window.ADMIN_CONFIG.pass;
 let _products = [];
 let _policies = {};
 let _editingId = null; // id đang sửa (null = đăng mới)
+let _chart = null;     // biểu đồ lượt truy cập
 
 // ---------- tiện ích ----------
 async function api(action, payload = {}) {
@@ -18,7 +19,7 @@ async function api(action, payload = {}) {
 }
 
 function toast(msg, type = 'ok') {
-  const colors = { ok: 'bg-green-600', err: 'bg-red-600', info: 'bg-slate-800' };
+  const colors = { ok: 'bg-green-600', err: 'bg-red-600', info: 'bg-navy-800' };
   const el = document.createElement('div');
   el.className = `${colors[type]} text-white text-sm font-bold px-4 py-3 rounded-xl shadow-lg flex items-center gap-2`;
   el.innerHTML = `<i class="fa-solid ${type === 'ok' ? 'fa-circle-check' : type === 'err' ? 'fa-circle-exclamation' : 'fa-circle-info'}"></i> ${msg}`;
@@ -26,16 +27,31 @@ function toast(msg, type = 'ok') {
   setTimeout(() => el.remove(), 3500);
 }
 
-const fmtVND = (v) => (parseInt(String(v || '0').replace(/[^0-9]/g, ''), 10) || 0).toLocaleString('vi-VN') + ' đ';
+const fmtVND = (v) => (parseInt(String(v || '0').replace(/[^0-9]/g, ''), 10) || 0).toLocaleString('vi-VN') + 'đ';
 const driveUrl = (u) => {
   u = String(u || '').trim();
   const m = u.match(/\/d\/([A-Za-z0-9_-]+)/) || u.match(/id=([A-Za-z0-9_-]+)/);
   return (u.includes('drive.google.com') && m) ? `https://lh3.googleusercontent.com/d/${m[1]}=w200` : u;
 };
+const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+
+// ---------- đọc số liệu truy cập (main site ghi vào localStorage) ----------
+function readVisits() {
+  try { return JSON.parse(localStorage.getItem('tohoVisits') || '{"days":{},"devices":{}}'); }
+  catch { return { days: {}, devices: {} }; }
+}
+const dayKey = (d) => d.toISOString().slice(0, 10);
+const fmtDMY = (d) => { const p = (n) => String(n).padStart(2, '0'); return p(d.getDate()) + '-' + p(d.getMonth() + 1) + '-' + String(d.getFullYear()).slice(2); };
+
+// ---------- sidebar mobile ----------
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('-translate-x-full');
+  document.getElementById('sbOverlay').classList.toggle('hidden');
+}
 
 // ---------- đăng nhập gate ----------
-async function doLogin() {
-  const pass = document.getElementById('passInput').value;
+async function doLogin(pass) {
+  pass = pass !== undefined ? pass : document.getElementById('passInput').value;
   try {
     const r = await api('auth', { pass });
     if (r.ok) {
@@ -54,40 +70,122 @@ async function doLogin() {
     msg.classList.remove('hidden');
   }
 }
-document.getElementById('passInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('passInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
 
-// ---------- tabs ----------
+// ---------- tabs + sidebar active ----------
 function switchTab(tab) {
-  document.querySelectorAll('[id^=tab-]').forEach(s => s.classList.add('hidden'));
-  document.getElementById('tab-' + tab).classList.remove('hidden');
-  document.querySelectorAll('.tab-btn').forEach(b => {
-    b.className = 'tab-btn btn bg-white shadow';
+  document.querySelectorAll('main > section').forEach((s) => s.classList.add('hidden'));
+  const sec = document.getElementById('tab-' + tab);
+  if (sec) sec.classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach((b) => {
+    b.classList.toggle('active', b.dataset.tab === tab);
   });
-  const active = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
-  active.className = 'tab-btn btn bg-starRed text-white shadow';
+  if (tab === 'dashboard') renderDashboard();
+  window.scrollTo({ top: 0 });
 }
 
 // ---------- nạp dữ liệu ----------
 async function refreshData() {
   const r = await api('data');
   if (!r.ok) return toast('Không lấy được dữ liệu server', 'err');
-  _products = r.products;
-  _policies = r.policies;
+  _products = r.products || [];
+  _policies = r.policies || {};
+  renderDashboard();
   renderProductRows();
   renderPostList();
+}
+
+// ---------- DASHBOARD ----------
+function sumVisits(days, n) {
+  let s = 0;
+  for (let i = 0; i < n; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    s += days[dayKey(d)] || 0;
+  }
+  return s;
+}
+
+function renderDashboard() {
+  const v = readVisits();
+  const days = v.days || {}, devices = v.devices || {};
+
+  // thẻ thống kê lượt truy cập
+  const yd = new Date(); yd.setDate(yd.getDate() - 1);
+  setText('stToday', days[dayKey(new Date())] || 0);
+  setText('stDesk', devices.desktop || 0);
+  setText('stMob', devices.mobile || 0);
+  setText('stYest', days[dayKey(yd)] || 0);
+  setText('stWeek', sumVisits(days, 7));
+  setText('stMonth', sumVisits(days, 30));
+
+  // dữ liệu website
+  setText('dtProducts', _products.length);
+  setText('dtFlash', _products.filter((p) => p.isFlashSale).length);
+  setText('dtPosts', Object.keys(_policies).length);
+  setText('dtCats', new Set(_products.map((p) => p.category).filter(Boolean)).size);
+
+  // sản phẩm bán chạy nhất
+  const top = [..._products].sort((a, b) => (parseInt(b.soldCount) || 0) - (parseInt(a.soldCount) || 0)).slice(0, 5);
+  const rowsEl = document.getElementById('topRows');
+  if (rowsEl) {
+    rowsEl.innerHTML = top.map((p) => `
+      <tr class="hover:bg-slate-50">
+        <td class="p-3 font-semibold text-slate-700 max-w-[220px] truncate">
+          <img src="${driveUrl(p.image)}" onerror="this.src='images/no-image.svg'" class="w-8 h-8 object-contain rounded border bg-slate-50 inline-block mr-2 align-middle">${(p.name || '').slice(0, 45)}
+        </td>
+        <td class="p-3 font-bold text-tohoRed whitespace-nowrap">${fmtVND(p.price)}</td>
+        <td class="p-3 text-center font-bold">${parseInt(p.soldCount) || 0}</td>
+        <td class="p-3 text-center text-slate-500">${parseInt(p.totalCount) || 0}</td>
+      </tr>`).join('') || '<tr><td colspan="4" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>';
+  }
+
+  // biểu đồ 7 ngày
+  const labels = [], data = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    labels.push(fmtDMY(d));
+    data.push(days[dayKey(d)] || 0);
+  }
+  if (typeof Chart === 'undefined') return;
+  if (_chart) _chart.destroy();
+  const max = Math.max(30, ...data);
+  _chart = new Chart(document.getElementById('visitChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Lượt truy cập',
+        data,
+        borderColor: '#38bdb8',
+        backgroundColor: 'rgba(56,189,184,.15)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 3,
+        pointBackgroundColor: '#38bdb8'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, labels: { color: '#64748b', font: { size: 11 } } } },
+      scales: {
+        y: { min: 0, max: max + 5, grid: { color: '#e2e8f0' }, ticks: { color: '#64748b', stepSize: Math.ceil(max / 6) } },
+        x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } }
+      }
+    }
+  });
 }
 
 // ---------- SẢN PHẨM ----------
 function renderProductRows() {
   const q = (document.getElementById('prodSearch').value || '').toLowerCase();
-  const list = _products.filter(p => !q || String(p.id).toLowerCase().includes(q) || String(p.name).toLowerCase().includes(q));
-  document.getElementById('prodRows').innerHTML = list.slice(0, 300).map(p => `
+  const list = _products.filter((p) => !q || String(p.id).toLowerCase().includes(q) || String(p.name).toLowerCase().includes(q));
+  document.getElementById('prodRows').innerHTML = list.slice(0, 300).map((p) => `
     <tr class="hover:bg-slate-50">
       <td class="p-2"><img src="${driveUrl(p.image)}" onerror="this.src='images/no-image.svg'" class="w-10 h-10 object-contain rounded-lg border bg-slate-50"></td>
-      <td class="p-3 font-mono font-bold text-starRed">${p.id}</td>
+      <td class="p-3 font-mono font-bold text-tohoRed">${p.id}</td>
       <td class="p-3">${(p.name || '').slice(0, 60)}</td>
-      <td class="p-3 font-bold">${fmtVND(p.price)}</td>
-      <td class="p-3">${p.badge ? `<span class="bg-red-100 text-starRed px-2 py-0.5 rounded font-bold text-[10px]">${p.badge}</span>` : '—'}</td>
+      <td class="p-3 font-bold whitespace-nowrap">${fmtVND(p.price)}</td>
+      <td class="p-3">${p.badge ? `<span class="bg-red-100 text-tohoRed px-2 py-0.5 rounded font-bold text-[10px]">${p.badge}</span>` : '—'}</td>
       <td class="p-3 text-center">${p.isFlashSale ? '<i class="fa-solid fa-bolt text-amber-500"></i>' : '—'}</td>
       <td class="p-3 whitespace-nowrap">
         <button onclick="openProductForm('${String(p.id).replace(/'/g, "\\'")}')" class="text-blue-600 hover:underline mr-2 font-bold">Sửa</button>
@@ -98,7 +196,7 @@ function renderProductRows() {
 
 function openProductForm(id) {
   _editingId = id || null;
-  const p = id ? _products.find(x => String(x.id) === String(id)) : null;
+  const p = id ? _products.find((x) => String(x.id) === String(id)) : null;
   document.getElementById('prodModalTitle').textContent = p ? 'Sửa sản phẩm: ' + p.id : 'Đăng sản phẩm mới';
   document.getElementById('f_id').value = p ? p.id : '';
   document.getElementById('f_id').disabled = !!p; // không đổi mã khi sửa
@@ -129,7 +227,7 @@ function parseNum(v) {
 
 async function saveProduct() {
   const sub = document.getElementById('f_sub').value;
-  const parts = sub.split('/').map(s => s.trim());
+  const parts = sub.split('/').map((s) => s.trim());
   const product = {
     id: document.getElementById('f_id').value.trim() || (_editingId || '').trim(),
     name: document.getElementById('f_name').value.trim(),
@@ -143,7 +241,7 @@ async function saveProduct() {
     isFlashSale: document.getElementById('f_flash').checked,
     specs: document.getElementById('f_specs').value.trim(),
     skuGroup: document.getElementById('f_skuGroup').value.trim() || document.getElementById('f_id').value.trim(),
-    images: document.getElementById('f_images').value.split(/\n|,/).map(s => s.trim()).filter(Boolean)
+    images: document.getElementById('f_images').value.split(/\n|,/).map((s) => s.trim()).filter(Boolean)
   };
 
   if (!product.id || !product.name) {
@@ -153,12 +251,12 @@ async function saveProduct() {
     return;
   }
   if (product.price && product.oldPrice && parseInt(product.price) >= parseInt(product.oldPrice)) {
-    product.oldPrice = '0'; // và cũ phải > giá mới, nếu không bỏ giá cũ
+    product.oldPrice = '0'; // giá gốc phải > giá bán, nếu không bỏ giá gốc
   }
 
   const r = await api('product.save', { product });
   const m = document.getElementById('prodMsg');
-  m.textContent = r.ok ? '✓ ' + r.msg + ' — website đặt tải lại là thấy ngay!' : '✗ ' + (r.error || 'Lỗi');
+  m.textContent = r.ok ? '✓ ' + r.msg + ' — website tải lại là thấy ngay!' : '✗ ' + (r.error || 'Lỗi');
   m.className = r.ok ? 'text-sm font-bold text-green-600' : 'text-sm font-bold text-red-600';
   if (r.ok) { await refreshData(); setTimeout(closeProductForm, 900); }
 }
@@ -173,8 +271,10 @@ async function deleteProduct(id) {
 // ---------- BÀI VIẾT ----------
 function renderPostList() {
   const titles = Object.keys(_policies);
-  document.getElementById('postList').innerHTML = titles.map(t => `
-    <button onclick="openPostEditor('${t.replace(/'/g, "\\'")}')" class="w-full text-left px-3 py-2.5 hover:bg-red-50 rounded-xl font-bold text-xs text-slate-700 hover:text-starRed transition">
+  const el = document.getElementById('postList');
+  if (!el) return;
+  el.innerHTML = titles.map((t) => `
+    <button onclick="openPostEditor('${t.replace(/'/g, "\\'")}')" class="w-full text-left px-3 py-2.5 hover:bg-red-50 rounded-xl font-bold text-xs text-slate-700 hover:text-tohoRed transition">
       <i class="fa-regular fa-newspaper mr-2 text-slate-400"></i>${t}
     </button>`).join('') || '<p class="text-xs text-slate-400 p-3">Chưa có bài viết. Bấm nút bài viết mới.</p>';
 }
@@ -214,7 +314,8 @@ async function deletePost() {
 async function runAction(action, btn) {
   const log = document.getElementById('syncLog');
   btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>ĐANG CHẠY...';
+  const oldHtml = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG CHẠY...';
   log.textContent = 'Đang thực hiện…\n';
   try {
     const r = await api(action);
@@ -225,9 +326,7 @@ async function runAction(action, btn) {
     toast('Lỗi server', 'err');
   }
   btn.disabled = false;
-  btn.innerHTML = action === 'sync.sheets'
-    ? '<i class="fa-solid fa-rotate mr-2"></i>CẬP NHẬT TỪ SHEETS'
-    : '<i class="fa-solid fa-hammer mr-2"></i>ĐẠM BẢO SEO LÀM MỚI';
+  btn.innerHTML = oldHtml;
 }
 
 // ---------- khởi động ----------
@@ -235,10 +334,6 @@ async function runAction(action, btn) {
   if (sessionStorage.getItem('tohoAdmin') === '1') {
     document.getElementById('loginGate').classList.add('hidden');
     document.getElementById('adminApp').classList.remove('hidden');
-    refreshData().then(() => switchTab('products'));
+    refreshData().then(() => switchTab('dashboard'));
   }
-  const onErr = window.addEventListener('error', () => {
-    const msg = document.getElementById('loginMsg');
-    if (msg) { msg.textContent = 'Không chạy được admin — hãy chạy ADMIN.bat / node server.js'; msg.classList.remove('hidden'); }
-  });
 })();

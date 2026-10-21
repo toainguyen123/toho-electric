@@ -23,6 +23,14 @@ if (fs.existsSync(cfgPath)) {
   if (m) ADMIN_PASS = m[1];
 }
 
+// Đổi mật khẩu: ghi lại vào js/admin-config.js
+function updatePassFile(newPass) {
+  const raw = fs.readFileSync(cfgPath, 'utf8');
+  const updated = raw.replace(/pass\s*:\s*'([^']*)'/, "pass: '" + newPass + "'");
+  fs.writeFileSync(cfgPath, updated, 'utf-8');
+  ADMIN_PASS = newPass;
+}
+
 // ============ DỮ LIỆU ============
 function readProducts() {
   try { return JSON.parse(fs.readFileSync(path.join(DATA, 'products.json'), 'utf8')); }
@@ -40,6 +48,18 @@ function readPolicies() {
 function writePolicies(p) {
   fs.writeFileSync(path.join(DATA, 'policies.json'), JSON.stringify(p, null, 2), 'utf-8');
   fs.writeFileSync(path.join(DATA, 'policies.js'), 'window.POLICIES_DATA = ' + JSON.stringify(p) + ';', 'utf-8');
+}
+
+// Tạo file CSV (mở bằng Excel) từ danh sách sản phẩm
+function productsToCSV(list) {
+  const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const head = ['id', 'name', 'category', 'subCategory', 'childCategory', 'price', 'oldPrice', 'badge', 'stock', 'specs', 'images'];
+  const rows = list.map((p) => [
+    p.id, p.name, p.category, p.subCategory, p.childCategory,
+    p.price, p.oldPrice, p.badge, p.stock, p.specs,
+    (p.images || []).join(' | ')
+  ].map(esc).join(','));
+  return head.map(esc).join(',') + '\n' + rows.join('\n');
 }
 
 // ============ API ============
@@ -86,6 +106,30 @@ const server = http.createServer((req, res) => {
 
   if (req.method === 'GET') {
     if (req.url === '/api/health') return json(res, 200, { ok: true, server: 'admin-server' });
+    // ==== XUẤT FILE DỮ LIỆU (download từ admin) ====
+    if (req.url.startsWith('/api/export')) {
+      const u = new URL(req.url, 'http://localhost');
+      if (u.searchParams.get('pass') !== ADMIN_PASS) { res.writeHead(401); return res.end('Sai mật khẩu'); }
+      let body, name;
+      if (u.searchParams.get('type') === 'policies') {
+        body = JSON.stringify(readPolicies(), null, 2);
+        name = 'policies.json';
+      } else if (u.searchParams.get('type') === 'products-csv') {
+        body = productsToCSV(readProducts());
+        name = 'san-pham.csv';
+      } else if (u.searchParams.get('type') === 'all') {
+        body = JSON.stringify({ exportedAt: new Date().toISOString(), products: readProducts(), policies: readPolicies() }, null, 2);
+        name = 'backup-toho-dulieu.json';
+      } else {
+        body = JSON.stringify(readProducts(), null, 2);
+        name = 'products.json';
+      }
+      res.writeHead(200, {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Content-Disposition': 'attachment; filename="' + name + '"'
+      });
+      return res.end('\uFEFF' + body); // BOM để Excel đọc tiếng Việt chuẩn
+    }
     return serveStatic(req, res, req.url);
   }
 
@@ -166,6 +210,28 @@ const server = http.createServer((req, res) => {
           json(res, 200, { ok: code === 0, msg: code === 0 ? 'Đã export 394 trang SEO tĩnh + sitemap!' : 'Lỗi khi build', log });
         });
         return;
+      }
+
+      // === XUẤT TIA ĐỒNG BỘ TỪ LIOA.COM.VN: nhập biến áp về source ===
+      case 'scrape.lioa': {
+        const out = spawn('node', ['tools/scrape-lioa.js'], { cwd: ROOT });
+        let log = '';
+        out.stdout.on('data', d => { log += d; });
+        out.stderr.on('data', d => { log += d; });
+        out.on('close', code => {
+          json(res, 200, { ok: code === 0, msg: code === 0 ? 'Đã nhập sản phẩm LIOA + xuất lại SEO!' : 'Lỗi nhập hàng LIOA', log });
+        });
+        return;
+      }
+      // === TÀI KHOẢN: ĐỔI MẬT KHẨU ADMIN ===
+      case 'auth.save': {
+        if (String(body.currentPass || '') !== ADMIN_PASS) {
+          return json(res, 401, { ok: false, error: 'Mật khẩu hiện tại không đúng' });
+        }
+        const np = String(body.newPass || '').trim();
+        if (np.length < 6) return json(res, 400, { ok: false, error: 'Mật khẩu mới cần tối thiểu 6 ký tự' });
+        updatePassFile(np);
+        return json(res, 200, { ok: true, msg: 'Đã đổi mật khẩu admin! Lần đăng nhập sau dùng mật khẩu mới.' });
       }
 
       default:

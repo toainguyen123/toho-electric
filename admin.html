@@ -56,6 +56,7 @@
       <button class="nav-item" data-tab="products" onclick="switchTab('products')"><i class="fa-solid fa-boxes-stacked"></i>Sản Phẩm</button>
       <button class="nav-item" data-tab="posts" onclick="switchTab('posts')"><i class="fa-solid fa-newspaper"></i>Bài Viết</button>
       <button class="nav-item" data-tab="sync" onclick="switchTab('sync')"><i class="fa-solid fa-cloud-arrow-down"></i>Đồng Bộ &amp; Xuất</button>
+      <button class="nav-item" data-tab="system" onclick="switchTab('system')"><i class="fa-solid fa-gear"></i>Hệ Thống</button>
     </nav>
     <!-- Hỗ trợ -->
     <div class="p-3">
@@ -79,6 +80,9 @@
         <a href="/index.html" target="_blank" class="btn border border-slate-500 text-white hover:bg-navy-700 text-xs">
           <i class="fa-solid fa-globe"></i>Xem website
         </a>
+        <button onclick="logout()" title="Đăng xuất" class="w-9 h-9 rounded-lg hover:bg-navy-700 text-slate-300 hover:text-white">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </button>
         <div class="flex items-center gap-2 pl-2 border-l border-navy-600">
           <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center overflow-hidden">
             <img src="images/logo.png" alt="avatar" class="max-w-full max-h-full object-contain" onerror="this.parentNode.innerHTML='<i class=&quot;fa-solid fa-user text-navy-800&quot;></i>'">
@@ -245,6 +249,13 @@
           </button>
         </div>
         <div class="bg-white rounded-2xl shadow border border-slate-200 p-6 space-y-4">
+          <h3 class="font-black uppercase text-navy-800"><i class="fa-solid fa-download text-tohoRed mr-2"></i>Nhập sản phẩm từ LIOA</h3>
+          <p class="text-xs text-slate-600">Kéo toàn bộ <b>94 biến áp</b> từ lioa.com.vn vào website của bạn: tên, mã hàng, thông số kỹ thuật, giá bán, ảnh (chạy bằng link gốc, không chiếm dung lượng). Các sản phẩm ngành biến áp lớn bên LIOA để "Liên hệ" sẽ hiển thị giá 0 → chữ <b>Liên hệ</b>.</p>
+          <button onclick="runAction('scrape.lioa', this)" class="btn bg-orange-500 hover:bg-orange-600 text-white w-full py-3 justify-center rounded-xl shadow">
+            <i class="fa-solid fa-cloud-arrow-up"></i>NHẬP HÀNG TỪ LIOA.COM.VN
+          </button>
+        </div>
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-6 space-y-4">
           <h3 class="font-black uppercase text-navy-800"><i class="fa-solid fa-file-export text-tohoRed mr-2"></i>Xuất lại trang SEO tĩnh</h3>
           <p class="text-xs text-slate-600">Sinh lại thư mục <b>san-pham/*</b> (394 trang HTML chuẩn SEO) + <b>sitemap.xml</b> + <b>robots.txt</b> từ dữ liệu source hiện tại.</p>
           <button onclick="runAction('rebuild.pages', this)" class="btn bg-navy-800 hover:bg-navy-900 text-white w-full py-3 justify-center rounded-xl shadow">
@@ -254,6 +265,39 @@
         <div class="bg-white rounded-2xl shadow border border-slate-200 p-4">
           <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Log tiến trình</p>
           <pre id="syncLog" class="text-xs bg-navy-900 text-green-400 rounded-xl p-4 overflow-auto max-h-64 whitespace-pre-wrap">Sẵn sàng…</pre>
+        </div>
+      </section>
+      <!-- ============ HỆ THỐNG ============ -->
+      <section id="tab-system" class="hidden space-y-4 max-w-3xl">
+        <!-- Tài khoản -->
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-6 space-y-4">
+          <h3 class="font-black uppercase text-navy-800"><i class="fa-solid fa-user-shield text-tohoRed mr-2"></i>Tài khoản quản trị</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-[10px] font-bold text-slate-400 uppercase">Mật khẩu hiện tại</label>
+              <input id="curPass" type="password" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-slate-400 uppercase">Mật khẩu mới (tối thiểu 6 ký tự)</label>
+              <input id="newPass" type="password" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="changePassword()" class="btn bg-tohoRed hover:bg-tohoRedHover text-white shadow"><i class="fa-solid fa-key"></i> Đổi mật khẩu</button>
+            <button onclick="logout()" class="btn bg-white border border-slate-300 text-slate-600 hover:border-red-400 hover:text-red-600"><i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất</button>
+          </div>
+          <p class="text-[10px] text-slate-400">Mật khẩu lưu trong file <b>js/admin-config.js</b> — đổi xong có thể đăng nhập lại bằng mật khẩu mới ngay.</p>
+        </div>
+        <!-- Xuất file -->
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-6 space-y-4">
+          <h3 class="font-black uppercase text-navy-800"><i class="fa-solid fa-file-arrow-down text-tohoRed mr-2"></i>Xuất file dữ liệu</h3>
+          <p class="text-xs text-slate-600">Tải dữ liệu source website về máy bằng file Excel/JSON — dùng để mở trên máy tính, lập bảng kê giá hoặc gửi cho người khác biên tập.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button onclick="downloadExport('products-csv')" class="btn bg-green-600 hover:bg-green-700 text-white py-3 justify-center rounded-xl shadow"><i class="fa-solid fa-file-excel"></i> Sản phẩm — Excel/CSV</button>
+            <button onclick="downloadExport('products')" class="btn bg-blue-600 hover:bg-blue-700 text-white py-3 justify-center rounded-xl shadow"><i class="fa-solid fa-file-code"></i> Sản phẩm — JSON</button>
+            <button onclick="downloadExport('policies')" class="btn bg-amber-500 hover:bg-amber-600 text-white py-3 justify-center rounded-xl shadow"><i class="fa-regular fa-file-lines"></i> Bài viết — JSON</button>
+            <button onclick="downloadExport('all')" class="btn bg-navy-800 hover:bg-navy-900 text-white py-3 justify-center rounded-xl shadow"><i class="fa-solid fa-box-archive"></i> Bản sao đầy đủ</button>
+          </div>
         </div>
       </section>
     </main>

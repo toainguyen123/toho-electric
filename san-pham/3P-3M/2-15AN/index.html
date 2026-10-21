@@ -809,6 +809,17 @@
       </button>
     </div>
 
+    <script>
+    // Bộ đếm lượt truy cập hàng ngày (lưu trong trình duyệt của khách)
+    (function(){try{
+      var k='tohoVisits', d=new Date().toISOString().slice(0,10);
+      var v=JSON.parse(localStorage.getItem(k)||'{"days":{},"devices":{}}');
+      v.days[d]=(v.days[d]||0)+1;
+      var dev=window.innerWidth<768?'mobile':'desktop';
+      v.devices[dev]=(v.devices[dev]||0)+1;
+      localStorage.setItem(k,JSON.stringify(v));
+    }catch(e){}})();
+    </script>
     <script src="js/site.config.js"></script>
     <script src="data/product-images.js" onerror="window.LOCAL_IMAGES={}"></script>
     <script src="data/products.js"></script>

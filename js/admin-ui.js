@@ -2,7 +2,7 @@
 // LOGIC TRANG QUẢN TRỊ TOHO ELECTRIC VN (giao diện sidebar)
 // ============================================================
 const API = window.ADMIN_CONFIG.apiUrl;
-const PASS = window.ADMIN_CONFIG.pass;
+let PASS = window.ADMIN_CONFIG.pass; // có thể đổi khi đổi mật khẩu trong Hệ Thống
 let _products = [];
 let _policies = {};
 let _editingId = null; // id đang sửa (null = đăng mới)
@@ -327,6 +327,47 @@ async function runAction(action, btn) {
   }
   btn.disabled = false;
   btn.innerHTML = oldHtml;
+}
+
+// ---------- HỆ THỐNG: TÀI KHOẢN ----------
+async function changePassword() {
+  const cur = document.getElementById('curPass').value;
+  const np = document.getElementById('newPass').value;
+  if (!cur || np.length < 6) return toast('Điền đủ mật khẩu hiện tại + mật khẩu mới (≥6 ký tự)', 'err');
+  const r = await api('auth.save', { currentPass: cur, newPass: np });
+  if (r.ok) {
+    toast(r.msg, 'ok');
+    PASS = np;
+    document.getElementById('curPass').value = '';
+    document.getElementById('newPass').value = '';
+  } else {
+    toast(r.error || 'Lỗi', 'err');
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('tohoAdmin');
+  window.location.reload();
+}
+
+// ---------- HỆ THỐNG: XUẤT FILE ----------
+async function downloadExport(type) {
+  try {
+    const res = await fetch(API + '/api/export?type=' + type + '&pass=' + encodeURIComponent(PASS));
+    if (!res.ok) return toast('Lỗi khi tạo file (' + res.status + ')', 'err');
+    const blob = await res.blob();
+    const cd = res.headers.get('Content-Disposition') || '';
+    const m = cd.match(/filename="([^"]+)"/);
+    const name = (m && m[1]) || ('toho-' + type + '.' + (type === 'products-csv' ? 'csv' : 'json'));
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Đã tải file ' + name, 'ok');
+  } catch (e) {
+    toast('Lỗi tải file: ' + e.message, 'err');
+  }
 }
 
 // ---------- khởi động ----------

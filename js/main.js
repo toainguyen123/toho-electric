@@ -239,33 +239,49 @@ initData();
 });
 
 async function initData() {
-    try {
-        const res = await fetch(GOOGLE_SHEET_CSV_URL);
-        const csvText = await res.text();
-        products = parseProductsFromCSV(csvText);
+    // ==== NỘI DUNG ĐỌC TỪ SOURCE CỘC BỘ (do trang admin quản lý) ====
+    // data/products.js là nguồn dữ liệu chính. Ảnh sản phẩm vẫn nằm trên Google Drive (chỉ lưu URL).
+    products = window.PRODUCTS_DATA || window.PRODUCTS_FALLBACK || [];
+    filteredProducts = [...products];
 
-        // file:// hoặc Sheet lỗi -> dùng bản data cục bộ data/products.js (do convert.js tạo)
-        if (!products || products.length === 0) {
-            await loadProductsFallback();
-        }
-        filteredProducts = [...products];
+    if (!products || products.length === 0) {
+        showToast("Chưa có sản phẩm trong source! Mở admin và bấm nút 'Cập nhật từ Sheets'.", "info");
+    }
 
-        renderHoverCategories();
-        renderFlashSale();
-        renderCategoryBlocks();
+    renderHoverCategories();
+    renderFlashSale();
+    renderCategoryBlocks();
 
-        await loadPoliciesFromSheet();
-        await loadCouponsFromSheet();
-        await loadDevicesFromSheet();
+    await loadPolicies();          // bài viết / chính sách từ data/policies.js
+    await loadCouponsFromSheet();  // mã khuyến mãi (từ Sheet)
+    await loadDevicesFromSheet();
 
-        applyStartupRouting();
-        // =============================================
+    applyStartupRouting();
+}
 
-    } catch (e) {
-        console.error("Lỗi tải dữ liệu Sheets:", e);
-        // file:// bị CORS hoặc mạng lỗi -> nạp bản data cục bộ thay thế
-        await loadProductsFallback();
-        applyStartupRouting();
+// Nạp bài viết / chính sách: ưu tiên source cục bộ (admin đăng), fallback sang Sheet cũ nếu có
+async function loadPolicies() {
+    loadDefaultPolicies();
+    if (window.POLICIES_DATA && Object.keys(window.POLICIES_DATA).length) {
+        policiesMap = Object.assign(policiesMap, window.POLICIES_DATA);
+    }
+    if (GOOGLE_SHEET_POLICY_CSV_URL) {
+        try {
+            const cacheBusterUrl = GOOGLE_SHEET_POLICY_CSV_URL + '&t=' + new Date().getTime();
+            const response = await fetch(cacheBusterUrl);
+            if (response.ok) {
+                const rows = parseCSV(await response.text());
+                rows.forEach(cols => {
+                    if (cols.length >= 2 && cols[0].trim() && cols[1].trim()) {
+                        policiesMap[cols[0].trim()] = cols[1].trim();
+                    }
+                });
+            }
+        } catch (e) { /* sheet không tải được vẫn còn bản local */ }
+    }
+    // Vẽ lại danh sách chính sách nếu đã render rồi
+    if (typeof renderPolicies === 'function' && document.getElementById('policyList')) {
+        try { renderPolicies(); } catch (e) { /* bỏ qua */ }
     }
 }
 
@@ -303,38 +319,21 @@ function applyStartupRouting() {
     }
 }
 
-// Nạp data/products.js (script đơn giản, chạy được kể cả khi mở file:// double-click)
+// (Dự phòng: nếu source hoàn toàn trống, thử nạp data/products.js lần cuối)
 function loadProductsFallback() {
     return new Promise((resolve) => {
-        if (window.PRODUCTS_FALLBACK && window.PRODUCTS_FALLBACK.length) {
-            products = window.PRODUCTS_FALLBACK;
+        const apply = (list) => {
+            products = list || [];
             filteredProducts = [...products];
             renderHoverCategories();
             renderFlashSale();
             renderCategoryBlocks();
-            showToast("Đang dùng bản dự phòng cục bộ (nội dung có thể chưa mới nhất).", "info");
-            resolve();
-            return;
-        }
+        };
+        if (window.PRODUCTS_FALLBACK && window.PRODUCTS_FALLBACK.length) { apply(window.PRODUCTS_FALLBACK); resolve(); return; }
         const s = document.createElement('script');
         s.src = 'data/products.js';
-        s.onload = () => {
-            if (window.PRODUCTS_FALLBACK && window.PRODUCTS_FALLBACK.length) {
-                products = window.PRODUCTS_FALLBACK;
-                filteredProducts = [...products];
-                renderHoverCategories();
-                renderFlashSale();
-                renderCategoryBlocks();
-                showToast("Đang dùng bản dự phòng cục bộ (nội dung có thể chưa mới nhất).", "info");
-            } else {
-                showToast("Không tải được danh sách sản phẩm!", "info");
-            }
-            resolve();
-        };
-        s.onerror = () => {
-            showToast("Không tải được danh sách sản phẩm!", "info");
-            resolve();
-        };
+        s.onload = () => { apply(window.PRODUCTS_DATA || window.PRODUCTS_FALLBACK); resolve(); };
+        s.onerror = () => resolve();
         document.head.appendChild(s);
     });
 }

@@ -70,6 +70,12 @@ function formatImageUrl(url) {
         }
     }
     if (/lh([0-9]+)\.googleusercontent\.com/.test(u)) {
+        // Ưu tiên ảnh đã tải cục bộ (tools/download-images.js làm kho ảnh riêng, khỏi bị Drive throttle)
+        const localMap = window.LOCAL_IMAGES;
+        if (localMap) {
+            const m = u.match(/\/d\/([A-Za-z0-9_-]{20,})/);
+            if (m && localMap[m[1]]) return localMap[m[1]];
+        }
         return googleImageSized(u, 800);
     }
     return u;

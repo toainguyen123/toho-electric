@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="300" rx="24" fill="url(#bg)"/>
+  <!-- Biểu tượng ổ cắm mờ -->
+  <g stroke="#94a3b8" stroke-width="6" fill="none" opacity="0.55">
+    <rect x="105" y="95" width="90" height="110" rx="18"/>
+    <circle cx="150" cy="150" r="6" fill="#94a3b8" stroke="none"/>
+    <path d="M135 125 v14 M165 125 v14 M135 168 h30" stroke-linecap="round"/>
+  </g>
+  <text x="150" y="242" font-family="Arial, sans-serif" font-size="17" font-weight="700"
+        fill="#64748b" text-anchor="middle">TOHO ELECTRIC</text>
+  <text x="150" y="264" font-family="Arial, sans-serif" font-size="13" fill="#94a3b8"
+        text-anchor="middle">Cập nhật ảnh sau</text>
+</svg>

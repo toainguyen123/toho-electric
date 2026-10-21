@@ -1,9 +1,9 @@
 const categoryBannerMap = {
-    "Ổ CẮM ĐIỆN": "images/category-o-cam-dien.jpg",
-    "DÂY ĐIỆN": "images/category-day-dien.jpg",
-    "ỔN ÁP": "images/category-on-ap.jpg",
-    "BIẾN ÁP": "images/category-bien-ap.jpg",
-    "THIẾT BỊ ĐIỆN": "images/category-thiet-bi-dien.jpg"
+    "Ổ CẮM ĐIỆN": "images/opt/category-o-cam-dien.webp",
+    "DÂY ĐIỆN": "images/opt/category-day-dien.webp",
+    "ỔN ÁP": "images/opt/category-thiet-bi-dien.webp",
+    "BIẾN ÁP": "images/opt/category-thiet-bi-dien.webp",
+    "THIẾT BỊ ĐIỆN": "images/opt/category-thiet-bi-dien.webp"
 };
 const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWm2p0bF1cb1jjEdiol9BUZzVnH53XEvwpj9DW9QfOmgmbgj9VIX-QqoXXA6QCP-YvPQQQDGOaVrEW/pub?gid=1881975737&single=true&output=csv';
 const GOOGLE_SHEET_POLICY_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWm2p0bF1cb1jjEdiol9BUZzVnH53XEvwpj9DW9QfOmgmbgj9VIX-QqoXXA6QCP-YvPQQQDGOaVrEW/pub?gid=607784045&single=true&output=csv'; 
@@ -36,21 +36,56 @@ let deviceList = [];
 let selectedDevices = {};
 
 // --- TIỆN ÍCH XỬ LÝ HÌNH ẢNH & GIÁ ---
+// Ảnh lỗi cho sạch: dùng file local thay vì dịch vụ placeholder ngoài (tránh thêm chậm/lỗi)
+const IMG_PLACEHOLDER = 'images/no-image.svg';
+
+// chống lặp vô hạn khi placeholder cũng lỗi
+function imgFallback(el) {
+    if (el && !el.dataset.fbk) {
+        el.dataset.fbk = '1';
+        el.src = IMG_PLACEHOLDER;
+    }
+}
+window.imgFallback = imgFallback;
+
+// Vá ký tự quý ớt khi nhét text vào attribute HTML (dấu nháy, dấu < ...)
+function sanitizeAttr(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/'/g, '&#39;');
+}
+window.sanitizeAttr = sanitizeAttr;
+
+// Chèn tham số kích thước googleusercontent để tải nhẹ hơn (thay vì bản gốc to hàng chục MB)
+function googleImageSized(url, width) {
+    // Bỏ mọi tham số =w... cũ rồi thêm tham số mới
+    return url.replace(/=[^=]*$/, '') + '=w' + width;
+}
+
 function formatImageUrl(url) {
-    if (!url) return 'https://via.placeholder.com/300?text=No+Image';
-    if (url.includes('drive.google.com')) {
-        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+    if (!url) return IMG_PLACEHOLDER;
+    let u = String(url).trim();
+    if (u.includes('drive.google.com')) {
+        const match = u.match(/\/d\/([a-zA-Z0-9_-]+)/) || u.match(/id=([a-zA-Z0-9_-]+)/);
         if (match && match[1]) {
-            return `https://lh3.googleusercontent.com/d/${match[1]}`;
+            u = `https://lh3.googleusercontent.com/d/${match[1]}`;
         }
     }
-    return url.trim();
+    if (/lh([0-9]+)\.googleusercontent\.com/.test(u)) {
+        return googleImageSized(u, 800);
+    }
+    return u;
+}
+
+// Dùng cho ảnh nhỏ (thumbnail giỏ hàng, ảnh trong thư viện góc)
+function smallImageUrl(url, width = 200) {
+    const u = formatImageUrl(url);
+    if (/=w\d+$/.test(u)) return u.replace(/=w\d+$/, '=w' + width);
+    return u;
 }
 
 function parseImageGallery(imageStr) {
-    if (!imageStr) return ['https://via.placeholder.com/300?text=No+Image'];
+    if (!imageStr) return [IMG_PLACEHOLDER];
     const urls = imageStr.split(/[,|]/).map(u => formatImageUrl(u.trim())).filter(u => u !== '');
-    return urls.length > 0 ? urls : ['https://via.placeholder.com/300?text=No+Image'];
+    return urls.length > 0 ? urls : [IMG_PLACEHOLDER];
 }
 
 function parsePrice(val) {
@@ -211,13 +246,28 @@ async function initData() {
         await loadDevicesFromSheet();
 
         // === CHÈN KHÚC NÀY VÀO CUỐI HÀM initData() ===
+        // 1) URL chuẩn SEO dạng /san-pham/<id> (id có thể chứa "/", ví dụ 2P-3M/2-15A)
+        const pathMatch = window.location.pathname.match(/\/san-pham\/([^?#]+)/);
+        if (pathMatch) {
+            const productId = decodeURIComponent(pathMatch[1].replace(/\/+$/, ''));
+            const targetProd = products.find(x => x.id === productId);
+            if (targetProd) {
+                openProductDetailWithoutPush(productId);
+            } else {
+                // URL sản phẩm cũ/không tồn tại -> đưa về trang chủ
+                history.replaceState({ tab: 'home' }, '', '/#');
+            }
+        }
+        // 2) Giữ tương thích với link dạng #product-<id> cũ
         const hash = window.location.hash;
-        if (hash && hash.startsWith('#product-')) {
+        if (!pathMatch && hash && hash.startsWith('#product-')) {
             const productId = hash.replace('#product-', '');
             // Kiểm tra xem sản phẩm có tồn tại không rồi mở trang chi tiết
             const targetProd = products.find(x => x.id === productId);
             if (targetProd) {
                 openProductDetailWithoutPush(productId);
+                // Nâng link hash cũ lên URL chuẩn mới
+                history.replaceState({ tab: 'product-detail', productId: productId }, '', window.SITE_CONFIG.productPathUrl(productId));
             }
         }
         // =============================================
@@ -429,18 +479,106 @@ function switchTab(tab, pushToHistory = true, stateData = {}) {
 
     if (tab === 'home') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        resetSeoToHome();
     }
 
     // Đẩy state vào lịch sử trình duyệt nếu được phép
     if (pushToHistory) {
         const state = { tab: tab, ...stateData };
-        // Bạn có thể thay đổi URL tương ứng trên thanh địa chỉ nếu muốn (ví dụ: #home, #product, #policy)
         let url = `#${tab}`;
         if (tab === 'product-detail' && stateData.productId) {
-            url = `#product-${stateData.productId}`;
+            // URL chuẩn SEO: /san-pham/<id>
+            url = window.SITE_CONFIG ? window.SITE_CONFIG.productPathUrl(stateData.productId) : url;
         }
         history.pushState(state, '', url);
     }
+}
+
+// === SEO ĐỘNG: cập nhật title/meta/canonical/OG/JSON-LD theo sản phẩm đang xem ===
+function setHeadMeta() {
+    if (!window.SITE_CONFIG) return null;
+
+    const seo = {
+        siteUrl: (window.SITE_CONFIG.siteUrl || '').replace(/\/$/, ''),
+        siteName: window.SITE_CONFIG.siteName || 'TOHO ELECTRIC VN'
+    };
+
+    const ensure = (selector, createTag, attrs) => {
+        let el = document.head.querySelector(selector);
+        if (!el) {
+            el = document.createElement(createTag);
+            Object.entries(attrs || {}).forEach(([k, v]) => el.setAttribute(k, v));
+            document.head.appendChild(el);
+        }
+        return el;
+    };
+
+    return {
+        ...seo,
+        title: document.querySelector('title'),
+        desc: ensure('meta[name="description"]', 'meta', { name: 'description' }),
+        canonical: ensure('link[rel="canonical"]', 'link', { rel: 'canonical' }),
+        ogTitle: ensure('meta[property="og:title"]', 'meta', { property: 'og:title' }),
+        ogDesc: ensure('meta[property="og:description"]', 'meta', { property: 'og:description' }),
+        ogImage: ensure('meta[property="og:image"]', 'meta', { property: 'og:image' }),
+        ogUrl: ensure('meta[property="og:url"]', 'meta', { property: 'og:url' }),
+        ldProduct: ensure('script#ldProduct', 'script', { type: 'application/ld+json', id: 'ldProduct' })
+    };
+}
+
+// Gọi khi mở trang chi tiết sản phẩm (Google index đúng từng sản phẩm)
+function updateSeoForProduct(p) {
+    const meta = setHeadMeta();
+    if (!meta || !p) return;
+
+    const price = parsePrice(p.price);
+    const oldPrice = parsePrice(p.oldPrice);
+    const hasDiscount = oldPrice > price && oldPrice > 0;
+    const productUrl = window.SITE_CONFIG ? window.SITE_CONFIG.productPathUrl(p.id, true) : (`${meta.siteUrl}/san-pham/${encodeURIComponent(p.id)}`);
+    const desc = `${p.name} - Mã SP ${p.code}. Giá ${formatVND(p.price)}${hasDiscount ? ` (giảm còn ${formatVND(p.price)} từ ${formatVND(oldPrice)})` : ''}. ${p.category || ''} ${p.subCategory || ''} chính hãng tại ${meta.siteName}. Giao hàng toàn quốc, hỗ trợ tư vấn ${window.SITE_CONFIG.phone || ''}.`;
+
+    meta.title.textContent = `${p.name} | ${meta.siteName}`;
+    meta.desc.setAttribute('content', desc.slice(0, 300));
+    meta.canonical.setAttribute('href', productUrl);
+    meta.ogTitle.setAttribute('content', p.name);
+    meta.ogDesc.setAttribute('content', desc.slice(0, 200));
+    meta.ogImage.setAttribute('content', p.image || 'images/hero-banner-01.jpg');
+    meta.ogUrl.setAttribute('content', productUrl);
+
+    const ld = {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: p.name,
+        sku: p.code,
+        mpn: p.code,
+        description: (p.specs || desc).slice(0, 5000),
+        image: (p.images && p.images.length ? p.images : [p.image]).filter(Boolean),
+        category: [p.category, p.subCategory, p.childCategory].filter(Boolean).join(' > '),
+        brand: { '@type': 'Brand', name: meta.siteName },
+        offers: {
+            '@type': 'Offer',
+            url: productUrl,
+            priceCurrency: 'VND',
+            price: String(price),
+            itemCondition: 'https://schema.org/NewCondition',
+            availability: 'https://schema.org/InStock',
+            seller: { '@type': 'Organization', name: meta.siteName }
+        }
+    };
+    meta.ldProduct.textContent = JSON.stringify(ld);
+}
+
+// Khôi phục SEO trang chủ khi quay về home
+function resetSeoToHome() {
+    const meta = setHeadMeta();
+    if (!meta) return;
+    const homeTitle = document.querySelector('title');
+    homeTitle.textContent = 'TOHO ELECTRIC VN - Ổ cắm điện, Ổn áp, Thiết bị điện Giá Rẻ';
+    meta.canonical.setAttribute('href', `${meta.siteUrl}/`);
+    meta.ogUrl.setAttribute('content', `${meta.siteUrl}/`);
+    meta.ogTitle.setAttribute('content', 'TOHO ELECTRIC VN - Thiết Bị Điện & Ổ Cắm Chính Hãng');
+    const ld = document.querySelector('script#ldProduct');
+    if (ld) ld.textContent = '';
 }
 
 function renderHoverCategories() {
@@ -647,13 +785,14 @@ function renderCustomProductsGrid(title, items) {
 function renderProductCard(p) {
     const discount = getDiscountPercent(p.price, p.oldPrice);
     const hasDiscount = discount > 0;
+    const detailUrl = window.SITE_CONFIG ? window.SITE_CONFIG.productPathUrl(p.id) : (`san-pham/${encodeURIComponent(p.id)}`);
 
     return `
-        <div class="glass-card art-card p-3 flex flex-col justify-between cursor-pointer relative group overflow-hidden" onclick="openProductDetail('${p.id}')">
+        <a href="${detailUrl}" onclick="openProductDetail('${p.id}'); return false;" class="block glass-card art-card p-3 flex flex-col justify-between cursor-pointer relative group overflow-hidden" title="${p.name}">
             ${p.badge ? `<span class="absolute top-3 left-3 bg-starRed text-white text-[10px] font-extrabold px-2 py-0.5 rounded-lg shadow-md z-10 font-heading">${p.badge}</span>` : (hasDiscount ? `<span class="absolute top-3 left-3 bg-starRed text-white text-[10px] font-extrabold px-2 py-0.5 rounded-lg shadow-md z-10 font-heading">-${discount}%</span>` : '')}
             
            <div class="w-full h-70 md:h-72 flex items-center justify-center p-2 rounded-xl bg-slate-50 mb-2 overflow-hidden">
-                <img src="${p.image}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'" class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300" alt="${p.name}">
+                <img src="${p.image}" onerror="imgFallback(this)" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300" alt="${p.name} - ${p.code}">
            </div>
 
             <div class="space-y-1.5 flex-1 flex flex-col justify-between">
@@ -670,13 +809,13 @@ function renderProductCard(p) {
                         ${hasDiscount ? `<span class="text-[11px] text-slate-400 line-through">${formatVND(p.oldPrice)}</span>` : ''}
                     </div>
                     
-                    <button onclick="event.stopPropagation(); addToCart('${p.id}', event)" class="mt-2 w-full bg-red-50 hover:bg-starRed text-starRed hover:text-white border border-red-200 text-xs font-bold py-1.5 rounded-xl transition flex items-center justify-center space-x-1">
+                    <button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}', event)" class="mt-2 w-full bg-red-50 hover:bg-starRed text-starRed hover:text-white border border-red-200 text-xs font-bold py-1.5 rounded-xl transition flex items-center justify-center space-x-1">
                         <i class="fa-solid fa-cart-plus"></i>
                         <span>Thêm vào giỏ</span>
                     </button>
                 </div>
             </div>
-        </div>
+        </a>
     `;
 }
 function renderFlashSale() {
@@ -707,7 +846,7 @@ function renderCategoryBlocks() {
 
         const upperCat = cat.trim().toUpperCase();
         const bannerImg = categoryBannerMap[upperCat] 
-            || (categoryProducts[0] && categoryProducts[0].image ? categoryProducts[0].image : 'https://via.placeholder.com/400x600?text=Category+Banner');
+            || (categoryProducts[0] && categoryProducts[0].image ? categoryProducts[0].image : IMG_PLACEHOLDER);
 
         html += `
             <div class="glass-panel p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-4 mb-6">
@@ -719,7 +858,7 @@ function renderCategoryBlocks() {
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="md:col-span-1 relative rounded-2xl overflow-hidden group cursor-pointer border border-slate-200/80 shadow-inner bg-slate-900 flex flex-col justify-between p-5 min-h-[280px]" onclick="filterByCategory('${cat}')">
-                        <img src="${bannerImg}" onerror="this.src='https://via.placeholder.com/400x600?text=Category+Banner'" class="absolute inset-0 w-full h-full object-cover opacity-100 group-hover:scale-105 transition-transform duration-500" alt="${cat}">
+                        <img src="${bannerImg}" onerror="imgFallback(this)" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover opacity-100 group-hover:scale-105 transition-transform duration-500" alt="Danh mục ${sanitizeAttr(cat)}">
                         
                         <div class="relative z-10 pt-4"></div>
                     </div>
@@ -745,6 +884,7 @@ function openProductDetail(id) {
     // Đẩy state vào History API
     switchTab('product-detail', true, { productId: id });
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    updateSeoForProduct(p);
 
     if (!recentlyViewed.some(x => x.id === p.id)) {
         recentlyViewed.unshift(p);
@@ -769,12 +909,12 @@ function openProductDetail(id) {
         <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div class="md:col-span-5 space-y-4">
                 <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-inner flex items-center justify-center min-h-[300px]">
-                    <img id="mainDetailImage" src="${p.image}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'" class="max-h-80 object-contain hover:scale-105 transition cursor-pointer" onclick="openLightbox('${p.image}')" alt="${p.name}">
+                    <img id="mainDetailImage" src="${p.image}" onerror="imgFallback(this)" decoding="async" class="max-h-80 object-contain hover:scale-105 transition cursor-pointer" onclick="openLightbox('${p.image}')" alt="${p.name} - ${p.code}">
                 </div>
                 ${p.images && p.images.length > 1 ? `
                     <div class="flex space-x-2 overflow-x-auto pb-2">
                         ${p.images.map((img, idx) => `
-                            <img src="${img}" onerror="this.src='https://via.placeholder.com/100?text=No+Image'" onclick="document.getElementById('mainDetailImage').src='${img}'" class="w-16 h-16 object-contain rounded-xl border border-slate-200 bg-white p-1 cursor-pointer hover:border-starRed transition">
+                            <img src="${img}" onerror="imgFallback(this)" loading="lazy" decoding="async" onclick="document.getElementById('mainDetailImage').src='${img}'; document.getElementById('mainDetailImage').dataset.fbk = '';" class="w-16 h-16 object-contain rounded-xl border border-slate-200 bg-white p-1 cursor-pointer hover:border-starRed transition">
                         `).join('')}
                     </div>
                 ` : ''}
@@ -967,7 +1107,7 @@ function updateCartUI() {
         } else {
             cartList.innerHTML = cart.map(item => `
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3 text-xs gap-2">
-                    <img src="${item.image}" onerror="this.src='https://via.placeholder.com/80?text=No+Image'" class="w-12 h-12 object-contain rounded-lg border bg-white p-1 shrink-0">
+                    <img src="${smallImageUrl(item.image, 120)}" onerror="imgFallback(this)" loading="lazy" decoding="async" class="w-12 h-12 object-contain rounded-lg border bg-white p-1 shrink-0">
                     <div class="flex-1 min-w-0">
                         <h5 class="font-bold text-slate-800 line-clamp-1">${item.name}</h5>
                         <p class="text-[10px] font-mono text-slate-400">Mã SP: <span class="text-starRed font-bold">${item.code}</span></p>
@@ -1483,7 +1623,7 @@ function closeLightbox() {
 
 window.addEventListener('popstate', (event) => {
     const state = event.state;
-    
+
     if (state && state.tab) {
         if (state.tab === 'product-detail' && state.productId) {
             // Mở lại chi tiết sản phẩm khi người dùng bấm Next/Back
@@ -1491,9 +1631,11 @@ window.addEventListener('popstate', (event) => {
         } else {
             // Chuyển tab về trang chủ hoặc chính sách mà không đẩy thêm state mới
             switchTab(state.tab, false);
+            resetSeoToHome();
         }
     } else {
         switchTab('home', false);
+        resetSeoToHome();
     }
 });
 

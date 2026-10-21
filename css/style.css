@@ -325,8 +325,52 @@ header .max-w-7xl {
   font-size: 22px;
 }
 
+/* ==========================================================================
+   9. TỐI ƯU THẺ SẢN PHẨM & TÍNH NĂNG NHẮN CÓ
+   ========================================================================== */
+
+/* Thẻ sản phẩm: nhấc nhẹ + đổ mờ mềm, chữ giá ổn định nền */
+.art-card {
+    will-change: transform;
+}
+.art-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 22px 40px -14px rgba(227, 24, 55, 0.14), 0 0 20px rgba(227, 24, 55, 0.05);
+}
+
+/* Bỏ viền bật tiêu điểm khó chịu khi dùng chuột, giữ cho bàn phím */
+.art-card:focus-visible {
+    outline: 2px solid #E31837;
+    outline-offset: 2px;
+}
+
+/* Nút Thêm vào giỏ trên thẻ sản phẩm */
+.art-card button[class*="border-red-200"] {
+    transition: background .2s ease, color .2s ease, border-color .2s ease, transform .15s ease;
+}
+.art-card button[class*="border-red-200"]:active {
+    transform: scale(.97);
+}
+
+/* Ảnh placeholder khi mạng chậm - làm nền sáng dịu, tránh khối xám gắt */
+img[src*="no-image.svg"] {
+    background: #f1f5f9;
+    border-radius: 12px;
+    padding: 6px;
+}
+
+/* Tinh chỉnh chữ tiêu đề sản phẩm dễ đọc hơn */
+.product-title {
+    letter-spacing: -0.01em;
+}
+
 /* OVERLAY & DRAWER */
 .cart-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+
   position: fixed;
   inset: 0;
   z-index: 2000;

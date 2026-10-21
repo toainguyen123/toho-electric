@@ -4,12 +4,39 @@
 <!-- Meta SEO -->
 <meta name="description" content="TOHO ELECTRIC VN - Chuyên cung cấp ổ cắm điện, ổn áp, biến áp và thiết bị điện chính hãng, giá rẻ. Bảo hành chính hãng, giao hàng toàn quốc.">
 <meta name="keywords" content="ổ cắm điện, ổn áp lioa, biến áp, thiết bị điện toho, ổ cắm deli">
+<link rel="canonical" href="https://toho-electric.vercel.app/">
+<meta name="robots" content="index, follow, max-image-preview:large">
 
 <!-- Open Graph / Zalo / Facebook -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="TOHO ELECTRIC VN - Thiết Bị Điện & Ổ Cắm Chính Hãng">
 <meta property="og:description" content="Giải pháp nguồn điện an toàn, tối ưu hiệu suất cho gia đình và doanh nghiệp.">
-<meta property="og:image" content="images/hero-banner-01.jpg">
+<meta property="og:image" content="https://toho-electric.vercel.app/images/hero-banner-01.jpg">
+<meta property="og:url" content="https://toho-electric.vercel.app/">
+
+<!-- Schema SEO tĩnh: Doanh nghiệp + Sitelinks Searchbox -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://toho-electric.vercel.app/#org",
+      "name": "TOHO ELECTRIC VN",
+      "logo": "https://toho-electric.vercel.app/images/logo.png",
+      "telephone": "+84768718896",
+      "url": "https://toho-electric.vercel.app/"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://toho-electric.vercel.app/#website",
+      "url": "https://toho-electric.vercel.app/",
+      "name": "TOHO ELECTRIC VN",
+      "publisher": { "@id": "https://toho-electric.vercel.app/#org" }
+    }
+  ]
+}
+</script>
 <!-- Nhúng EmailJS SDK -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script type="text/javascript">
@@ -23,12 +50,14 @@
 <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOHO ELECTRIC VN - Ổ cắm điện, Ổn áp, Thiết bị điện Giá Rẻ</title>
+    <!-- SEO_PAGES_MARKER -->
     <link rel="icon" href="images/favicon.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://lh3.googleusercontent.com">
+    <link rel="dns-prefetch" href="https://docs.google.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="css/style.css">
@@ -55,13 +84,13 @@
  <!-- BANNER 2 BÊN HÔNG -->
 <div id="sideBannerLeft" class="fixed top-[145px] right-[calc(50%+640px)] z-30 hidden xl:block w-[160px] 2xl:w-[200px] transition-all pr-4">
     <a href="#" class="block hover:scale-[1.02] transition-transform">
-        <img src="images/banner-left.jpg" class="rounded-2xl shadow-xl border border-slate-200/80 w-full h-auto object-cover" alt="Banner Trai">
+        <img src="images/opt/banner-left.webp" loading="lazy" decoding="async" class="rounded-2xl shadow-xl border border-slate-200/80 w-full h-auto object-cover" alt="Banner Trai">
     </a>
 </div>
 
 <div id="sideBannerRight" class="fixed top-[145px] left-[calc(50%+640px)] z-30 hidden xl:block w-[160px] 2xl:w-[200px] transition-all pl-4">
     <a href="#" class="block hover:scale-[1.02] transition-transform">
-        <img src="images/banner-right.jpg" class="rounded-2xl shadow-xl border border-slate-200/80 w-full h-auto object-cover" alt="Banner Phai">
+        <img src="images/opt/banner-right.webp" loading="lazy" decoding="async" class="rounded-2xl shadow-xl border border-slate-200/80 w-full h-auto object-cover" alt="Banner Phai">
     </a>
 </div>
 
@@ -192,7 +221,7 @@
                 <div class="relative w-full h-64 md:h-[420px] rounded-3xl overflow-hidden shadow-2xl bg-slate-900 border border-white/20 group">
                     <div id="heroSlider" class="relative w-full h-full">
                         <div class="hero-slide active absolute inset-0 w-full h-full opacity-100 transition-opacity duration-700 ease-in-out">
-                            <img src="images/hero-banner-01.jpg" class="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700" alt="ToHo Banner 01">
+                            <img src="images/opt/hero-banner-01.webp" class="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700" alt="ToHo Banner 01">
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent flex flex-col justify-end p-6 md:p-10">
                                 <span class="inline-block px-3 py-1 bg-red-600/80 backdrop-blur-md text-white font-extrabold text-[10px] md:text-xs rounded-lg uppercase tracking-wider w-max mb-2 border border-red-400/40 shadow-lg">
                                     <i class="fa-solid fa-bolt mr-1"></i> Khuyến Mãi Hot
@@ -206,7 +235,7 @@
                             </div>
                         </div>
                         <div class="hero-slide absolute inset-0 w-full h-full opacity-0 pointer-events-none transition-opacity duration-700 ease-in-out">
-                            <img src="images/hero-banner-02.jpg" class="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700" alt="ToHo Banner 02">
+                            <img src="images/opt/hero-banner-02.webp" loading="lazy" decoding="async" class="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700" alt="ToHo Banner 02">
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent flex flex-col justify-end p-6 md:p-10">
                                 <span class="inline-block px-3 py-1 bg-purple-600/80 backdrop-blur-md text-white font-extrabold text-[10px] md:text-xs rounded-lg uppercase tracking-wider w-max mb-2 border border-purple-400/40 shadow-lg">
                                     <i class="fa-solid fa-plug mr-1"></i> Ổ Cắm Điện Cao Cấp
@@ -220,7 +249,7 @@
                             </div>
                         </div>
                         <div class="hero-slide absolute inset-0 w-full h-full opacity-0 pointer-events-none transition-opacity duration-700 ease-in-out">
-                            <img src="images/hero-banner-03.jpg" class="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700" alt="ToHo Banner 03">
+                            <img src="images/opt/hero-banner-03.webp" loading="lazy" decoding="async" class="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700" alt="ToHo Banner 03">
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent flex flex-col justify-end p-6 md:p-10">
                                 <span class="inline-block px-3 py-1 bg-amber-500/80 backdrop-blur-md text-slate-950 font-black text-[10px] md:text-xs rounded-lg uppercase tracking-wider w-max mb-2 border border-amber-300/40 shadow-lg">
                                     <i class="fa-solid fa-shield-halved mr-1"></i> Ổn Áp Chính Hãng
@@ -234,7 +263,7 @@
                             </div>
                         </div>
                         <div class="hero-slide absolute inset-0 w-full h-full opacity-0 pointer-events-none transition-opacity duration-700 ease-in-out">
-                            <img src="images/hero-banner-04.jpg" class="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700" alt="ToHo Banner 04">
+                            <img src="images/opt/hero-banner-04.webp" loading="lazy" decoding="async" class="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700" alt="ToHo Banner 04">
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent flex flex-col justify-end p-6 md:p-10">
                                 <span class="inline-block px-3 py-1 bg-emerald-600/80 backdrop-blur-md text-white font-extrabold text-[10px] md:text-xs rounded-lg uppercase tracking-wider w-max mb-2 border border-emerald-400/40 shadow-lg">
                                     <i class="fa-solid fa-tags mr-1"></i> Ưu Đãi Giờ Vàng
@@ -757,6 +786,7 @@
       </button>
     </div>
 
+    <script src="js/site.config.js"></script>
     <script src="js/main.js"></script>
 <!-- MOBILE CATEGORY DRAWER / MODAL -->
     <div id="mobileCategoryModal" class="hidden fixed inset-0 z-50 flex flex-col justify-end bg-slate-950/60 backdrop-blur-sm md:hidden">

@@ -95,8 +95,10 @@ async function convertSheetToJSON() {
             }
         }
 
-        fs.writeFileSync('products.json', JSON.stringify(products, null, 2), 'utf-8');
-        console.log(`Xuất thành công ${products.length} sản phẩm ra file products.json!`);
+        fs.writeFileSync('data/products.json', JSON.stringify(products, null, 2), 'utf-8');
+        // Bản JS cho chế độ mở file:// (trình duyệt chặn fetch Google Sheet) - nhúng thẳng biến
+        fs.writeFileSync('data/products.js', 'window.PRODUCTS_FALLBACK = ' + JSON.stringify(products) + ';', 'utf-8');
+        console.log(`Xuất thành công ${products.length} sản phẩm ra data/products.json + data/products.js!`);
     } catch (e) {
         console.error("Lỗi:", e);
     }

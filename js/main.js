@@ -221,10 +221,12 @@ function getGroupedUniqueProducts(productList) {
 
 // --- KHỞI TẠO DỮ LIỆU & GIAO DIỆN ---
 document.addEventListener('DOMContentLoaded', () => {
-// Khởi tạo History State mặc định khi load trang
-if (window.history.state === null) {
-    window.history.replaceState({ tab: 'home' }, '', window.location.href);
-}    
+// Khởi tạo History State mặc định khi load trang (file:// không dùng được History API -> bỏ qua)
+try {
+    if (window.history.state === null) {
+        window.history.replaceState({ tab: 'home' }, '', window.location.href);
+    }
+} catch (e) { /* file:// - dùng hash thay thế */ }
 initData();
     initHeroSlider();
     initFlashSaleTimer();
@@ -235,6 +237,11 @@ async function initData() {
         const res = await fetch(GOOGLE_SHEET_CSV_URL);
         const csvText = await res.text();
         products = parseProductsFromCSV(csvText);
+
+        // file:// hoặc Sheet lỗi -> dùng bản data cục bộ data/products.js (do convert.js tạo)
+        if (!products || products.length === 0) {
+            await loadProductsFallback();
+        }
         filteredProducts = [...products];
 
         renderHoverCategories();
@@ -245,7 +252,21 @@ async function initData() {
         await loadCouponsFromSheet();
         await loadDevicesFromSheet();
 
-        // === CHÈN KHÚC NÀY VÀO CUỐI HÀM initData() ===
+        applyStartupRouting();
+        // =============================================
+
+    } catch (e) {
+        console.error("Lỗi tải dữ liệu Sheets:", e);
+        // file:// bị CORS hoặc mạng lỗi -> nạp bản data cục bộ thay thế
+        await loadProductsFallback();
+        applyStartupRouting();
+    }
+}
+
+// Điều hướng mở sâu khi vừa vào trang (dùng chung cho cả 2 nhánh data online/offline)
+function applyStartupRouting() {
+    if (!products || products.length === 0) return;
+    try {
         // 1) URL chuẩn SEO dạng /san-pham/<id> (id có thể chứa "/", ví dụ 2P-3M/2-15A)
         const pathMatch = window.location.pathname.match(/\/san-pham\/([^?#]+)/);
         if (pathMatch) {
@@ -253,7 +274,7 @@ async function initData() {
             const targetProd = products.find(x => x.id === productId);
             if (targetProd) {
                 openProductDetailWithoutPush(productId);
-            } else {
+            } else if (location.protocol.startsWith('http')) {
                 // URL sản phẩm cũ/không tồn tại -> đưa về trang chủ
                 history.replaceState({ tab: 'home' }, '', '/#');
             }
@@ -262,20 +283,54 @@ async function initData() {
         const hash = window.location.hash;
         if (!pathMatch && hash && hash.startsWith('#product-')) {
             const productId = hash.replace('#product-', '');
-            // Kiểm tra xem sản phẩm có tồn tại không rồi mở trang chi tiết
             const targetProd = products.find(x => x.id === productId);
             if (targetProd) {
                 openProductDetailWithoutPush(productId);
-                // Nâng link hash cũ lên URL chuẩn mới
-                history.replaceState({ tab: 'product-detail', productId: productId }, '', window.SITE_CONFIG.productPathUrl(productId));
+                // Nâng link hash cũ lên URL chuẩn mới (chỉ khi chạy qua http/https)
+                if (location.protocol.startsWith('http') && window.SITE_CONFIG) {
+                    history.replaceState({ tab: 'product-detail', productId: productId }, '', window.SITE_CONFIG.productPathUrl(productId));
+                }
             }
         }
-        // =============================================
-
     } catch (e) {
-        console.error("Lỗi tải dữ liệu Sheets:", e);
-        showToast("Không thể tải danh sách sản phẩm từ Sheets!", "info");
+        console.warn('Bỏ qua định tuyến khởi động (file:// không hỗ trợ History API):', e);
     }
+}
+
+// Nạp data/products.js (script đơn giản, chạy được kể cả khi mở file:// double-click)
+function loadProductsFallback() {
+    return new Promise((resolve) => {
+        if (window.PRODUCTS_FALLBACK && window.PRODUCTS_FALLBACK.length) {
+            products = window.PRODUCTS_FALLBACK;
+            filteredProducts = [...products];
+            renderHoverCategories();
+            renderFlashSale();
+            renderCategoryBlocks();
+            showToast("Đang dùng bản dự phòng cục bộ (nội dung có thể chưa mới nhất).", "info");
+            resolve();
+            return;
+        }
+        const s = document.createElement('script');
+        s.src = 'data/products.js';
+        s.onload = () => {
+            if (window.PRODUCTS_FALLBACK && window.PRODUCTS_FALLBACK.length) {
+                products = window.PRODUCTS_FALLBACK;
+                filteredProducts = [...products];
+                renderHoverCategories();
+                renderFlashSale();
+                renderCategoryBlocks();
+                showToast("Đang dùng bản dự phòng cục bộ (nội dung có thể chưa mới nhất).", "info");
+            } else {
+                showToast("Không tải được danh sách sản phẩm!", "info");
+            }
+            resolve();
+        };
+        s.onerror = () => {
+            showToast("Không tải được danh sách sản phẩm!", "info");
+            resolve();
+        };
+        document.head.appendChild(s);
+    });
 }
 // === NẠP DANH SÁCH THIẾT BỊ TỪ GOOGLE SHEET (ĐÃ XỬ LÝ LỖI HOÀN CHỈNH) ===
 async function loadDevicesFromSheet() {
@@ -490,7 +545,11 @@ function switchTab(tab, pushToHistory = true, stateData = {}) {
             // URL chuẩn SEO: /san-pham/<id>
             url = window.SITE_CONFIG ? window.SITE_CONFIG.productPathUrl(stateData.productId) : url;
         }
-        history.pushState(state, '', url);
+        try {
+            history.pushState(state, '', url);
+        } catch (e) {
+            // file:// -> URL/History API bị hạn chế, giữ nguyên trang không đổi địa chỉ
+        }
     }
 }
 

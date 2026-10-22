@@ -6,8 +6,8 @@
     "category": "Ổ CẮM ĐIỆN",
     "subCategory": "Công Suất Nhỏ  1100W (5A)",
     "childCategory": "Dòng thường",
-    "price": "60000",
-    "oldPrice": "70000",
+    "price": "60.000",
+    "oldPrice": "70.000",
     "image": "https://lh3.googleusercontent.com/d/11lQG7DGAq-Pmo9fiTsFM1tbguU6KX9Ju",
     "images": [
       "https://lh3.googleusercontent.com/d/11lQG7DGAq-Pmo9fiTsFM1tbguU6KX9Ju",
@@ -18,7 +18,7 @@
     "badge": "HOT",
     "isFlashSale": true,
     "stock": "Có hàng",
-    "specs": "[•] THÔNG SỐ KỸ THUẬT: \n- Công suất tối đa: 1000W/250V \n- Số ổ cắm: 3 ổ cắm \n- Chiều dài dây: 3m / 5m\n- Số lõi dây: 2",
+    "specs": "Ổ CẮM KÉO DÀI PHỔ THÔNG",
     "soldCount": 5,
     "totalCount": 20,
     "variant1": "",
@@ -1048,9 +1048,9 @@
     "childCategory": "Dòng USB Thường",
     "price": "317.000",
     "oldPrice": "317.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -1097,9 +1097,9 @@
     "childCategory": "Dòng USB Thường",
     "price": "407.000",
     "oldPrice": "407.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -1120,9 +1120,9 @@
     "childCategory": "Dòng USB Thường",
     "price": "465.000",
     "oldPrice": "465.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -1143,9 +1143,9 @@
     "childCategory": "Dòng USB Thường",
     "price": "222.000",
     "oldPrice": "222.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -1166,9 +1166,9 @@
     "childCategory": "Dòng USB Thường",
     "price": "275.000",
     "oldPrice": "275.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -1189,9 +1189,9 @@
     "childCategory": "Dòng USB Thường",
     "price": "266.000",
     "oldPrice": "266.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -1212,9 +1212,9 @@
     "childCategory": "Dòng USB Thường",
     "price": "335.000",
     "oldPrice": "335.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -2203,9 +2203,9 @@
     "childCategory": "Dòng USB Đa Năng",
     "price": "330.000",
     "oldPrice": "330.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -2278,9 +2278,9 @@
     "childCategory": "Dòng USB Đa Năng",
     "price": "485.000",
     "oldPrice": "485.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -2301,9 +2301,9 @@
     "childCategory": "Dòng USB Đa Năng",
     "price": "220.000",
     "oldPrice": "220.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -2350,9 +2350,9 @@
     "childCategory": "Dòng USB Đa Năng",
     "price": "273.000",
     "oldPrice": "273.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -2481,9 +2481,9 @@
     "childCategory": "Dòng Đa Năng",
     "price": "151.000",
     "oldPrice": "151.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -2504,9 +2504,9 @@
     "childCategory": "Dòng Đa Năng",
     "price": "203.000",
     "oldPrice": "203.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -2527,9 +2527,9 @@
     "childCategory": "Dòng Đa Năng",
     "price": "177.000",
     "oldPrice": "177.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -2865,9 +2865,9 @@
     "childCategory": "Dòng Đa Năng",
     "price": "235.000",
     "oldPrice": "235.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -2888,9 +2888,9 @@
     "childCategory": "Dòng Đa Năng",
     "price": "302.000",
     "oldPrice": "302.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -2911,9 +2911,9 @@
     "childCategory": "Dòng Đa Năng",
     "price": "302.000",
     "oldPrice": "302.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3015,9 +3015,9 @@
     "childCategory": "Dòng KHÔNG DÂY",
     "price": "110.000",
     "oldPrice": "110.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3038,9 +3038,9 @@
     "childCategory": "Dòng KHÔNG DÂY",
     "price": "250.000",
     "oldPrice": "250.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3061,9 +3061,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "480.000",
     "oldPrice": "480.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3084,9 +3084,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "410.000",
     "oldPrice": "410.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3132,9 +3132,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "495.000",
     "oldPrice": "495.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3155,9 +3155,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "425.000",
     "oldPrice": "425.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3204,9 +3204,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "540.000",
     "oldPrice": "540.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3227,9 +3227,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "470.000",
     "oldPrice": "470.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3276,9 +3276,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "468.000",
     "oldPrice": "468.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3299,9 +3299,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "468.000",
     "oldPrice": "468.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3322,9 +3322,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "545.000",
     "oldPrice": "545.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3345,9 +3345,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "545.000",
     "oldPrice": "545.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3368,9 +3368,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "371.000",
     "oldPrice": "371.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3391,9 +3391,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "371.000",
     "oldPrice": "371.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3414,9 +3414,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "409.000",
     "oldPrice": "409.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3437,9 +3437,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "409.000",
     "oldPrice": "409.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3460,9 +3460,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "398.000",
     "oldPrice": "398.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3483,9 +3483,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "398.000",
     "oldPrice": "398.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3506,9 +3506,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "438.000",
     "oldPrice": "438.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3529,9 +3529,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "438.000",
     "oldPrice": "438.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3552,9 +3552,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "466.000",
     "oldPrice": "466.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3575,9 +3575,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "466.000",
     "oldPrice": "466.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3598,9 +3598,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "502.000",
     "oldPrice": "502.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3621,9 +3621,9 @@
     "childCategory": "Dòng Có Đồng Hồ",
     "price": "502.000",
     "oldPrice": "502.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3750,9 +3750,9 @@
     "childCategory": "Dòng thường",
     "price": "166.000",
     "oldPrice": "166.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3773,9 +3773,9 @@
     "childCategory": "Dòng thường",
     "price": "193.000",
     "oldPrice": "193.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3796,9 +3796,9 @@
     "childCategory": "Dòng thường",
     "price": "178.000",
     "oldPrice": "178.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3819,9 +3819,9 @@
     "childCategory": "Dòng thường",
     "price": "198.000",
     "oldPrice": "198.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3842,9 +3842,9 @@
     "childCategory": "Dòng thường",
     "price": "190.000",
     "oldPrice": "190.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3865,9 +3865,9 @@
     "childCategory": "Dòng thường",
     "price": "240.000",
     "oldPrice": "240.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3888,9 +3888,9 @@
     "childCategory": "Dòng thường",
     "price": "240.000",
     "oldPrice": "240.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3911,9 +3911,9 @@
     "childCategory": "Dòng thường",
     "price": "196.000",
     "oldPrice": "196.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3934,9 +3934,9 @@
     "childCategory": "Dòng thường",
     "price": "258.000",
     "oldPrice": "258.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3957,9 +3957,9 @@
     "childCategory": "Dòng thường",
     "price": "246.000",
     "oldPrice": "246.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -3980,9 +3980,9 @@
     "childCategory": "",
     "price": "19.000",
     "oldPrice": "19.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -4003,9 +4003,9 @@
     "childCategory": "",
     "price": "30.000",
     "oldPrice": "30.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -4026,9 +4026,9 @@
     "childCategory": "",
     "price": "27.000",
     "oldPrice": "27.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -4049,9 +4049,9 @@
     "childCategory": "",
     "price": "33.000",
     "oldPrice": "33.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -4942,9 +4942,9 @@
     "childCategory": "Dòng KHÔNG DÂY",
     "price": "75.000",
     "oldPrice": "75.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -5047,9 +5047,9 @@
     "childCategory": "Dòng KHÔNG DÂY",
     "price": "80.000",
     "oldPrice": "80.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -5746,9 +5746,9 @@
     "childCategory": "Dòng KHÔNG DÂY",
     "price": "75.000",
     "oldPrice": "75.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -5769,9 +5769,9 @@
     "childCategory": "Dòng KHÔNG DÂY",
     "price": "90.000",
     "oldPrice": "90.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -5792,9 +5792,9 @@
     "childCategory": "Dòng KHÔNG DÂY",
     "price": "125.000",
     "oldPrice": "125.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -5815,9 +5815,9 @@
     "childCategory": "Dòng KHÔNG DÂY",
     "price": "80.000",
     "oldPrice": "80.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -5838,9 +5838,9 @@
     "childCategory": "Dòng KHÔNG DÂY",
     "price": "95.000",
     "oldPrice": "95.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -5861,9 +5861,9 @@
     "childCategory": "Dòng KHÔNG DÂY",
     "price": "130.000",
     "oldPrice": "130.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -5884,9 +5884,9 @@
     "childCategory": "Dòng Rulo",
     "price": "980.000",
     "oldPrice": "980.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -5907,9 +5907,9 @@
     "childCategory": "Dòng Rulo",
     "price": "1.170.000",
     "oldPrice": "1.170.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -5930,9 +5930,9 @@
     "childCategory": "Dòng Rulo",
     "price": "1.482.000",
     "oldPrice": "1.482.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -5953,9 +5953,9 @@
     "childCategory": "Dòng Rulo",
     "price": "1.860.000",
     "oldPrice": "1.860.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -5976,9 +5976,9 @@
     "childCategory": "Dòng Rulo",
     "price": "2.600.000",
     "oldPrice": "2.600.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6053,9 +6053,9 @@
     "childCategory": "Dòng Rulo",
     "price": "760.000",
     "oldPrice": "760.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6076,9 +6076,9 @@
     "childCategory": "Dòng Rulo",
     "price": "800.000",
     "oldPrice": "800.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6153,9 +6153,9 @@
     "childCategory": "Dòng Rulo",
     "price": "1.080.000",
     "oldPrice": "1.080.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6176,9 +6176,9 @@
     "childCategory": "Dòng Rulo",
     "price": "1.239.000",
     "oldPrice": "1.239.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6253,9 +6253,9 @@
     "childCategory": "Dòng Rulo",
     "price": "1.330.000",
     "oldPrice": "1.330.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6276,9 +6276,9 @@
     "childCategory": "Dòng Rulo",
     "price": "1.500.000",
     "oldPrice": "1.500.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6353,9 +6353,9 @@
     "childCategory": "Dòng Rulo",
     "price": "2.080.000",
     "oldPrice": "2.080.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6376,9 +6376,9 @@
     "childCategory": "Dòng Rulo",
     "price": "3.100.000",
     "oldPrice": "3.100.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6553,9 +6553,9 @@
     "childCategory": "Dòng Xách Tay",
     "price": "385.000",
     "oldPrice": "385.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6576,9 +6576,9 @@
     "childCategory": "Dòng Xách Tay",
     "price": "405.000",
     "oldPrice": "405.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6599,9 +6599,9 @@
     "childCategory": "Dòng Xách Tay",
     "price": "515.000",
     "oldPrice": "515.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6622,9 +6622,9 @@
     "childCategory": "Dòng Xách Tay",
     "price": "570.000",
     "oldPrice": "570.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6645,9 +6645,9 @@
     "childCategory": "Dòng Xách Tay",
     "price": "450.000",
     "oldPrice": "450.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6668,9 +6668,9 @@
     "childCategory": "Dòng Xách Tay",
     "price": "505.000",
     "oldPrice": "505.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6741,9 +6741,9 @@
     "childCategory": "Dòng Đĩa Bay",
     "price": "175.000",
     "oldPrice": "175.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6764,9 +6764,9 @@
     "childCategory": "Dòng Đĩa Bay",
     "price": "210.000",
     "oldPrice": "210.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6841,9 +6841,9 @@
     "childCategory": "Dòng Đĩa Bay",
     "price": "235.000",
     "oldPrice": "235.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6864,9 +6864,9 @@
     "childCategory": "Dòng Đĩa Bay",
     "price": "245.000",
     "oldPrice": "245.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6887,9 +6887,9 @@
     "childCategory": "Dòng Đĩa Bay",
     "price": "385.000",
     "oldPrice": "385.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6910,9 +6910,9 @@
     "childCategory": "Dòng Đĩa Bay",
     "price": "415.000",
     "oldPrice": "415.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6933,9 +6933,9 @@
     "childCategory": "Dòng Đĩa Bay",
     "price": "285.000",
     "oldPrice": "285.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6956,9 +6956,9 @@
     "childCategory": "Dòng Đĩa Bay",
     "price": "360.000",
     "oldPrice": "360.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -6979,9 +6979,9 @@
     "childCategory": "Dòng Đĩa Bay",
     "price": "450.000",
     "oldPrice": "450.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7002,9 +7002,9 @@
     "childCategory": "Dòng Đĩa Bay",
     "price": "505.000",
     "oldPrice": "505.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7051,9 +7051,9 @@
     "childCategory": "Dòng Đĩa Bay",
     "price": "175.000",
     "oldPrice": "175.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7074,9 +7074,9 @@
     "childCategory": "Dòng Đĩa Bay",
     "price": "210.000",
     "oldPrice": "210.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7097,9 +7097,9 @@
     "childCategory": "Dòng Đĩa Bay",
     "price": "300.000",
     "oldPrice": "300.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7120,9 +7120,9 @@
     "childCategory": "",
     "price": "80.000",
     "oldPrice": "80.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7143,9 +7143,9 @@
     "childCategory": "",
     "price": "110.000",
     "oldPrice": "110.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7166,9 +7166,9 @@
     "childCategory": "",
     "price": "190.000",
     "oldPrice": "190.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7189,9 +7189,9 @@
     "childCategory": "",
     "price": "270.000",
     "oldPrice": "270.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7212,9 +7212,9 @@
     "childCategory": "",
     "price": "110.000",
     "oldPrice": "110.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7235,9 +7235,9 @@
     "childCategory": "",
     "price": "160.000",
     "oldPrice": "160.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7258,9 +7258,9 @@
     "childCategory": "",
     "price": "260.000",
     "oldPrice": "260.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7281,9 +7281,9 @@
     "childCategory": "",
     "price": "380.000",
     "oldPrice": "380.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7304,9 +7304,9 @@
     "childCategory": "",
     "price": "303.000",
     "oldPrice": "303.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7327,9 +7327,9 @@
     "childCategory": "",
     "price": "420.000",
     "oldPrice": "420.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7350,9 +7350,9 @@
     "childCategory": "",
     "price": "1.235.000",
     "oldPrice": "1.235.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7373,9 +7373,9 @@
     "childCategory": "",
     "price": "415.000",
     "oldPrice": "415.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7396,9 +7396,9 @@
     "childCategory": "",
     "price": "500.000",
     "oldPrice": "500.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7419,9 +7419,9 @@
     "childCategory": "",
     "price": "310.000",
     "oldPrice": "310.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7442,9 +7442,9 @@
     "childCategory": "",
     "price": "365.000",
     "oldPrice": "365.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7465,9 +7465,9 @@
     "childCategory": "",
     "price": "150.000",
     "oldPrice": "150.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7488,9 +7488,9 @@
     "childCategory": "",
     "price": "180.000",
     "oldPrice": "180.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7511,9 +7511,9 @@
     "childCategory": "",
     "price": "160.000",
     "oldPrice": "160.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7534,9 +7534,9 @@
     "childCategory": "",
     "price": "200.000",
     "oldPrice": "200.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7557,9 +7557,9 @@
     "childCategory": "",
     "price": "218.000",
     "oldPrice": "218.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7580,9 +7580,9 @@
     "childCategory": "",
     "price": "355.000",
     "oldPrice": "355.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7603,9 +7603,9 @@
     "childCategory": "",
     "price": "410.000",
     "oldPrice": "410.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7626,9 +7626,9 @@
     "childCategory": "",
     "price": "6.000",
     "oldPrice": "6.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7649,9 +7649,9 @@
     "childCategory": "",
     "price": "7.000",
     "oldPrice": "7.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7672,9 +7672,9 @@
     "childCategory": "",
     "price": "7.000",
     "oldPrice": "7.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7695,9 +7695,9 @@
     "childCategory": "",
     "price": "10.000",
     "oldPrice": "10.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7718,9 +7718,9 @@
     "childCategory": "",
     "price": "17.000",
     "oldPrice": "17.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7741,9 +7741,9 @@
     "childCategory": "",
     "price": "15.000",
     "oldPrice": "15.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7764,9 +7764,9 @@
     "childCategory": "",
     "price": "40.000",
     "oldPrice": "40.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7787,9 +7787,9 @@
     "childCategory": "",
     "price": "30.000",
     "oldPrice": "30.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7810,9 +7810,9 @@
     "childCategory": "",
     "price": "19.000",
     "oldPrice": "19.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7833,9 +7833,9 @@
     "childCategory": "",
     "price": "20.000",
     "oldPrice": "20.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7856,9 +7856,9 @@
     "childCategory": "",
     "price": "16.500",
     "oldPrice": "16.500",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7879,9 +7879,9 @@
     "childCategory": "",
     "price": "20.000",
     "oldPrice": "20.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7902,9 +7902,9 @@
     "childCategory": "",
     "price": "25.000",
     "oldPrice": "25.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7925,9 +7925,9 @@
     "childCategory": "",
     "price": "25.000",
     "oldPrice": "25.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7948,9 +7948,9 @@
     "childCategory": "",
     "price": "14.000",
     "oldPrice": "14.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7971,9 +7971,9 @@
     "childCategory": "",
     "price": "18.000",
     "oldPrice": "18.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -7994,9 +7994,9 @@
     "childCategory": "",
     "price": "15.000",
     "oldPrice": "15.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -8017,9 +8017,9 @@
     "childCategory": "",
     "price": "8.000",
     "oldPrice": "8.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -8040,9 +8040,9 @@
     "childCategory": "",
     "price": "8.000",
     "oldPrice": "8.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -8063,9 +8063,9 @@
     "childCategory": "",
     "price": "8.000",
     "oldPrice": "8.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -8086,9 +8086,9 @@
     "childCategory": "",
     "price": "10.000",
     "oldPrice": "10.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -8109,9 +8109,9 @@
     "childCategory": "",
     "price": "10.000",
     "oldPrice": "10.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -8132,9 +8132,9 @@
     "childCategory": "",
     "price": "50.000",
     "oldPrice": "50.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -8389,9 +8389,9 @@
     "childCategory": "DẢI 150V",
     "price": "23.710.000",
     "oldPrice": "23.710.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -8618,9 +8618,9 @@
     "childCategory": "DẢI 90V",
     "price": "9.900.000",
     "oldPrice": "9.900.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -8641,9 +8641,9 @@
     "childCategory": "DẢI 90V",
     "price": "17.850.000",
     "oldPrice": "17.850.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -8816,9 +8816,9 @@
     "childCategory": "DẢI 50V",
     "price": "5.950.000",
     "oldPrice": "5.950.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -8917,9 +8917,9 @@
     "childCategory": "DẢI 150V",
     "price": "8.970.000",
     "oldPrice": "8.970.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -8940,9 +8940,9 @@
     "childCategory": "DẢI 150V",
     "price": "12.590.000",
     "oldPrice": "12.590.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -8963,9 +8963,9 @@
     "childCategory": "DẢI 150V",
     "price": "13.800.000",
     "oldPrice": "13.800.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -8986,9 +8986,9 @@
     "childCategory": "DẢI 150V",
     "price": "17.940.000",
     "oldPrice": "17.940.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9009,9 +9009,9 @@
     "childCategory": "DẢI 150V",
     "price": "25.990.000",
     "oldPrice": "25.990.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9032,9 +9032,9 @@
     "childCategory": "DẢI 150V",
     "price": "36.860.000",
     "oldPrice": "36.860.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9055,9 +9055,9 @@
     "childCategory": "DẢI 150V",
     "price": "54.860.000",
     "oldPrice": "54.860.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9078,9 +9078,9 @@
     "childCategory": "DẢI 150V",
     "price": "65.950.000",
     "oldPrice": "65.950.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9101,9 +9101,9 @@
     "childCategory": "DẢI 150V",
     "price": "74.640.000",
     "oldPrice": "74.640.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9124,9 +9124,9 @@
     "childCategory": "DẢI 150V",
     "price": "101.320.000",
     "oldPrice": "101.320.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9147,9 +9147,9 @@
     "childCategory": "",
     "price": "14.490.000",
     "oldPrice": "14.490.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9170,9 +9170,9 @@
     "childCategory": "",
     "price": "23.920.000",
     "oldPrice": "23.920.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9193,9 +9193,9 @@
     "childCategory": "",
     "price": "8.400.000",
     "oldPrice": "8.400.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9216,9 +9216,9 @@
     "childCategory": "",
     "price": "10.500.000",
     "oldPrice": "10.500.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9239,9 +9239,9 @@
     "childCategory": "",
     "price": "13.200.000",
     "oldPrice": "13.200.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9262,9 +9262,9 @@
     "childCategory": "",
     "price": "17.000.000",
     "oldPrice": "17.000.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9285,9 +9285,9 @@
     "childCategory": "",
     "price": "26.050.000",
     "oldPrice": "26.050.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9308,9 +9308,9 @@
     "childCategory": "",
     "price": "0",
     "oldPrice": "0",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9331,9 +9331,9 @@
     "childCategory": "",
     "price": "15.850.000",
     "oldPrice": "15.850.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9354,9 +9354,9 @@
     "childCategory": "",
     "price": "350.000",
     "oldPrice": "350.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9377,9 +9377,9 @@
     "childCategory": "",
     "price": "500.000",
     "oldPrice": "500.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9400,9 +9400,9 @@
     "childCategory": "",
     "price": "550.000",
     "oldPrice": "550.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9423,9 +9423,9 @@
     "childCategory": "",
     "price": "650.000",
     "oldPrice": "650.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9446,9 +9446,9 @@
     "childCategory": "",
     "price": "700.000",
     "oldPrice": "700.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9469,9 +9469,9 @@
     "childCategory": "",
     "price": "800.000",
     "oldPrice": "800.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9492,9 +9492,9 @@
     "childCategory": "",
     "price": "950.000",
     "oldPrice": "950.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9515,9 +9515,9 @@
     "childCategory": "",
     "price": "1.500.000",
     "oldPrice": "1.500.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9538,9 +9538,9 @@
     "childCategory": "",
     "price": "2.350.000",
     "oldPrice": "2.350.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9561,9 +9561,9 @@
     "childCategory": "",
     "price": "3.000.000",
     "oldPrice": "3.000.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9584,9 +9584,9 @@
     "childCategory": "",
     "price": "1.280.000",
     "oldPrice": "1.280.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9607,9 +9607,9 @@
     "childCategory": "",
     "price": "1.770.000",
     "oldPrice": "1.770.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9630,9 +9630,9 @@
     "childCategory": "",
     "price": "1.000.000",
     "oldPrice": "1.000.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9653,9 +9653,9 @@
     "childCategory": "",
     "price": "1.800.000",
     "oldPrice": "1.800.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9676,9 +9676,9 @@
     "childCategory": "",
     "price": "1.600.000",
     "oldPrice": "1.600.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
+    "image": "images/no-image.svg",
     "images": [
-      "https://via.placeholder.com/300?text=No+Image"
+      "images/no-image.svg"
     ],
     "badge": "",
     "isFlashSale": false,
@@ -9689,29 +9689,6 @@
     "variant1": "",
     "variant2": "",
     "skuGroup": "DN0602K2"
-  },
-  {
-    "id": "DN006A",
-    "code": "DN006A",
-    "name": "Sản phẩm",
-    "category": "BIẾN ÁP",
-    "subCategory": "",
-    "childCategory": "",
-    "price": "550.000",
-    "oldPrice": "550.000",
-    "image": "https://via.placeholder.com/300?text=No+Image",
-    "images": [
-      "https://via.placeholder.com/300?text=No+Image"
-    ],
-    "badge": "",
-    "isFlashSale": false,
-    "stock": "Có hàng",
-    "specs": "Bảo hành chính hãng",
-    "soldCount": 5,
-    "totalCount": 20,
-    "variant1": "",
-    "variant2": "",
-    "skuGroup": "DN006A"
   },
   {
     "id": "LIOA-DN001.5D",
@@ -12142,5 +12119,80 @@
     "vat": "Giá đã gồm VAT",
     "warranty": "Bảo hành chính hãng LiOA",
     "source": "https://lioa.com.vn/bien-ap-doi-nguon-ha-ap-1-pha-bien-ap-the-he-moi-loai-pho-thong-ma-dnv015a"
+  },
+  {
+    "id": "Mã SP: 3TC3-2 3TC5-2",
+    "code": "Mã SP: 3TC3-2 3TC5-2",
+    "name": "Sản phẩm",
+    "category": "Khác",
+    "subCategory": "",
+    "childCategory": "",
+    "price": "0",
+    "oldPrice": "0",
+    "image": "images/no-image.svg",
+    "images": [
+      "images/no-image.svg"
+    ],
+    "badge": "",
+    "stock": "Còn hàng",
+    "specs": "Bảo hành chính hãng",
+    "soldCount": 5,
+    "totalCount": 20,
+    "variant1": "",
+    "variant2": "",
+    "skuGroup": "Mã SP: 3TC3-2 3TC5-2",
+    "isFlashSale": false,
+    "description": "",
+    "sku": "Mã SP: 3TC3-2 3TC5-2"
+  },
+  {
+    "id": "Các ổ cắm điện Lioa thường có dây dài từ 3 đến 5m hoặc hơn",
+    "code": "Các ổ cắm điện Lioa thường có dây dài từ 3 đến 5m hoặc hơn",
+    "name": "cho phép cắm nhiều các thiết bị khác nhau trên cùng một ổ cắm tuy nhiên chúng thường để dưới đất và không đảm bảo an toàn",
+    "category": "các nhà sản xuất cũng dần trang bị cho các ổ cắm điện kéo dài những công nghệ an toàn cao hơn đi đầu là hãng sản xuất thiết bị điện nổi tiếng LiOA.",
+    "subCategory": "",
+    "childCategory": "",
+    "price": "0",
+    "oldPrice": "0",
+    "image": "images/no-image.svg",
+    "images": [
+      "images/no-image.svg"
+    ],
+    "badge": "",
+    "stock": "Còn hàng",
+    "specs": "Bảo hành chính hãng",
+    "soldCount": 5,
+    "totalCount": 20,
+    "variant1": "",
+    "variant2": "",
+    "skuGroup": "Các ổ cắm điện Lioa thường có dây dài từ 3 đến 5m hoặc hơn",
+    "isFlashSale": false,
+    "description": "",
+    "sku": "Các ổ cắm điện Lioa thường có dây dài từ 3 đến 5m hoặc hơn"
+  },
+  {
+    "id": "Quy cách: đóng gói riêng biệt",
+    "code": "Quy cách: đóng gói riêng biệt",
+    "name": "Sản phẩm",
+    "category": "Khác",
+    "subCategory": "",
+    "childCategory": "",
+    "price": "0",
+    "oldPrice": "0",
+    "image": "images/no-image.svg",
+    "images": [
+      "images/no-image.svg"
+    ],
+    "badge": "",
+    "stock": "Còn hàng",
+    "specs": "Bảo hành chính hãng",
+    "soldCount": 5,
+    "totalCount": 20,
+    "variant1": "",
+    "variant2": "",
+    "skuGroup": "Quy cách: đóng gói riêng biệt",
+    "isFlashSale": false,
+    "description": "",
+    "sku": "Quy cách: đóng gói riêng biệt"
   }
 ]

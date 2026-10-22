@@ -11,6 +11,7 @@ let prodPage = 1;      // trang hiện tại của bảng Sản Phẩm
 const PROD_PAGE_SIZE = 20;
 let _flashSelected = new Set(); // sản phẩm đang chọn cho Flash Sale
 let _settings = {};             // cấu hình website (flashHours, flashMax...)
+let _orders = [];               // đơn hàng của khách (tab Đơn Hàng)
 
 // ---------- tiện ích ----------
 async function api(action, payload = {}) {
@@ -86,6 +87,7 @@ function switchTab(tab) {
   });
   if (tab === 'dashboard') renderDashboard();
   if (tab === 'flash') syncFlashTab();
+  if (tab === 'orders') renderOrderRows();
   window.scrollTo({ top: 0 });
 }
 
@@ -96,10 +98,12 @@ async function refreshData() {
   _products = r.products || [];
   _policies = r.policies || {};
   _settings = r.settings || {};
+  _orders = r.orders || [];
   syncFlashSelected();
   renderDashboard();
   renderProductRows();
   renderPostList();
+  renderOrderRows();
 }
 
 // Đồng bộ lựa chọn Flash Sale từ trạng thái thật của source
@@ -483,6 +487,146 @@ async function downloadExport(type) {
   } catch (e) {
     toast('Lỗi tải file: ' + e.message, 'err');
   }
+}
+
+// ---------- ĐƠN HÀNG ----------
+const ORDER_STATUSES = ['Chờ xác nhận', 'Đã xác nhận', 'Đang giao', 'Hoàn thành', 'Đã hủy'];
+const orderBadge = (s) => ({
+  'Chờ xác nhận': 'bg-amber-100 text-amber-700',
+  'Đã xác nhận': 'bg-blue-100 text-blue-700',
+  'Đang giao': 'bg-violet-100 text-violet-700',
+  'Hoàn thành': 'bg-green-100 text-green-700',
+  'Đã hủy': 'bg-slate-200 text-slate-500'
+}[s] || 'bg-slate-100 text-slate-600');
+
+async function refreshOrders() {
+  const r = await api('data');
+  if (!r.ok) return toast('Không lấy được dữ liệu server', 'err');
+  _orders = r.orders || [];
+  renderOrderRows();
+  toast('Đã làm mới danh sách đơn hàng', 'ok');
+}
+
+function updateOrdersBadge() {
+  const badge = document.getElementById('ordersNavBadge');
+  if (!badge) return;
+  const n = _orders.filter((o) => o.status === 'Chờ xác nhận').length;
+  badge.textContent = n;
+  badge.classList.toggle('hidden', n === 0);
+}
+
+function renderOrderRows() {
+  updateOrdersBadge();
+  const body = document.getElementById('ordersBody');
+  if (!body) return;
+  const filter = document.getElementById('ordersStatusFilter').value;
+  const list = _orders.filter((o) => !filter || o.status === filter);
+  setText('ordersSummary', `(${_orders.length} đơn, ${_orders.filter((o) => o.status === 'Chờ xác nhận').length} chờ xác nhận)`);
+  document.getElementById('ordersEmpty').classList.toggle('hidden', list.length > 0);
+  body.innerHTML = list.map((o) => `
+    <tr class="border-b border-slate-100 hover:bg-slate-50">
+      <td class="p-2.5 font-black font-mono text-navy-800 cursor-pointer" onclick="openOrderDetail('${o.id}')">${o.id}</td>
+      <td class="p-2.5 text-slate-500 whitespace-nowrap">${o.date || ''}</td>
+      <td class="p-2.5 whitespace-nowrap">
+        <span class="font-bold text-slate-700">${o.name || '—'}</span>
+        <span class="block text-[10px] text-slate-400 font-mono">${o.phone || ''}</span>
+      </td>
+      <td class="p-2.5 max-w-[260px]">
+        <span class="text-slate-600 line-clamp-2">${(o.items || []).map((it) => `${it.quantity ? 'x' + it.quantity + ' ' : ''}${it.name}`).join('; ')}</span>
+      </td>
+      <td class="p-2.5 text-right font-black text-tohoRed whitespace-nowrap">${fmtVND(o.total)}</td>
+      <td class="p-2.5 text-center whitespace-nowrap"><span class="text-[10px] font-bold ${o.payment === 'BANK' ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-500'} px-2 py-0.5 rounded-full">${o.payment === 'BANK' ? 'CK QR' : 'COD'}</span></td>
+      <td class="p-2.5">
+        <select onchange="orderStatusChange('${o.id}', this.value)" class="border rounded-lg px-2 py-1 text-[10px] font-bold focus:outline-none focus:border-tohoRed">
+          ${ORDER_STATUSES.map((s) => `<option ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td class="p-2.5 text-center whitespace-nowrap">
+        <button onclick="openOrderDetail('${o.id}')" title="Xem chi tiết" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500"><i class="fa-solid fa-eye"></i></button>
+        <button onclick="orderDelete('${o.id}')" title="Xóa đơn" class="w-7 h-7 rounded-lg hover:bg-red-50 text-red-500"><i class="fa-solid fa-trash"></i></button>
+      </td>
+    </tr>`).join('');
+}
+
+async function orderStatusChange(id, status) {
+  const r = await api('order.save', { id, status });
+  if (!r.ok) return toast(r.error || 'Lỗi cập nhật', 'err');
+  const o = _orders.find((x) => x.id === id);
+  if (o) o.status = status;
+  renderOrderRows();
+  toast(`Đơn ${id}: ${status}`, 'ok');
+}
+
+async function orderDelete(id) {
+  if (!confirm('Xóa vĩnh viễn đơn ' + id + '?')) return;
+  const r = await api('order.delete', { id });
+  if (!r.ok) return toast(r.error || 'Lỗi xóa', 'err');
+  _orders = _orders.filter((x) => x.id !== id);
+  renderOrderRows();
+  toast(`Đã xóa đơn ${id}`, 'ok');
+}
+
+function openOrderDetail(id) {
+  const o = _orders.find((x) => x.id === id);
+  if (!o) return;
+  setText('odId', o.id);
+  document.getElementById('orderDetailBody').innerHTML = `
+    <div class="flex items-center justify-between">
+      <span class="font-bold text-slate-500 text-xs">Trạng thái</span>
+      <span class="text-xs font-black px-2.5 py-1 rounded-full ${orderBadge(o.status)}">${o.status}</span>
+    </div>
+    <div class="border border-slate-200 rounded-xl p-3 space-y-1.5">
+      <p><b>Khách:</b> ${o.name || '—'} · <span class="font-mono">${o.phone || '—'}</span></p>
+      ${o.email ? `<p class="text-xs text-slate-500">Email: ${o.email}</p>` : ''}
+      <p class="text-xs text-slate-600 leading-relaxed"><b>Địa chỉ:</b> ${o.address || '—'}</p>
+      ${o.note ? `<p class="text-xs text-slate-600"><b>Ghi chú:</b> ${o.note}</p>` : ''}
+      <p class="text-[10px] text-slate-400 pt-1">Đặt lúc: ${o.date || ''} · Nguồn: ${o.source === 'google-sheet' ? 'Website (Sheets)' : 'Website'}</p>
+    </div>
+    <div class="border border-slate-200 rounded-xl p-3">
+      <p class="text-xs font-black text-slate-400 uppercase mb-2">Sản phẩm</p>
+      ${(o.items || []).map((it) => `
+        <div class="flex justify-between text-xs py-1 border-b border-slate-50 last:border-0">
+          <span>${it.quantity ? `<b>x${it.quantity}</b> ` : ''}${it.name}</span>
+          ${it.price ? `<span class="font-mono text-slate-500 shrink-0 ml-2">${fmtVND(it.price * (it.quantity || 1))}</span>` : ''}
+        </div>`).join('')}
+    </div>
+    <div class="bg-slate-50 rounded-xl p-3 text-xs space-y-1">
+      ${o.subTotal ? `<div class="flex justify-between"><span>Tạm tính</span><b>${fmtVND(o.subTotal)}</b></div>` : ''}
+      ${o.shippingFee ? `<div class="flex justify-between"><span>Phí vận chuyển</span><b>${fmtVND(o.shippingFee)}</b></div>` : ''}
+      ${o.discount ? `<div class="flex justify-between text-green-600"><span>Giảm giá</span><b>- ${fmtVND(o.discount)}</b></div>` : ''}
+      <div class="flex justify-between text-base pt-1 border-t border-slate-200">
+        <span class="font-black">TỔNG CỘNG</span><b class="font-black text-tohoRed">${fmtVND(o.total)}</b>
+      </div>
+      <p class="text-right text-[10px] text-slate-400">Thanh toán: ${o.payment === 'BANK' ? 'Chuyển khoản QR' : 'COD khi nhận hàng'}</p>
+    </div>
+    <button onclick="orderStatusChange('${o.id}', 'Đã xác nhận'); closeOrderDetail()" class="w-full bg-tohoRed hover:bg-tohoRedHover text-white font-bold py-2.5 rounded-xl text-xs">
+      <i class="fa-solid fa-check mr-1"></i>XÁC NHẬN ĐƠN NÀY
+    </button>`;
+  document.getElementById('orderDetailModal').classList.remove('hidden');
+}
+function closeOrderDetail() { document.getElementById('orderDetailModal').classList.add('hidden'); }
+
+function ordersCsvLink() {
+  return API + '/api/export?type=orders-csv&pass=' + encodeURIComponent(PASS);
+}
+
+// Kéo đơn đặt trên website Vercel về (qua Google Sheet của khách)
+async function importOrdersSheet() {
+  const saved = _settings.ordersSheetUrl || '';
+  const useAlt = (typeof event !== 'undefined' && event && event.altKey); // giữ Alt + bấm = đổi link
+  let url = saved;
+  if (!saved || useAlt) {
+    const asked = prompt((saved ? 'Link hiện tại:\n' + saved + '\n\n' : '') +
+      'Dán link CSV sheet ĐƠN HÀNG đã xuất bản.\nHướng dẫn: mở Google Sheet chứa đơn hàng → File → Chia sẻ → Xuất bản lên web → chọn sheet ĐƠN HÀNG → định dạng CSV → Copy link.') || '';
+    url = asked.trim();
+    if (!url) return;
+  }
+  const r = await api('orders.import', { url, saveUrl: url !== saved });
+  if (!r.ok) return toast(r.error || 'Không nhập được đơn từ Sheets', 'err');
+  const d = await api('data');
+  if (d.ok) { _orders = d.orders || []; _settings = d.settings || _settings; }
+  renderOrderRows();
+  toast(r.msg, 'ok');
 }
 
 // ---------- khởi động ----------

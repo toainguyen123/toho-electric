@@ -54,6 +54,7 @@
     <nav class="mt-2 flex-1 overflow-y-auto">
       <button class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-gauge-high"></i>Dashboard</button>
       <button class="nav-item" data-tab="products" onclick="switchTab('products')"><i class="fa-solid fa-boxes-stacked"></i>Sản Phẩm</button>
+      <button class="nav-item" data-tab="orders" onclick="switchTab('orders')"><i class="fa-solid fa-receipt"></i>Đơn Hàng <span id="ordersNavBadge" class="hidden ml-auto bg-white text-tohoRed text-[10px] font-black px-1.5 py-0.5 rounded-full">0</span></button>
       <button class="nav-item" data-tab="flash" onclick="switchTab('flash')"><i class="fa-solid fa-bolt"></i>Flash Sale</button>
       <button class="nav-item" data-tab="posts" onclick="switchTab('posts')"><i class="fa-solid fa-newspaper"></i>Bài Viết</button>
       <button class="nav-item" data-tab="sync" onclick="switchTab('sync')"><i class="fa-solid fa-cloud-arrow-down"></i>Đồng Bộ &amp; Xuất</button>
@@ -228,6 +229,61 @@
       </section>
 
       <!-- ============ BÀI VIẾT ============ -->
+      <!-- ============ ĐƠN HÀNG ============ -->
+      <section id="tab-orders" class="hidden space-y-4">
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-4 lg:p-5">
+          <div class="flex flex-wrap items-center gap-3 mb-4">
+            <h3 class="text-lg font-black text-navy-800 mr-auto flex items-center gap-2">
+              <i class="fa-solid fa-receipt text-tohoRed"></i>Đơn Hàng
+              <span id="ordersSummary" class="text-xs font-bold text-slate-400"></span>
+            </h3>
+            <select id="ordersStatusFilter" onchange="renderOrderRows()" class="border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-tohoRed">
+              <option value="">Tất cả trạng thái</option>
+              <option>Chờ xác nhận</option>
+              <option>Đã xác nhận</option>
+              <option>Đang giao</option>
+              <option>Hoàn thành</option>
+              <option>Đã hủy</option>
+            </select>
+            <button onclick="importOrdersSheet()" title="Kéo đơn đặt từ website (Vercel) về — giữ Alt + bấm để đổi link sheet. Cần xuất bản sheet ĐƠN HÀNG dạng CSV trước." class="btn bg-navy-800 hover:bg-navy-700 text-white"><i class="fa-solid fa-cloud-arrow-down"></i>Nhập từ Sheets</button>
+            <button onclick="refreshOrders()" class="btn bg-slate-100 hover:bg-slate-200 text-navy-800"><i class="fa-solid fa-rotate"></i>Làm mới</button>
+            <a href="#" onclick="this.href=ordersCsvLink()" class="btn bg-green-600 hover:bg-green-700 text-white"><i class="fa-solid fa-file-excel"></i>Xuất Excel</a>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+              <thead class="text-slate-400 uppercase text-[10px] border-b border-slate-200">
+                <tr>
+                  <th class="text-left p-2.5">Mã đơn</th>
+                  <th class="text-left p-2.5">Ngày giờ</th>
+                  <th class="text-left p-2.5">Khách hàng</th>
+                  <th class="text-left p-2.5">Sản phẩm</th>
+                  <th class="text-right p-2.5">Tổng tiền</th>
+                  <th class="text-center p-2.5">Thanh toán</th>
+                  <th class="text-left p-2.5">Trạng thái</th>
+                  <th class="text-center p-2.5">Xử lý</th>
+                </tr>
+              </thead>
+              <tbody id="ordersBody"></tbody>
+            </table>
+          </div>
+          <p id="ordersEmpty" class="hidden text-center py-10 text-sm text-slate-400 font-bold">
+            <i class="fa-solid fa-receipt text-3xl mb-2 block text-slate-200"></i>
+            Chưa có đơn hàng nào. Đơn khách đặt trên website sẽ tự hiện tại đây.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============ CHI TIẾT ĐƠN HÀNG (modal) ============ -->
+      <div id="orderDetailModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onclick="if(event.target===this)closeOrderDetail()">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
+          <div class="bg-navy-800 text-white p-4 flex items-center justify-between">
+            <p class="font-black text-sm">Đơn <span id="odId" class="text-amber-300 font-mono"></span></p>
+            <button onclick="closeOrderDetail()" class="text-white/70 hover:text-white text-xl font-bold">&times;</button>
+          </div>
+          <div class="p-5 overflow-y-auto text-sm space-y-3" id="orderDetailBody"></div>
+        </div>
+      </div>
+
       <section id="tab-posts" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="md:col-span-1 bg-white rounded-2xl shadow border border-slate-200 p-4 space-y-2">
           <button onclick="openPostEditor()" class="btn w-full bg-tohoRed hover:bg-tohoRedHover text-white shadow justify-center">

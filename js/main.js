@@ -1686,6 +1686,28 @@ async function submitOrder(e) {
     };
 
     try {
+        // Gửi đơn về TRẠM ADMIN trên máy này — để mục "Đơn Hàng" trong admin tự nhận đơn mới
+        // (chỉ khi website mở trên máy có chạy server; truy cập từ điện thoại/khách qua Vercel vẫn gửi về Google Sheet như cũ)
+        if (location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname)) {
+            fetch('http://localhost:8120/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' }, // tránh preflight CORS
+                body: JSON.stringify({
+                    action: 'order.add',
+                    order: {
+                        id: orderId, date: new Date().toLocaleString('vi-VN'),
+                        name, phone, email, address, note,
+                        payment: paymentMethod,
+                        items: cart.map((it) => ({ name: it.name, code: it.code, quantity: it.quantity, price: it.price })),
+                        subTotal, shippingFee, discount, total: grandTotal,
+                        status: 'Chờ xác nhận', source: 'web'
+                    }
+                })
+            }).catch(() => { /* Không có server admin trên máy → bỏ qua yên lặng */ });
+        }
+    } catch (e) { /* bỏ qua */ }
+
+    try {
         if (SCRIPT_WEB_APP_URL) {
             fetch(SCRIPT_WEB_APP_URL, {
                 method: 'POST',

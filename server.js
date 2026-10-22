@@ -50,6 +50,34 @@ function writePolicies(p) {
   fs.writeFileSync(path.join(DATA, 'policies.js'), 'window.POLICIES_DATA = ' + JSON.stringify(p) + ';', 'utf-8');
 }
 
+// ============ ĐƠN HÀNG ============
+function readOrders() {
+  try { return JSON.parse(fs.readFileSync(path.join(DATA, 'orders.json'), 'utf8')); }
+  catch { return []; }
+}
+function writeOrders(list) {
+  // Mới nhất lên đầu
+  list.sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''), 'vi', { numeric: true }) || 0);
+  fs.writeFileSync(path.join(DATA, 'orders.json'), JSON.stringify(list, null, 2), 'utf-8');
+  fs.writeFileSync(path.join(DATA, 'orders.js'), 'window.ORDERS_DATA = ' + JSON.stringify(list) + ';', 'utf-8');
+}
+function normalizeOrder(o) {
+  return {
+    id: String(o.id || '').trim(),
+    date: o.date || new Date().toLocaleString('vi-VN'),
+    name: o.name || '', phone: o.phone || '', email: o.email || '',
+    address: o.address || '', note: o.note || '',
+    payment: o.payment || 'COD',
+    items: Array.isArray(o.items) ? o.items : [],
+    subTotal: parseInt(o.subTotal) || 0,
+    shippingFee: parseInt(o.shippingFee) || 0,
+    discount: parseInt(o.discount) || 0,
+    total: parseInt(o.total) || 0,
+    status: o.status || 'Chờ xác nhận',
+    source: o.source || 'web'
+  };
+}
+
 // Cấu hình website (Flash Sale...)
 function readSettings() {
   try { return JSON.parse(fs.readFileSync(path.join(DATA, 'settings.json'), 'utf8')); }
@@ -84,9 +112,27 @@ function productsToCSV(list) {
   return head.map(esc).join(';') + '\n' + rows.join('\n');
 }
 
+// Phân tích CSV biết dấu ngoặc kép + ô có xuống dòng (sheet đơn hàng chứa nhiều dòng)
+function parseCSV(text) {
+  const rows = []; let row = [], cell = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else inQ = false; }
+      else cell += c;
+    } else if (c === '"') inQ = true;
+    else if (c === ',') { row.push(cell); cell = ''; }
+    else if (c === '\n') { row.push(cell); cell = ''; rows.push(row); row = []; }
+    else if (c === '\r') { /* bỏ qua */ }
+    else cell += c;
+  }
+  if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+  return rows.map(r => r.map(s => s.trim()));
+}
+
 // ============ API ============
 const json = (res, code, obj) => {
-  res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': 'http://localhost:' + PORT });
+  res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
   res.end(JSON.stringify(obj));
 };
 
@@ -119,7 +165,7 @@ let buffers = new Map();
 const server = http.createServer((req, res) => {
   if (req.method === 'OPTIONS') {
     res.writeHead(204, {
-      'Access-Control-Allow-Origin': 'http://localhost:' + PORT,
+      'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
     });
@@ -139,6 +185,16 @@ const server = http.createServer((req, res) => {
       } else if (u.searchParams.get('type') === 'products-csv') {
         body = productsToCSV(readProducts());
         name = 'san-pham.csv';
+      } else if (u.searchParams.get('type') === 'orders-csv') {
+        const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""').replace(/\r?\n/g, ' | ') + '"';
+        const head = ['MÃ ĐƠN', 'NGÀY GIỜ', 'KHÁCH HÀNG', 'ĐIỆN THOẠI', 'EMAIL', 'ĐỊA CHỈ', 'GHI CHÚ', 'SẢN PHẨM', 'TỔNG TIỀN (đ)', 'THANH TOÁN', 'TRẠNG THÁI'];
+        const rows = readOrders().map((o) => [
+          o.id, o.date, o.name, o.phone, o.email || '', o.address, o.note || '',
+          (o.items || []).map((it) => (it.name || '') + (it.quantity ? ' x' + it.quantity : '')).join(' | '),
+          o.total, o.payment, o.status
+        ].map(esc).join(';'));
+        body = head.map(esc).join(';') + '\n' + rows.join('\n');
+        name = 'don-hang.csv';
       } else if (u.searchParams.get('type') === 'all') {
         body = JSON.stringify({ exportedAt: new Date().toISOString(), products: readProducts(), policies: readPolicies() }, null, 2);
         name = 'backup-toho-dulieu.json';
@@ -159,12 +215,12 @@ const server = http.createServer((req, res) => {
 
   const chunks = [];
   req.on('data', c => chunks.push(c));
-  req.on('end', () => {
+  req.on('end', async () => {
     let body = {};
     try { body = JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}'); }
     catch { return json(res, 400, { ok: false, error: 'JSON lỗi' }); }
 
-    if (body.pass !== ADMIN_PASS && !buffers.has('auth_' + req.socket.remoteAddress)) {
+    if (body.action !== 'order.add' && body.pass !== ADMIN_PASS && !buffers.has('auth_' + req.socket.remoteAddress)) {
       return json(res, 401, { ok: false, error: 'Sai mật khẩu admin' });
     }
 
@@ -174,7 +230,78 @@ const server = http.createServer((req, res) => {
         return json(res, 200, { ok: true });
       }
       case 'data': {
-        return json(res, 200, { ok: true, products: readProducts(), policies: readPolicies(), settings: readSettings() });
+        return json(res, 200, { ok: true, products: readProducts(), policies: readPolicies(), settings: readSettings(), orders: readOrders() });
+      }
+
+      // === ĐƠN HÀNG: web gửi đơn về trạm admin (không cần mật khẩu — chỉ máy này gọi được) ===
+      case 'order.add': {
+        const o = normalizeOrder(body.order || {});
+        if (!o.id || !o.phone) return json(res, 400, { ok: false, error: 'Đơn thiếu mã hoặc SĐT' });
+        const list = readOrders();
+        const i = list.findIndex(x => String(x.id) === String(o.id));
+        if (i >= 0) { o.status = list[i].status || o.status; list[i] = o; } // chống nhân đôi khi trang gửi lại
+        else list.unshift(o);
+        writeOrders(list);
+        return json(res, 200, { ok: true, msg: `Đã nhận đơn ${o.id}`, count: list.length });
+      }
+      case 'order.save': {
+        const id = String(body.id || '');
+        const list = readOrders();
+        const o = list.find(x => String(x.id) === id);
+        if (!o) return json(res, 404, { ok: false, error: 'Không tìm thấy đơn ' + id });
+        if (body.status !== undefined) o.status = String(body.status);
+        if (body.note !== undefined) o.adminNote = String(body.note);
+        writeOrders(list);
+        return json(res, 200, { ok: true, msg: `Đã cập nhật đơn ${id}` });
+      }
+      case 'order.delete': {
+        const id = String(body.id || '');
+        const list = readOrders().filter(x => String(x.id) !== id);
+        writeOrders(list);
+        return json(res, 200, { ok: true, msg: `Đã xóa đơn ${id}`, count: list.length });
+      }
+      // === NHẬP ĐƠN TỪ GOOGLE SHEET (dành cho đơn đặt từ web Vercel) ===
+      case 'orders.import': {
+        let url = String(body.url || readSettings().ordersSheetUrl || '').trim();
+        if (!url) return json(res, 400, { ok: false, error: 'Chưa có link: mở Google Sheet đơn hàng → File → Chia sẻ → Xuất bản lên web → CSV, rồi dán link vào.' });
+        try {
+          const txt = await fetch(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now()).then(r => r.text());
+          const rows = parseCSV(txt).filter(r => r.some(c => String(c).trim()));
+          const pick = (r, names) => { for (const n of names) { const i = r.h.findIndex(h => String(h).toLowerCase().includes(String(n).toLowerCase())); if (i >= 0 && r[i] !== undefined) return String(r[i] || '').trim(); } return ''; };
+          const head = rows.shift() || [];
+          const list = readOrders();
+          let added = 0, updated = 0, skipped = 0;
+          rows.forEach(r => {
+            r.h = head;
+            const id = pick(r, ['order_id', 'ma don', 'mã đơn', 'id đơn', 'id']);
+            const phone = pick(r, ['customer_phone', 'phone', 'sdt', 'số điện thoại']);
+            const total = parseInt(String(pick(r, ['total_amount', 'tổng', 'total'])).replace(/[^0-9]/g, ''), 10) || 0;
+            if (!id && !phone) { skipped++; return; }
+            const items = pick(r, ['order_items', 'sản phẩm', 'items']) || '';
+            const o = {
+              id: id || ('TH' + Date.now().toString().slice(-6) + added),
+              date: pick(r, ['timestamp', 'date', 'ngày']) || new Date().toLocaleString('vi-VN'),
+              name: pick(r, ['customer_name', 'name', 'tên']),
+              phone,
+              email: pick(r, ['customer_email', 'email']),
+              address: pick(r, ['customer_address', 'address', 'địa chỉ']),
+              note: pick(r, ['customer_note', 'note', 'ghi chú']),
+              payment: pick(r, ['payment_method', 'payment']).toUpperCase().includes('QR') ? 'BANK' : 'COD',
+              items: items.split(/\s*\n\s*/).filter(Boolean).map(line => ({ name: line })),
+              total,
+              status: 'Chờ xác nhận',
+              source: 'google-sheet'
+            };
+            const i = list.findIndex(x => String(x.id) === String(o.id));
+            if (i >= 0) { if (list[i].status === 'Chờ xác nhận') list[i] = o; updated++; }
+            else { list.unshift(o); added++; }
+          });
+          writeOrders(list);
+          if (body.saveUrl) { const s = readSettings(); s.ordersSheetUrl = body.url; writeSettings(s); }
+          return json(res, 200, { ok: true, msg: `Nhập sheet: ${added} đơn mới, ${updated} cập nhật, ${skipped} bỏ qua`, count: list.length });
+        } catch (e) {
+          return json(res, 500, { ok: false, error: 'Không đọc được sheet: ' + e.message });
+        }
       }
       case 'product.save': {
         const p = body.product || {};

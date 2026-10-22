@@ -78,6 +78,19 @@
             }
         }
     </script>
+    <!-- CHẠY CUỘN KHU FLASH SALE -->
+    <style>
+        /* Chỉ hiện 5 sản phẩm trên desktop (3 trên bảng, 2 trên điện thoại) */
+        .flash-item { width: calc(50% - 7px); flex-shrink: 0; }
+        @media (min-width: 640px) { .flash-item { width: calc((100% - 28px) / 3); } }
+        @media (min-width: 768px) { .flash-item { width: calc((100% - 56px) / 5); } }
+
+        @keyframes flashMarqueeScroll {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+        }
+        .flash-marquee-track:hover { animation-play-state: paused !important; }
+    </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased relative selection:bg-red-500 selection:text-white">
 
@@ -124,11 +137,16 @@
             </span>
         </a>
 
-        <!-- Giỏ hàng Mobile -->
-        <button onclick="toggleCartModal()" class="relative text-slate-700 hover:text-starRed p-1">
-            <i class="fa-solid fa-cart-shopping text-lg"></i>
-            <span id="cartBadgeMobile" class="absolute -top-1 -right-1 bg-starRed text-white font-extrabold text-[9px] w-4 h-4 rounded-full flex items-center justify-center shadow">0</span>
-        </button>
+        <!-- Tài khoản + Giỏ hàng Mobile -->
+        <div class="flex items-center gap-2">
+            <button onclick="accountBtnTap()" class="relative text-slate-700 hover:text-starRed p-1">
+                <i class="fa-regular fa-user text-lg"></i>
+            </button>
+            <button onclick="toggleCartModal()" class="relative text-slate-700 hover:text-starRed p-1">
+                <i class="fa-solid fa-cart-shopping text-lg"></i>
+                <span id="cartBadgeMobile" class="absolute -top-1 -right-1 bg-starRed text-white font-extrabold text-[9px] w-4 h-4 rounded-full flex items-center justify-center shadow">0</span>
+            </button>
+        </div>
     </div>
 
     <!-- Thanh tìm kiếm Mobile (Đã đồng bộ ID và hàm xử lý tìm kiếm) -->
@@ -192,13 +210,28 @@
             </div>
 
             <div class="flex items-center space-x-5 shrink-0">
-                <div onclick="showToast('Chức năng Tài khoản đang được nâng cấp!', 'info')" class="flex items-center space-x-2 cursor-pointer text-slate-700 hover:text-starRed transition">
-                    <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200">
-                        <i class="fa-regular fa-user text-sm"></i>
+                <div class="relative">
+                    <div id="accountMenuBtn" onclick="accountBtnTap()" class="flex items-center space-x-2 cursor-pointer text-slate-700 hover:text-starRed transition">
+                        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200">
+                            <i class="fa-regular fa-user text-sm"></i>
+                        </div>
+                        <div class="text-xs leading-tight">
+                            <span id="accountSubLabel" class="text-slate-400 block text-[10px]">Đăng nhập/Đăng ký</span>
+                            <span id="accountNameLabel" class="font-bold flex items-center">Tài khoản <i class="fa-solid fa-caret-down ml-1 text-[10px]"></i></span>
+                        </div>
                     </div>
-                    <div class="text-xs leading-tight">
-                        <span class="text-slate-400 block text-[10px]">Đăng nhập/Đăng ký</span>
-                        <span class="font-bold flex items-center">Tài khoản <i class="fa-solid fa-caret-down ml-1 text-[10px]"></i></span>
+                    <!-- Danh sách thả xuống khi đã đăng nhập -->
+                    <div id="accountDropdown" class="hidden absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-slate-200 z-40 overflow-hidden">
+                        <div class="p-4 bg-red-50/60 border-b border-red-100">
+                            <p id="dropAccName" class="font-bold text-sm text-slate-900"></p>
+                            <p id="dropAccPhone" class="text-[11px] text-slate-500 font-mono"></p>
+                        </div>
+                        <button onclick="closeAccountDropdown(); openMyOrdersModal();" class="w-full text-left px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5">
+                            <i class="fa-solid fa-box-open text-starRed w-4"></i> Đơn hàng của tôi <span id="dropAccOrderCount" class="text-[10px] bg-slate-100 rounded-full px-1.5"></span>
+                        </button>
+                        <button onclick="closeAccountDropdown(); authLogout();" class="w-full text-left px-4 py-3 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2.5 border-t border-slate-100">
+                            <i class="fa-solid fa-right-from-bracket w-4"></i> Đăng xuất
+                        </button>
                     </div>
                 </div>
 
@@ -351,7 +384,9 @@
                     </div>
                 </div>
 
-                <div id="flashSaleGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5"></div>
+                <div id="flashMarqueeViewport" class="overflow-hidden relative flash-marquee-viewport">
+                    <div id="flashSaleGrid" class="flex gap-3.5 items-stretch flash-marquee-track will-change-transform"></div>
+                </div>
             </section>
 
             <!-- DANH MỤC KHỐI SẢN PHẨM -->
@@ -562,6 +597,61 @@
     </div>
 
     <!-- MODAL THANH TOÁN (CHECKOUT MODAL) -->
+    <!-- ============ TÀI KHOẢN KHÁCH HÀNG: ĐĂNG NHẬP / ĐĂNG KÝ ============ -->
+    <div id="authModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-3">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+            <div class="relative bg-gradient-to-r from-starRed to-orange-500 text-white p-5">
+                <button onclick="closeAuthModal()" class="absolute top-3 right-4 text-white/80 hover:text-white text-2xl font-bold">&times;</button>
+                <h3 class="font-black text-lg uppercase font-heading flex items-center"><i class="fa-regular fa-user mr-2"></i>Tài Khoản Của Bạn</h3>
+                <p class="text-white/80 text-xs mt-0.5">Đặt hàng nhanh hơn — lưu thông tin &amp; theo dõi đơn hàng</p>
+            </div>
+            <div class="px-5 pt-4 flex gap-2">
+                <button id="tabAuthLogin" onclick="authShowMode('login')" class="flex-1 py-2.5 text-xs font-black rounded-xl border-2 border-starRed bg-red-50 text-starRed">ĐĂNG NHẬP</button>
+                <button id="tabAuthRegister" onclick="authShowMode('register')" class="flex-1 py-2.5 text-xs font-black rounded-xl border-2 border-slate-200 bg-white text-slate-500">ĐĂNG KÝ</button>
+            </div>
+            <form id="authForm" onsubmit="authSubmit(event)" class="flex-1 overflow-y-auto p-5 space-y-3.5">
+                <input type="hidden" id="authMode" value="login">
+                <div id="fwAuthName" class="hidden">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Họ tên đầy đủ <span class="text-starRed">*</span></label>
+                    <input id="fAuthName" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-starRed bg-slate-50/50" placeholder="VD: Nguyễn Văn A">
+                </div>
+                <div id="fwAuthPhone" class="hidden">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Số điện thoại (làm mã đăng nhập) <span class="text-starRed">*</span></label>
+                    <input id="fAuthPhone" type="tel" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-starRed bg-slate-50/50" placeholder="SĐT nhận đơn hàng">
+                </div>
+                <div id="fwAuthUser">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Số điện thoại / Tên đăng nhập <span class="text-starRed">*</span></label>
+                    <input id="fAuthUser" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-starRed bg-slate-50/50" placeholder="Thông tin bạn đã đăng ký">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Mật khẩu <span class="text-starRed">*</span></label>
+                    <input id="fAuthPass" type="password" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-starRed bg-slate-50/50" placeholder="Tối thiểu 6 ký tự">
+                </div>
+                <div id="fwAuthPass2" class="hidden">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Nhập lại mật khẩu <span class="text-starRed">*</span></label>
+                    <input id="fAuthPass2" type="password" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-starRed bg-slate-50/50">
+                </div>
+                <p id="authMsg" class="text-xs font-bold hidden"></p>
+                <button id="authSubmitBtn" type="submit" class="w-full bg-starRed hover:bg-starRedHover text-white font-black py-3.5 rounded-2xl shadow-lg transition uppercase font-heading text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i><span id="authSubmitLabel">Đăng nhập</span>
+                </button>
+                <p class="text-[10px] text-slate-400 text-center">Thông tin tài khoản lưu trên máy bạn — không dùng chung với thiết bị khác. Đặt hàng nhanh hơn khi đã đăng nhập.</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============ ĐƠN HÀNG CỦA TÔI ============ -->
+    <div id="myOrdersModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-3">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl max-h-[85vh] flex flex-col">
+            <div class="relative bg-slate-900 text-white p-5">
+                <button onclick="closeMyOrdersModal()" class="absolute top-3 right-4 text-white/80 hover:text-white text-2xl font-bold">&times;</button>
+                <h3 class="font-black text-lg uppercase font-heading flex items-center"><i class="fa-solid fa-box-open mr-2 text-amber-400"></i>Đơn Hàng Của Tôi</h3>
+                <p id="myOrdersSub" class="text-slate-300 text-xs mt-0.5"></p>
+            </div>
+            <div id="myOrdersList" class="flex-1 overflow-y-auto p-5 space-y-3"></div>
+        </div>
+    </div>
+
     <div id="checkoutModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-3 md:p-6">
         <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden">
             

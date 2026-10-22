@@ -6,8 +6,8 @@
     "category": "Ổ CẮM ĐIỆN",
     "subCategory": "Công Suất Nhỏ  1100W (5A)",
     "childCategory": "Dòng thường",
-    "price": "60.000",
-    "oldPrice": "70.000",
+    "price": "60000",
+    "oldPrice": "70000",
     "image": "https://lh3.googleusercontent.com/d/11lQG7DGAq-Pmo9fiTsFM1tbguU6KX9Ju",
     "images": [
       "https://lh3.googleusercontent.com/d/11lQG7DGAq-Pmo9fiTsFM1tbguU6KX9Ju",
@@ -26,7 +26,8 @@
     "skuGroup": "3TN",
     "description": "Ổ CẮM KÉO DÀI PHỔ THÔNG\nMã SP: 3TC3-2 3TC5-2\n\nCác ổ cắm điện Lioa thường có dây dài từ 3 đến 5m hoặc hơn, cho phép cắm nhiều các thiết bị khác nhau trên cùng một ổ cắm tuy nhiên chúng thường để dưới đất và không đảm bảo an toàn, các nhà sản xuất cũng dần trang bị cho các ổ cắm điện kéo dài những công nghệ an toàn cao hơn đi đầu là hãng sản xuất thiết bị điện nổi tiếng LiOA. \nỔ cắm điện kéo dài LiOA luôn là các thiết bị đảm bảo tính an toàn nhất cho người sử dụng, được người dùng tin tưởng hài lòng về chất lượng nhiều năm qua. Ổ cắm lioa được dùng rộng rãi  trong dân dụng và trong công nghiệp nhờ tính năng cũng như giá thành rất tốt của ổ cắm Lioa.\n\n[•] ƯU ĐIỂM VƯỢT TRỘI: \n- Chiều dài dây điện 3m / 5m được sản xuất theo tiêu chuẩn TCVN và IEC giúp thuận tiện cho việc di chuyển và đảm bảo an toàn khi sử dụng.\" \n- Mỗi ổ cắm có màu sắc khác nhau và dễ phân biệt và tránh nhầm lẫn. \n- Tích hợp công tắc bật, tắt ổ cắm khi sử dụng. \n- Có đánh dấu phân biệt ổ cắm ∅4, ∅5 để tránh nhầm lẫn khi cắm, nâng cao tuổi thọ và tránh bị lỏng. \n- Vỏ nhựa được sản xuất bằng nhựa ABS chịu va đập tốt. \n- Nhíp đồng bên trong ổ cắm được gia công bằng đồng nguyên chất 100%; đàn hồi và tiếp xúc tốt, dẫn điện tốt.\n\n[•] THÔNG SỐ KỸ THUẬT: \n- Công suất tối đa: 1000W/250V \n- Số ổ cắm: 3 ổ cắm \n- Chiều dài dây: 3m / 5m\n- Số lõi dây: 2\n\nQuy cách: đóng gói riêng biệt\nBảo quản: Nơi khô ráo, thoáng mát. Tránh xa nguồn nhiệt, nơi có nhiều dầu mỡ, ẩm ướt\n \n#ocamdienlioa #ocamdien #odien #ocamdiendanang #ocam #ocamlioa #ocamdanang #odiendanang #odienlioa #odienlioa6lo #ocamdiencaocap #odiencaocap #odiendaydai #ocamdienlioa10lo #ocamdienlioa4lo #ocamdienlioa8lo #odien4lo #odien6lo #odien10lo",
     "sku": "3TN",
-    "flashPrice": 0
+    "flashPrice": 0,
+    "virtualSold": 500
   },
   {
     "id": "3TN3.3.5",
@@ -152,7 +153,7 @@
     "image": "images/no-image.svg",
     "images": [],
     "badge": "",
-    "isFlashSale": true,
+    "isFlashSale": false,
     "stock": "Chờ đặt hàng",
     "specs": "Bảo hành chính hãng",
     "soldCount": 5,
@@ -237,7 +238,7 @@
       "https://lh3.googleusercontent.com/d/1G4ancOphAesJDDXDDD9HUULjr5Sn-04l"
     ],
     "badge": "",
-    "isFlashSale": true,
+    "isFlashSale": false,
     "stock": "Có hàng",
     "specs": "Bảo hành chính hãng",
     "soldCount": 5,
@@ -265,7 +266,7 @@
       "https://lh3.googleusercontent.com/d/1G4ancOphAesJDDXDDD9HUULjr5Sn-04l"
     ],
     "badge": "",
-    "isFlashSale": true,
+    "isFlashSale": false,
     "stock": "Chờ đặt hàng",
     "specs": "Bảo hành chính hãng",
     "soldCount": 5,
@@ -2522,7 +2523,7 @@
       "images/no-image.svg"
     ],
     "badge": "",
-    "isFlashSale": false,
+    "isFlashSale": true,
     "stock": "Có hàng",
     "specs": "Bảo hành chính hãng",
     "soldCount": 5,
@@ -2578,7 +2579,7 @@
       "https://lh3.googleusercontent.com/d/1zaf49kIx15HKdgQS9dCsOaFipNyaEAuJ"
     ],
     "badge": "",
-    "isFlashSale": false,
+    "isFlashSale": true,
     "stock": "Có hàng",
     "specs": "Bảo hành chính hãng",
     "soldCount": 5,
@@ -2636,7 +2637,7 @@
       "https://lh3.googleusercontent.com/d/1zaf49kIx15HKdgQS9dCsOaFipNyaEAuJ"
     ],
     "badge": "",
-    "isFlashSale": false,
+    "isFlashSale": true,
     "stock": "Có hàng",
     "specs": "Bảo hành chính hãng",
     "soldCount": 5,
@@ -3309,7 +3310,7 @@
       "images/no-image.svg"
     ],
     "badge": "",
-    "isFlashSale": false,
+    "isFlashSale": true,
     "stock": "Có hàng",
     "specs": "Bảo hành chính hãng",
     "soldCount": 5,
@@ -3335,7 +3336,7 @@
       "https://lh3.googleusercontent.com/d/1F9sLM-fICSZ4B9z6G2oyNNkrCmtaDAqi"
     ],
     "badge": "",
-    "isFlashSale": false,
+    "isFlashSale": true,
     "stock": "Chờ đặt hàng",
     "specs": "Bảo hành chính hãng",
     "soldCount": 5,
@@ -3725,7 +3726,7 @@
       "images/no-image.svg"
     ],
     "badge": "",
-    "isFlashSale": false,
+    "isFlashSale": true,
     "stock": "Chờ đặt hàng",
     "specs": "Bảo hành chính hãng",
     "soldCount": 5,
@@ -5176,7 +5177,7 @@
       "https://lh3.googleusercontent.com/d/10xZd7ag8Pd6NV91RFzUBLz2edWyhnS8_"
     ],
     "badge": "",
-    "isFlashSale": false,
+    "isFlashSale": true,
     "stock": "Chờ đặt hàng",
     "specs": "Bảo hành chính hãng",
     "soldCount": 5,
@@ -5185,7 +5186,7 @@
     "variant2": "",
     "skuGroup": "4P-N",
     "sku": "4P-N",
-    "flashPrice": 0
+    "flashPrice": 15000
   },
   {
     "id": "6P-5M/3-15A",
@@ -5232,7 +5233,7 @@
       "https://lh3.googleusercontent.com/d/12kbx4x7wGDxiytjMV2MFDbrbXjjxClrl"
     ],
     "badge": "",
-    "isFlashSale": false,
+    "isFlashSale": true,
     "stock": "Chờ đặt hàng",
     "specs": "Bảo hành chính hãng",
     "soldCount": 5,
@@ -12844,84 +12845,6 @@
     "vat": "Giá đã gồm VAT",
     "warranty": "Bảo hành chính hãng LiOA",
     "source": "https://lioa.com.vn/bien-ap-doi-nguon-ha-ap-1-pha-bien-ap-the-he-moi-loai-pho-thong-ma-dnv015a",
-    "flashPrice": 0
-  },
-  {
-    "id": "Mã SP: 3TC3-2 3TC5-2",
-    "code": "Mã SP: 3TC3-2 3TC5-2",
-    "name": "Sản phẩm",
-    "category": "Khác",
-    "subCategory": "",
-    "childCategory": "",
-    "price": "0",
-    "oldPrice": "0",
-    "image": "images/no-image.svg",
-    "images": [
-      "images/no-image.svg"
-    ],
-    "badge": "",
-    "stock": "Còn hàng",
-    "specs": "Bảo hành chính hãng",
-    "soldCount": 5,
-    "totalCount": 20,
-    "variant1": "",
-    "variant2": "",
-    "skuGroup": "Mã SP: 3TC3-2 3TC5-2",
-    "isFlashSale": false,
-    "description": "",
-    "sku": "Mã SP: 3TC3-2 3TC5-2",
-    "flashPrice": 0
-  },
-  {
-    "id": "Các ổ cắm điện Lioa thường có dây dài từ 3 đến 5m hoặc hơn",
-    "code": "Các ổ cắm điện Lioa thường có dây dài từ 3 đến 5m hoặc hơn",
-    "name": "cho phép cắm nhiều các thiết bị khác nhau trên cùng một ổ cắm tuy nhiên chúng thường để dưới đất và không đảm bảo an toàn",
-    "category": "các nhà sản xuất cũng dần trang bị cho các ổ cắm điện kéo dài những công nghệ an toàn cao hơn đi đầu là hãng sản xuất thiết bị điện nổi tiếng LiOA.",
-    "subCategory": "",
-    "childCategory": "",
-    "price": "0",
-    "oldPrice": "0",
-    "image": "images/no-image.svg",
-    "images": [
-      "images/no-image.svg"
-    ],
-    "badge": "",
-    "stock": "Còn hàng",
-    "specs": "Bảo hành chính hãng",
-    "soldCount": 5,
-    "totalCount": 20,
-    "variant1": "",
-    "variant2": "",
-    "skuGroup": "Các ổ cắm điện Lioa thường có dây dài từ 3 đến 5m hoặc hơn",
-    "isFlashSale": false,
-    "description": "",
-    "sku": "Các ổ cắm điện Lioa thường có dây dài từ 3 đến 5m hoặc hơn",
-    "flashPrice": 0
-  },
-  {
-    "id": "Quy cách: đóng gói riêng biệt",
-    "code": "Quy cách: đóng gói riêng biệt",
-    "name": "Sản phẩm",
-    "category": "Khác",
-    "subCategory": "",
-    "childCategory": "",
-    "price": "0",
-    "oldPrice": "0",
-    "image": "images/no-image.svg",
-    "images": [
-      "images/no-image.svg"
-    ],
-    "badge": "",
-    "stock": "Còn hàng",
-    "specs": "Bảo hành chính hãng",
-    "soldCount": 5,
-    "totalCount": 20,
-    "variant1": "",
-    "variant2": "",
-    "skuGroup": "Quy cách: đóng gói riêng biệt",
-    "isFlashSale": false,
-    "description": "",
-    "sku": "Quy cách: đóng gói riêng biệt",
     "flashPrice": 0
   }
 ]

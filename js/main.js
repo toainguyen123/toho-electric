@@ -121,6 +121,28 @@ function getFlashSalePrice(p) {
     return fp;
 }
 
+// --- LƯỢT BÁN HIỂN THỊ (thật + ảo): nếu admin không điền "bán ảo" thì tự động 50–100 ---
+// Số tự sinh ổn định theo mã sản phẩm (không nhảy loạn mỗi lần tải)
+function pseudoSeed(s) {
+    let h = 0; const str = String(s || '');
+    for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 100000007;
+    return h;
+}
+function autoVirtualSold(id) { return 50 + (pseudoSeed(id) % 51); }      // 50 → 100
+function autoVirtualStock(id) { return 10 + (pseudoSeed(id) % 41); }     // 10 → 50
+
+function getSoldDisplay(p) {
+    const real = parseInt(p.soldCount) || 0;
+    const virt = parseInt(p.virtualSold) || 0;
+    return real + (virt > 0 ? virt : autoVirtualSold(p.id));
+}
+
+function getStockDisplay(p) {
+    const st = parseInt(p.totalCount) || 0;
+    // Tồn kho thật > 0 và hợp lệ → dùng, ngược lại sinh số "còn lại" ổn định
+    return st >= getSoldDisplay(p) ? (st - getSoldDisplay(p)) : autoVirtualStock(p.id);
+}
+
 function getDiscountPercent(price, oldPrice) {
     const p = parsePrice(price);
     const op = parsePrice(oldPrice);
@@ -245,6 +267,15 @@ try {
 initData();
     initHeroSlider();
     initFlashSaleTimer();
+    // Tài khoản khách hàng: hiển thị trạng thái đăng nhập + đóng panel khi bấm ra ngoài
+    updateAccountUI();
+    document.addEventListener('click', (e) => {
+        const btn = document.getElementById('accountMenuBtn');
+        const dd = document.getElementById('accountDropdown');
+        if (btn && dd && !dd.classList.contains('hidden') && !btn.contains(e.target) && !dd.contains(e.target)) {
+            dd.classList.add('hidden');
+        }
+    });
 });
 
 async function initData() {
@@ -537,6 +568,170 @@ function initFlashSaleTimer() {
         if (mEl) mEl.innerText = String(m).padStart(2, '0');
         if (sEl) sEl.innerText = String(s).padStart(2, '0');
     }, 1000);
+}
+
+// ============ TÀI KHOẢN KHÁCH HÀNG (lưu trên máy người dùng) ============
+// Website tĩnh (Vercel) không có server → tài khoản & đơn hàng lưu trong trình duyệt
+function hashPass(s) {
+    return String(s).split('').map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
+}
+function loadCustomerAccounts() {
+    try { return JSON.parse(localStorage.getItem('tohoAccounts')) || []; } catch { return []; }
+}
+function saveCustomerAccounts(list) { localStorage.setItem('tohoAccounts', JSON.stringify(list)); }
+function getCustomerSession() {
+    try { return JSON.parse(localStorage.getItem('tohoSession')); } catch { return null; }
+}
+function setCustomerSession(s) {
+    if (s) localStorage.setItem('tohoSession', JSON.stringify(s));
+    else localStorage.removeItem('tohoSession');
+}
+
+function accountBtnTap() {
+    const s = getCustomerSession();
+    if (s) {
+        const dd = document.getElementById('accountDropdown');
+        dd.classList.toggle('hidden');
+        if (!dd.classList.contains('hidden')) renderAccountOrdersCount();
+    } else {
+        openAuthModal('login');
+    }
+}
+function closeAccountDropdown() {
+    const dd = document.getElementById('accountDropdown');
+    if (dd) dd.classList.add('hidden');
+}
+
+function openAuthModal(mode) {
+    closeAccountDropdown();
+    document.getElementById('authModal').classList.remove('hidden');
+    authShowMode(mode || 'login');
+}
+function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+
+function authShowMode(mode) {
+    const isLogin = mode === 'login';
+    document.getElementById('authMode').value = mode;
+    document.getElementById('fwAuthName').classList.toggle('hidden', isLogin);
+    document.getElementById('fwAuthPhone').classList.toggle('hidden', isLogin);
+    document.getElementById('fwAuthPass2').classList.toggle('hidden', isLogin);
+    document.getElementById('fwAuthUser').classList.toggle('hidden', !isLogin);
+    document.getElementById('tabAuthLogin').className = isLogin
+        ? 'flex-1 py-2.5 text-xs font-black rounded-xl border-2 border-starRed bg-red-50 text-starRed'
+        : 'flex-1 py-2.5 text-xs font-black rounded-xl border-2 border-slate-200 bg-white text-slate-500';
+    document.getElementById('tabAuthRegister').className = !isLogin
+        ? 'flex-1 py-2.5 text-xs font-black rounded-xl border-2 border-starRed bg-red-50 text-starRed'
+        : 'flex-1 py-2.5 text-xs font-black rounded-xl border-2 border-slate-200 bg-white text-slate-500';
+    document.getElementById('authSubmitLabel').textContent = isLogin ? 'Đăng nhập' : 'Tạo tài khoản';
+    const msg = document.getElementById('authMsg');
+    msg.textContent = ''; msg.classList.add('hidden');
+}
+
+function authMsgShow(ok, text) {
+    const msg = document.getElementById('authMsg');
+    msg.textContent = (ok ? '✓ ' : '✗ ') + text;
+    msg.className = 'text-xs font-bold ' + (ok ? 'text-green-600' : 'text-red-600');
+}
+
+function authSubmit(e) {
+    e.preventDefault();
+    const mode = document.getElementById('authMode').value;
+    const v = (id) => (document.getElementById(id) || {}).value?.trim() || '';
+
+    if (mode === 'register') {
+        const name = v('fAuthName'), phone = v('fAuthPhone'), pass = v('fAuthPass'), pass2 = v('fAuthPass2');
+        if (!name || !phone || !pass) return authMsgShow(false, 'Vui lòng điền đủ Họ tên, SĐT và Mật khẩu');
+        if (pass.length < 6) return authMsgShow(false, 'Mật khẩu cần ít nhất 6 ký tự');
+        if (pass !== pass2) return authMsgShow(false, 'Mật khẩu 2 lần nhập không giống nhau');
+        const accounts = loadCustomerAccounts();
+        if (accounts.find(a => a.phone === phone)) return authMsgShow(false, 'SĐT này đã đăng ký rồi — chuyển sang ĐĂNG NHẬP');
+        accounts.push({ name, phone, pass: hashPass(pass), created: Date.now() });
+        saveCustomerAccounts(accounts);
+        setCustomerSession({ name, phone });
+        authMsgShow(true, 'Đăng ký thành công! Bạn đang đăng nhập.');
+        updateAccountUI();
+        setTimeout(closeAuthModal, 800);
+    } else {
+        const user = v('fAuthUser'), pass = v('fAuthPass');
+        if (!user || !pass) return authMsgShow(false, 'Nhập tên/SĐT và mật khẩu đã đăng ký');
+        const acc = loadCustomerAccounts().find(a => a.phone === user || (a.name || '').toLowerCase() === user.toLowerCase());
+        if (!acc) return authMsgShow(false, 'Không tìm thấy tài khoản này — bấm ĐĂNG KÝ để tạo mới');
+        if (acc.pass !== hashPass(pass)) return authMsgShow(false, 'Mật khẩu không đúng');
+        setCustomerSession({ name: acc.name, phone: acc.phone });
+        authMsgShow(true, 'Đăng nhập thành công!');
+        updateAccountUI();
+        setTimeout(closeAuthModal, 700);
+    }
+}
+
+function authLogout() {
+    setCustomerSession(null);
+    updateAccountUI();
+    closeAccountDropdown();
+    showToast('Đã đăng xuất tài khoản', 'info');
+}
+
+function updateAccountUI() {
+    const s = getCustomerSession();
+    const nameEl = document.getElementById('accountNameLabel');
+    const subEl = document.getElementById('accountSubLabel');
+    if (s) {
+        subEl.textContent = 'Xin chào!';
+        nameEl.innerHTML = s.name.split(' ').slice(-1)[0] + ' <i class="fa-solid fa-caret-down ml-1 text-[10px]"></i>';
+        document.getElementById('dropAccName').textContent = s.name;
+        document.getElementById('dropAccPhone').textContent = s.phone;
+    } else {
+        subEl.textContent = 'Đăng nhập/Đăng ký';
+        nameEl.innerHTML = 'Tài khoản <i class="fa-solid fa-caret-down ml-1 text-[10px]"></i>';
+    }
+    renderAccountOrdersCount();
+}
+
+// --- Đơn hàng của tôi (lưu theo SĐT đã đăng nhập) ---
+function getMyOrders() {
+    const s = getCustomerSession();
+    if (!s) return [];
+    try { return JSON.parse(localStorage.getItem('tohoOrders_' + s.phone)) || []; } catch { return []; }
+}
+function saveMyOrder(order) {
+    const s = getCustomerSession();
+    if (!s) return; // khách chưa đăng nhập thì không lưu cục bộ
+    const list = getMyOrders();
+    list.unshift(order);
+    localStorage.setItem('tohoOrders_' + s.phone, JSON.stringify(list));
+    renderAccountOrdersCount();
+}
+function renderAccountOrdersCount() {
+    const el = document.getElementById('dropAccOrderCount');
+    if (!el) return;
+    const n = getMyOrders().length;
+    el.textContent = n > 0 ? n : '';
+}
+function openMyOrdersModal() {
+    document.getElementById('myOrdersModal').classList.remove('hidden');
+    const s = getCustomerSession();
+    document.getElementById('myOrdersSub').textContent = s ? (s.name + ' · ' + s.phone) : '';
+    const list = getMyOrders();
+    document.getElementById('myOrdersList').innerHTML = list.length ? list.map(o => `
+        <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/60">
+            <div class="flex items-center justify-between mb-2">
+                <span class="font-black text-sm font-heading">Đơn <span class="text-starRed font-mono">${o.id}</span></span>
+                <span class="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">${o.status || 'Chờ xác nhận'}</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mb-1.5">${o.date}</p>
+            <p class="text-[11px] text-slate-600 whitespace-pre-line leading-relaxed">${o.items}</p>
+            <p class="text-right text-sm font-black text-starRed mt-2">Tổng: ${formatVND(o.total)}</p>
+        </div>`).join('')
+        : '<div class="text-center py-12"><i class="fa-solid fa-box-open text-4xl text-slate-200 mb-3"></i><p class="text-sm text-slate-400 font-bold">Bạn chưa có đơn hàng nào.</p><p class="text-[11px] text-slate-400 mt-1">Đơn đặt khi đã đăng nhập sẽ hiện tại đây.</p></div>';
+}
+function closeMyOrdersModal() { document.getElementById('myOrdersModal').classList.add('hidden'); }
+
+// Tự điền thông tin đã đăng nhập vào form thanh toán
+function prefillCheckoutFromAccount() {
+    const s = getCustomerSession();
+    if (!s) return;
+    const n = document.getElementById('custName'); if (n && !n.value) n.value = s.name;
+    const ph = document.getElementById('custPhone'); if (ph && !ph.value) ph.value = s.phone;
 }
 
 // Thêm tham số pushToHistory để tránh lặp state khi người dùng bấm nút Back/Forward
@@ -879,7 +1074,23 @@ function renderProductCard(p) {
                     <div class="text-[11px] text-slate-500 font-mono mt-1">
                         Mã: <span class="font-bold text-starRed">${p.code}</span>
                     </div>
-                    ${(parseInt(p.soldCount) || 0) + (parseInt(p.virtualSold) || 0) > 0 ? `<div class="text-[10px] text-orange-500 font-semibold mt-0.5"><i class="fa-solid fa-fire mr-1"></i>Đã bán ${(parseInt(p.soldCount) || 0) + (parseInt(p.virtualSold) || 0)}</div>` : ''}
+                    ${(() => {
+                        const soldShown = getSoldDisplay(p);
+                        if (p.isFlashSale) {
+                            const stockLeft = getStockDisplay(p);
+                            const pct = Math.min(96, Math.max(18, Math.round((soldShown / (soldShown + stockLeft + 30)) * 100)));
+                            return `<div class="mt-1.5">
+                                <div class="flex items-center justify-between text-[10px] font-bold">
+                                    <span class="text-red-600"><i class="fa-solid fa-fire mr-1"></i>Đã bán ${soldShown}</span>
+                                    <span class="text-slate-400">Còn lại ${stockLeft} hàng</span>
+                                </div>
+                                <div class="h-1.5 bg-red-100 rounded-full mt-1 overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-amber-400 to-red-500 rounded-full" style="width:${pct}%"></div>
+                                </div>
+                            </div>`;
+                        }
+                        return `<div class="text-[10px] text-orange-500 font-semibold mt-0.5"><i class="fa-solid fa-fire mr-1"></i>Đã bán ${soldShown}</div>`;
+                    })()}
                 </div>
 
                 <div class="pt-2">
@@ -917,7 +1128,19 @@ function renderFlashSale() {
     const maxShow = (cfgMax > 0) ? cfgMax : flashProducts.length;
     const displayList = flashProducts.slice(0, maxShow);
 
-    container.innerHTML = displayList.map(p => renderProductCard(p)).join('');
+    // CHẠY CUỘN ngang tự động (dừng khi rê chuột vào): mỗi thẻ gói đầu flash-item
+    let items = displayList;
+    if (displayList.length > 5) items = displayList.concat(displayList); // nhân đôi để cuộn liền mạch
+
+    container.innerHTML = items.map(p => `<div class="flash-item">${renderProductCard(p)}</div>`).join('');
+
+    if (displayList.length > 5) {
+        // thời lượng tỉ lệ số sản phẩm để cuộn êm; >5 sp mới chạy cuộn
+        const dur = Math.max(12, displayList.length * 2.6);
+        container.style.animation = `flashMarqueeScroll ${dur}s linear infinite`;
+    } else {
+        container.style.animation = 'none';
+    }
 }
 
 function renderCategoryBlocks() {
@@ -1278,6 +1501,9 @@ function openCheckoutModal() {
     const modal = document.getElementById('checkoutModal');
     if (modal) modal.classList.remove('hidden');
 
+    // Đã đăng nhập → tự điền thông tin khách hàng
+    prefillCheckoutFromAccount();
+
     // Ẩn thanh xem giỏ hàng cố định ở dưới màn hình mobile khi mở bảng thanh toán
     const cartBar = document.getElementById('cartBar');
     if (cartBar) {
@@ -1478,6 +1704,14 @@ async function submitOrder(e) {
         }
 
         showToast("Đặt hàng thành công! Mã đơn của bạn là: " + orderId, "success");
+        // Đăng nhập rồi → lưu đơn vào "Đơn hàng của tôi" trên máy
+        saveMyOrder({
+            id: orderId,
+            date: new Date().toLocaleString('vi-VN'),
+            items: orderDetailsList,
+            total: grandTotal,
+            status: 'Chờ xác nhận'
+        });
         cart = [];
         appliedCoupon = null;
         updateCartUI();

@@ -187,6 +187,18 @@ function renderDashboard() {
   });
 }
 
+// Số "đã bán" hiển thị trên web: bán thật + bán ảo (không điền → tự động 50–100, ổn định theo mã)
+function autoVirtualSoldAdmin(id) {
+    let h = 0; const s = String(id || '');
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 100000007;
+    return 50 + (h % 51);
+}
+function soldDisplay(p) {
+    const real = parseInt(p.soldCount) || 0;
+    const virt = parseInt(p.virtualSold) || 0;
+    return real + (virt > 0 ? virt : autoVirtualSoldAdmin(p.id));
+}
+
 // ---------- SẢN PHẨM (phân trang, chứa toàn bộ sản phẩm của web) ----------
 function renderProductRows() {
   const q = (document.getElementById('prodSearch').value || '').toLowerCase();
@@ -205,7 +217,7 @@ function renderProductRows() {
       <td class="p-3 font-bold whitespace-nowrap">${fmtVND(p.price)}</td>
       <td class="p-3 text-slate-500">${((p.category || '') + (p.subCategory ? ' <span class="text-slate-300">/</span> ' + p.subCategory : '')).slice(0, 60)}</td>
       <td class="p-3 whitespace-nowrap">${p.stock ? `<span class="text-green-600 font-bold text-[10px]">${p.stock}</span>` : '—'}</td>
-      <td class="p-3 text-center whitespace-nowrap"><span class="font-bold">${(parseInt(p.soldCount) || 0) + (parseInt(p.virtualSold) || 0)}</span>${(parseInt(p.virtualSold) || 0) > 0 ? `<span class="text-[9px] text-slate-400 block">+${parseInt(p.virtualSold)} ảo</span>` : ''}</td>
+      <td class="p-3 text-center whitespace-nowrap"><span class="font-bold">${soldDisplay(p)}</span>${(parseInt(p.virtualSold) || 0) > 0 ? `<span class="text-[9px] text-slate-400 block">đã đặt: +${parseInt(p.virtualSold)} ảo</span>` : '<span class="text-[9px] text-slate-400 block">tự động</span>'}</td>
       <td class="p-3 whitespace-nowrap">
         <button onclick="openProductForm('${String(p.id).replace(/'/g, "\\'")}')" class="text-blue-600 hover:underline mr-2 font-bold">Sửa</button>
         <button onclick="deleteProduct('${String(p.id).replace(/'/g, "\\'")}')" class="text-red-600 hover:underline font-bold">Xóa</button>
@@ -233,7 +245,10 @@ function openProductForm(id) {
   document.getElementById('f_price').value = p ? parseNum(p.price) : '';
   document.getElementById('f_oldPrice').value = p ? parseNum(p.oldPrice) : '';
   document.getElementById('f_badge').value = p ? (p.badge || '') : '';
-  document.getElementById('f_vsold').value = p ? (parseInt(p.virtualSold) || 0) : 0;
+  // Lượt bán ảo: chưa điền → hiển thị số tự động đang dùng (placeholder), điền mới ghi đè
+  const autoVirt = p ? autoVirtualSoldAdmin(p.id) : 50;
+  document.getElementById('f_vsold').value = p && (parseInt(p.virtualSold) || 0) > 0 ? parseInt(p.virtualSold) : '';
+  document.getElementById('f_vsold').placeholder = 'Tự động: ' + autoVirt;
   document.getElementById('f_stock').value = p ? (p.stock || 'Còn hàng') : 'Còn hàng';
   document.getElementById('f_skuGroup').value = p ? (p.skuGroup || p.id) : '';
   document.getElementById('f_sku').value = p ? (p.sku || p.code || '') : '';

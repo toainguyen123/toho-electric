@@ -15,7 +15,7 @@ const GOOGLE_SHEET_DEVICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2
 
 const SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzth1uAlb4AaxDKmi_Wb0RDdfTPU7ZaqDx6epOz4SRFZeBBYPIWqx2HtsSta479mzLW/exec';
 // Web App của sheet ĐƠN HÀNG (ghi đơn tự động vào Google Sheet) — dán URL sau khi Deploy
-const ORDER_SHEET_WEB_APP_URL = '';
+const ORDER_SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbycNEhdFYiPke9U7-stHw6OQQdSvHlAeCNMCf4GAphEHRQsCbbenh1fKtXbQtvqBMiyog/exec';
 
 // CẤU HÌNH EMAILJS KHÔNG ĐỔI
 const EMAILJS_SERVICE_ID = 'service_w02rs0l';

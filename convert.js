@@ -37,33 +37,38 @@ function parseCategoryHierarchy(subCategoryStr) {
     return { subCategory: parts[0] || '', childCategory: parts[1] || '' };
 }
 
+// Parser CSV chuẩn: hiểu dấu ngoặc kép và XUỐNG DỒNG NGAY TRONG ô
+// (cột THÔNG SỐ / MÔ TẢ trên Sheets của bạn có nhiều dòng trong 1 ô)
 function parseCSV(text) {
-    const lines = String(text || '').split(/\r\n|\n|\r/);
     const rows = [];
-    for (const lineRaw of lines) {
-        if (!lineRaw.trim()) continue;
-        const row = [];
-        let inQ = false, field = '';
-        for (let i = 0; i < lineRaw.length; i++) {
-            const c = lineRaw[i];
-            if (c === '"') { inQ = !inQ; }
-            else if (c === ',' && !inQ) { row.push(field.trim()); field = ''; }
+    let row = [], field = '', inQ = false;
+    const src = String(text || '');
+    for (let i = 0; i < src.length; i++) {
+        const c = src[i];
+        if (inQ) {
+            if (c === '"') {
+                if (src[i + 1] === '"') { field += '"'; i++; }
+                else inQ = false;
+            } else field += c;
+        } else {
+            if (c === '"') inQ = true;
+            else if (c === ',') { row.push(field.trim()); field = ''; }
+            else if (c === '\n') { row.push(field.trim().replace(/\r$/, '')); rows.push(row); row = []; field = ''; }
             else field += c;
         }
-        row.push(field.trim());
-        rows.push(row);
     }
+    if (field !== '' || row.length) { row.push(field.trim()); rows.push(row); }
     return rows;
 }
 
 // Map các cột theo TÊN trong dòng tiêu đề (bất kể thứ tự)
 function buildHeaderMap(headerRow) {
+    const norm = (s) => String(s || '').toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd')
+        .replace(/[^a-z0-9]/g, '');
     const map = {};
-    const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
     headerRow.forEach((h, i) => { map[norm(h)] = i; });
-    // Tên chuẩn trong sheet: id, name, category, subCategory, price, oldPrice,
-    // image, badge, isFlashSale, stock, specs, soldCount, totalCount,
-    // variant1, variant2, skuGroup
+    // Tìm theo tên đã bỏ dấu: 'MÔ TẢ SẢN PHẨM' → 'motasanpham'...
     const col = (names, fallbackIdx) => {
         for (const n of names) if (map[n] !== undefined) return map[n];
         return fallbackIdx;
@@ -77,14 +82,17 @@ function buildHeaderMap(headerRow) {
         oldPrice: col(['oldprice'], 5),
         image: col(['image'], 6),
         badge: col(['badge'], 7),
-        isFlashSale: col(['isflashsale', 'flashsale', 'flash'], 8),
-        stock: col(['stock'], 9),
-        specs: col(['specs'], 10),
-        soldCount: col(['soldcount'], 11),
-        totalCount: col(['totalcount'], 12),
-        variant1: col(['variant1'], 13),
-        variant2: col(['variant2'], 14),
-        skuGroup: col(['skugroup', 'sku'], 15)
+        isFlashSale: col(['isflashsale', 'flashsale', 'flash'], -1), // cột FLASH xóa được — không có thì qua
+        stock: col(['stock'], 8),
+        // THÔNG SỐ = cột J, MÔ TẢ SẢN PHẨM = cột K, SKU = cột O (theo yêu cầu)
+        specs: col(['specs', 'thongso'], 9),
+        description: col(['motasanpham', 'mota'], 10),
+        sku: col(['sku'], 14),
+        soldCount: col(['soldcount'], -1),
+        totalCount: col(['totalcount'], -1),
+        variant1: col(['variant1'], -1),
+        variant2: col(['variant2'], -1),
+        skuGroup: col(['skugroup'], -1)
     };
 }
 
@@ -116,6 +124,9 @@ async function convertSheetToJSON() {
 
         const gallery = parseImageGallery(cell(cols, H.image));
         const catH = parseCategoryHierarchy(cell(cols, H.subCategory));
+        const sheetSpecs = cell(cols, H.specs).trim();
+        const sheetDesc = cell(cols, H.description).trim();
+        const sheetSku = cell(cols, H.sku).trim();
         const sheetData = {
             id: rawId,
             code: rawId,
@@ -129,27 +140,34 @@ async function convertSheetToJSON() {
             images: gallery,
             badge: cell(cols, H.badge),
             stock: cell(cols, H.stock) || 'Còn hàng',
-            specs: cell(cols, H.specs) || 'Bảo hành chính hãng',
             soldCount: parseInt(cell(cols, H.soldCount)) || 5,
             totalCount: parseInt(cell(cols, H.totalCount)) || 20,
             variant1: cell(cols, H.variant1),
             variant2: cell(cols, H.variant2),
             skuGroup: cell(cols, H.skuGroup).trim() || rawId
         };
-        const sheetFlashTrue = String(cell(cols, H.isFlashSale)).toUpperCase() === 'TRUE';
+        const sheetFlashTrue = H.isFlashSale >= 0 && String(cell(cols, H.isFlashSale)).toUpperCase() === 'TRUE';
 
         const old = byId.get(String(rawId));
         if (old) {
             // Sheet mới hơn → cập nhật các trường dữ liệu chính
             Object.assign(old, sheetData);
-            // FLASH SALE: sheet chỉ "TRUE" mới bật; bỏ trống/xóa cột → giữ giá trị admin đã đặt
+            // THÔNG SỐ / MÔ TẢ / SKU: sheet có nội dung → lấy từ sheet (cột J/K/O);
+            // ô trống → giữ nội dung đang có trong source
+            if (sheetSpecs) old.specs = sheetSpecs;
+            if (sheetDesc) old.description = sheetDesc;
+            if (sheetSku) {
+                old.sku = sheetSku;
+                old.skuGroup = old.skuGroup || sheetSku;
+            }
+            // FLASH SALE: sheet chỉ "TRUE" mới bật; xóa cột/bỏ trống → giữ giá trị admin đã đặt
             old.isFlashSale = sheetFlashTrue ? true : (old.isFlashSale === true);
-            // description/sku: chỉ admin tạo → không bị sheet ghi đè (field không có trong sheetData)
             updated++;
         } else {
             sheetData.isFlashSale = sheetFlashTrue;
-            sheetData.description = ''; // field do admin tạo; sheet không có cột này
-            sheetData.sku = rawId;
+            sheetData.specs = sheetSpecs || 'Bảo hành chính hãng';
+            sheetData.description = sheetDesc || ''; // cột K
+            sheetData.sku = sheetSku || rawId;        // cột O
             byId.set(String(rawId), sheetData);
             added++;
         }

@@ -239,8 +239,8 @@ const server = http.createServer((req, res) => {
         writeProducts(list);
         const s = readSettings();
         if (body.settings && typeof body.settings === 'object') {
-          if (body.settings.flashHours !== undefined) s.flashHours = Math.max(0.1, parseFloat(body.settings.flashHours) || 12.75);
-          if (body.settings.flashMax !== undefined) s.flashMax = Math.max(1, parseInt(body.settings.flashMax, 10) || 5);
+          if (body.settings.flashHours !== undefined) { const h = parseFloat(body.settings.flashHours); if (!isNaN(h)) s.flashHours = Math.max(0.1, h); }
+          if (body.settings.flashMax !== undefined) { const m = parseInt(body.settings.flashMax, 10); if (!isNaN(m)) s.flashMax = Math.max(0, m); } // 0 = hiện TẤT CẢ
           writeSettings(s);
         }
         const count = list.filter((p) => p.isFlashSale).length;

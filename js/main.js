@@ -197,13 +197,11 @@ function parseProductsFromCSV(csvText) {
                 image: gallery[0],
                 images: gallery,
                 badge: cols[7] || '', // Cột H (index 7) là Tag/Badge trên Google Sheets
-                isFlashSale: (cols[8] || '').toUpperCase() === 'TRUE',
-                stock: cols[9] || 'Còn hàng',
-                specs: cols[10] || 'Bảo hành chính hãng',
-                soldCount: parseInt(cols[11]) || 5,
-                totalCount: parseInt(cols[12]) || 20,
-                variant1: cols[13] || '',
-                variant2: cols[14] || '',
+                isFlashSale: false, // cột trên sheet đã xóa — Flash Sale quản lý trong admin
+                stock: cols[8] || 'Còn hàng',
+                specs: cols[9] || 'Bảo hành chính hãng', // cột J = THÔNG SỐ
+                description: cols[10] || '',             // cột K = MÔ TẢ SẢN PHẨM
+                sku: (cols[14] || '').trim() || rawId,   // cột O = SKU
                 skuGroup: skuGroup
             });
         }
@@ -890,7 +888,9 @@ function renderFlashSale() {
     if (!container) return;
 
     const flashProducts = getGroupedUniqueProducts(products.filter(p => p.isFlashSale));
-    const maxShow = (window.SITE_SETTINGS && window.SITE_SETTINGS.flashMax) || 5;
+    // flashMax = 0 hoặc bỏ trống → hiện TẤT CẢ sản phẩm đang Flash Sale
+    const cfgMax = parseInt(window.SITE_SETTINGS && window.SITE_SETTINGS.flashMax, 10);
+    const maxShow = (cfgMax > 0) ? cfgMax : flashProducts.length;
     const displayList = flashProducts.length > 0 ? flashProducts.slice(0, maxShow) : getGroupedUniqueProducts(products).slice(0, 5);
 
     container.innerHTML = displayList.map(p => renderProductCard(p)).join('');
@@ -1029,12 +1029,6 @@ function openProductDetail(id) {
                     </div>
                 ` : ''}
 
-                ${(p.description || p.specs) ? `
-                <div class="bg-white p-4 rounded-2xl border border-slate-200">
-                    <h3 class="font-black text-slate-800 uppercase text-sm mb-2"><i class="fa-solid fa-circle-info text-starRed mr-2"></i>MÔ TẢ SẢN PHẨM</h3>
-                    <div class="whitespace-pre-line text-sm text-slate-600 leading-relaxed">${((p.description && p.description.trim()) || p.specs || '').replace(/</g, '&lt;')}</div>
-                </div>` : ''}
-
                 <div class="space-y-2 text-xs text-slate-600 bg-white p-4 rounded-2xl border border-slate-200">
                     <p class="whitespace-pre-line"><i class="fa-solid fa-shield-check text-green-600 mr-2"></i><strong>Thông số:</strong><br>${p.specs}</p>
                     <p><i class="fa-solid fa-boxes-stacked text-blue-600 mr-2"></i> <strong>Tình trạng:</strong> <span class="text-green-600 font-bold">${p.stock}</span></p>
@@ -1051,6 +1045,12 @@ function openProductDetail(id) {
                 </div>
             </div>
         </div>
+
+        ${p.description && p.description.trim() ? `
+        <div class="mt-8 bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <h2 class="font-black text-slate-800 uppercase text-base mb-3 border-b border-slate-100 pb-3"><i class="fa-solid fa-circle-info text-starRed mr-2"></i>MÔ TẢ SẢN PHẨM</h2>
+            <div class="whitespace-pre-line text-sm text-slate-600 leading-relaxed max-w-4xl">${p.description.trim().replace(/</g, '&lt;')}</div>
+        </div>` : ''}
     `;
 
     document.getElementById('productDetailContent').innerHTML = detailHtml;

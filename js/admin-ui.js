@@ -199,7 +199,8 @@ function renderProductRows() {
   document.getElementById('prodRows').innerHTML = pageItems.map((p) => `
     <tr class="hover:bg-slate-50">
       <td class="p-2"><img src="${driveUrl(p.image)}" onerror="this.src='images/no-image.svg'" class="w-10 h-10 object-contain rounded-lg border bg-slate-50"></td>
-      <td class="p-3 font-mono font-bold text-tohoRed whitespace-nowrap">${p.id}<br><span class="text-slate-400 font-normal">${p.sku || p.code || ''}</span></td>
+      <td class="p-3 font-mono font-bold text-tohoRed whitespace-nowrap">${p.id}</td>
+      <td class="p-3 font-mono text-slate-500 whitespace-nowrap">${p.sku || p.code || ''}</td>
       <td class="p-3">${(p.name || '').slice(0, 60)}</td>
       <td class="p-3 font-bold whitespace-nowrap">${fmtVND(p.price)}</td>
       <td class="p-3 text-slate-500">${((p.category || '') + (p.subCategory ? ' <span class="text-slate-300">/</span> ' + p.subCategory : '')).slice(0, 60)}</td>
@@ -208,7 +209,7 @@ function renderProductRows() {
         <button onclick="openProductForm('${String(p.id).replace(/'/g, "\\'")}')" class="text-blue-600 hover:underline mr-2 font-bold">Sửa</button>
         <button onclick="deleteProduct('${String(p.id).replace(/'/g, "\\'")}')" class="text-red-600 hover:underline font-bold">Xóa</button>
       </td>
-    </tr>`).join('') || '<tr><td colspan="7" class="p-6 text-center text-slate-400">Không tìm thấy sản phẩm</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="8" class="p-6 text-center text-slate-400">Không tìm thấy sản phẩm</td></tr>';
 
   // Bộ đếm + phân trang
   setText('prodCount', list.length ? `Tổng ${list.length} sản phẩm — trang ${prodPage}/${totalPages}` : 'Không có sản phẩm nào');
@@ -340,8 +341,8 @@ async function deletePost() {
 // ---------- FLASH SALE ----------
 function syncFlashTab() {
   // cài đặt hiện tại
-  document.getElementById('setFlashHours').value = _settings.flashHours || 12.75;
-  document.getElementById('setFlashMax').value = _settings.flashMax || 5;
+  document.getElementById('setFlashHours').value = (_settings.flashHours === undefined ? 12.75 : _settings.flashHours);
+  document.getElementById('setFlashMax').value = (_settings.flashMax === undefined ? 5 : _settings.flashMax);
   renderFlashList();
   renderFlashPool();
 }
@@ -349,7 +350,7 @@ function syncFlashTab() {
 function renderFlashList() {
   const items = _products.filter((p) => _flashSelected.has(String(p.id)));
   setText('flashCount', items.length);
-  setText('flashSummary', `${items.length} sản phẩm đang sale · đếm ngược ${_settings.flashHours || 12.75} giờ/lượt · hiển thị tối đa ${_settings.flashMax || 5} sản phẩm trên trang chủ`);
+  setText('flashSummary', `${items.length} sản phẩm đang sale · đếm ngược ${_settings.flashHours || 12.75} giờ/lượt · ${(!parseInt(_settings.flashMax) ? 'hiện TẤT CẢ' : 'hiển thị tối đa ' + _settings.flashMax)} trên trang chủ`);
   document.getElementById('flashList').innerHTML = items.map((p) => `
     <div class="flex items-center gap-3 border border-red-100 bg-red-50/50 rounded-xl p-2">
       <img src="${driveUrl(p.image)}" onerror="this.src='images/no-image.svg'" class="w-10 h-10 object-contain rounded-lg border bg-white">
@@ -364,8 +365,10 @@ function renderFlashList() {
 
 function renderFlashPool() {
   const q = (document.getElementById('flashSearch').value || '').toLowerCase();
-  const pool = _products.filter((p) => !_flashSelected.has(String(p.id)) && (!q || String(p.id).toLowerCase().includes(q) || String(p.name).toLowerCase().includes(q)));
-  document.getElementById('flashPool').innerHTML = pool.slice(0, 40).map((p) => `
+  const pool = _products.filter((p) => !_flashSelected.has(String(p.id)) && (!q || String(p.id).toLowerCase().includes(q) || String(p.name).toLowerCase().includes(q) || String(p.sku || '').toLowerCase().includes(q)));
+  const shown = pool.slice(0, 200);
+  const more = pool.length - shown.length;
+  document.getElementById('flashPool').innerHTML = (pool.length > 200 ? `<p class="text-[10px] text-slate-400 font-bold">Đang hiện 200/${pool.length} kết quả${more > 0 ? ` — còn ${more} sản phẩm nữa, hãy gõ từ khóa để tìm nhanh hơn` : ''}</p>` : (pool.length ? `<p class="text-[10px] text-slate-400">${pool.length} sản phẩm khớp</p>` : '')) + shown.map((p) => `
     <div class="flex items-center gap-3 border border-slate-100 rounded-xl p-2 hover:bg-slate-50">
       <img src="${driveUrl(p.image)}" onerror="this.src='images/no-image.svg'" class="w-9 h-9 object-contain rounded-lg border bg-white">
       <div class="flex-1 min-w-0">

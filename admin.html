@@ -216,7 +216,7 @@
         <div class="bg-white rounded-2xl shadow border border-slate-200 overflow-x-auto">
           <table class="w-full text-xs">
             <thead class="bg-navy-800 text-left text-slate-200 uppercase">
-              <tr><th class="p-3">Ảnh</th><th class="p-3">Mã / SKU</th><th class="p-3">Tên</th><th class="p-3">Giá</th><th class="p-3">Danh mục</th><th class="p-3">Tình trạng</th><th class="p-3"></th></tr>
+              <tr><th class="p-3">Ảnh</th><th class="p-3">Mã SP</th><th class="p-3">SKU</th><th class="p-3">Tên</th><th class="p-3">Giá</th><th class="p-3">Danh mục</th><th class="p-3">Tình trạng</th><th class="p-3"></th></tr>
             </thead>
             <tbody id="prodRows" class="divide-y divide-slate-100"></tbody>
           </table>
@@ -321,9 +321,9 @@
                   <p class="text-[10px] text-slate-400 mt-1">VD 12.75 = 12 giờ 45 phút; hết giờ đếm ngược → tự động chạy lại vòng mới.</p>
                 </div>
                 <div>
-                  <label class="text-[10px] font-bold text-slate-400 uppercase">Hiển thị tối đa bao nhiêu sản phẩm</label>
-                  <input id="setFlashMax" type="number" min="1" max="30" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" value="5">
-                  <p class="text-[10px] text-slate-400 mt-1">Số sản phẩm khu FlashSale trên trang chủ.</p>
+                  <label class="text-[10px] font-bold text-slate-400 uppercase">Hiển thị tối đa bao nhiêu sản phẩm (0 = hiện TẤT CẢ)</label>
+                  <input id="setFlashMax" type="number" min="0" max="99" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" value="5">
+                  <p class="text-[10px] text-slate-400 mt-1">Số sản phẩm khu FlashSale trên trang chủ. Điền <b>0</b> để hiện tất cả sản phẩm đang sale.</p>
                 </div>
               </div>
             </div>

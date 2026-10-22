@@ -58,7 +58,8 @@ function buildSeoBlock(p) {
   const hasDiscount = oldPrice > price && oldPrice > 0;
   const url = productUrlOf(p.id, true);
   const title = `${p.name} | ${productName}`;
-  const desc = `${p.name} - Mã SP ${p.code}. Giá ${formatVND(p.price)}${hasDiscount ? ` (giảm còn ${formatVND(p.price)} từ ${formatVND(oldPrice)})` : ''}. ${[p.category, p.subCategory, p.childCategory].filter(Boolean).join(' > ')} chính hãng tại ${productName}. Giao hàng toàn quốc, tư vấn ${phone}.`;
+  const realDesc = String(p.description || '').trim();
+  const desc = `${p.name} - Mã SP ${p.code}. Giá ${formatVND(p.price)}${hasDiscount ? ` (giảm còn ${formatVND(p.price)} từ ${formatVND(oldPrice)})` : ''}. ${[p.category, p.subCategory, p.childCategory].filter(Boolean).join(' > ')} chính hãng tại ${productName}. Giao hàng toàn quốc, tư vấn ${phone}.${realDesc ? ` ${realDesc.slice(0, 200)}` : ''}`;
   const firstImage = p.image || (p.images && p.images[0]) || `${baseURL}/images/no-image.svg`;
 
   const jsonLd = {
@@ -67,7 +68,7 @@ function buildSeoBlock(p) {
     name: p.name,
     sku: p.code,
     mpn: p.code,
-    description: String(p.specs || p.name).slice(0, 5000),
+    description: String(p.description || p.specs || p.name).slice(0, 5000),
     image: [firstImage].concat(Array.isArray(p.images) ? p.images : []).slice(0, 5),
     category: [p.category, p.subCategory, p.childCategory].filter(Boolean).join(' > '),
     brand: { '@type': 'Brand', name: productName },

@@ -7,6 +7,10 @@ let _products = [];
 let _policies = {};
 let _editingId = null; // id đang sửa (null = đăng mới)
 let _chart = null;     // biểu đồ lượt truy cập
+let prodPage = 1;      // trang hiện tại của bảng Sản Phẩm
+const PROD_PAGE_SIZE = 20;
+let _flashSelected = new Set(); // sản phẩm đang chọn cho Flash Sale
+let _settings = {};             // cấu hình website (flashHours, flashMax...)
 
 // ---------- tiện ích ----------
 async function api(action, payload = {}) {
@@ -81,6 +85,7 @@ function switchTab(tab) {
     b.classList.toggle('active', b.dataset.tab === tab);
   });
   if (tab === 'dashboard') renderDashboard();
+  if (tab === 'flash') syncFlashTab();
   window.scrollTo({ top: 0 });
 }
 
@@ -90,9 +95,16 @@ async function refreshData() {
   if (!r.ok) return toast('Không lấy được dữ liệu server', 'err');
   _products = r.products || [];
   _policies = r.policies || {};
+  _settings = r.settings || {};
+  syncFlashSelected();
   renderDashboard();
   renderProductRows();
   renderPostList();
+}
+
+// Đồng bộ lựa chọn Flash Sale từ trạng thái thật của source
+function syncFlashSelected() {
+  _flashSelected = new Set(_products.filter((p) => p.isFlashSale).map((p) => String(p.id)));
 }
 
 // ---------- DASHBOARD ----------
@@ -175,24 +187,37 @@ function renderDashboard() {
   });
 }
 
-// ---------- SẢN PHẨM ----------
+// ---------- SẢN PHẨM (phân trang, chứa toàn bộ sản phẩm của web) ----------
 function renderProductRows() {
   const q = (document.getElementById('prodSearch').value || '').toLowerCase();
-  const list = _products.filter((p) => !q || String(p.id).toLowerCase().includes(q) || String(p.name).toLowerCase().includes(q));
-  document.getElementById('prodRows').innerHTML = list.slice(0, 300).map((p) => `
+  const list = _products.filter((p) => !q || String(p.id).toLowerCase().includes(q) || String(p.name).toLowerCase().includes(q) || String(p.sku || '').toLowerCase().includes(q));
+
+  const totalPages = Math.max(1, Math.ceil(list.length / PROD_PAGE_SIZE));
+  if (prodPage > totalPages) prodPage = totalPages;
+  const pageItems = list.slice((prodPage - 1) * PROD_PAGE_SIZE, prodPage * PROD_PAGE_SIZE);
+
+  document.getElementById('prodRows').innerHTML = pageItems.map((p) => `
     <tr class="hover:bg-slate-50">
       <td class="p-2"><img src="${driveUrl(p.image)}" onerror="this.src='images/no-image.svg'" class="w-10 h-10 object-contain rounded-lg border bg-slate-50"></td>
-      <td class="p-3 font-mono font-bold text-tohoRed">${p.id}</td>
+      <td class="p-3 font-mono font-bold text-tohoRed whitespace-nowrap">${p.id}<br><span class="text-slate-400 font-normal">${p.sku || p.code || ''}</span></td>
       <td class="p-3">${(p.name || '').slice(0, 60)}</td>
       <td class="p-3 font-bold whitespace-nowrap">${fmtVND(p.price)}</td>
-      <td class="p-3">${p.badge ? `<span class="bg-red-100 text-tohoRed px-2 py-0.5 rounded font-bold text-[10px]">${p.badge}</span>` : '—'}</td>
-      <td class="p-3 text-center">${p.isFlashSale ? '<i class="fa-solid fa-bolt text-amber-500"></i>' : '—'}</td>
+      <td class="p-3 text-slate-500">${((p.category || '') + (p.subCategory ? ' <span class="text-slate-300">/</span> ' + p.subCategory : '')).slice(0, 60)}</td>
+      <td class="p-3 whitespace-nowrap">${p.stock ? `<span class="text-green-600 font-bold text-[10px]">${p.stock}</span>` : '—'}</td>
       <td class="p-3 whitespace-nowrap">
         <button onclick="openProductForm('${String(p.id).replace(/'/g, "\\'")}')" class="text-blue-600 hover:underline mr-2 font-bold">Sửa</button>
         <button onclick="deleteProduct('${String(p.id).replace(/'/g, "\\'")}')" class="text-red-600 hover:underline font-bold">Xóa</button>
       </td>
     </tr>`).join('') || '<tr><td colspan="7" class="p-6 text-center text-slate-400">Không tìm thấy sản phẩm</td></tr>';
+
+  // Bộ đếm + phân trang
+  setText('prodCount', list.length ? `Tổng ${list.length} sản phẩm — trang ${prodPage}/${totalPages}` : 'Không có sản phẩm nào');
+  document.getElementById('prodPager').innerHTML = totalPages > 1 ? `
+    <button onclick="gotoProdPage(${prodPage - 1})" ${prodPage <= 1 ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 disabled:opacity-40 font-bold"><i class="fa-solid fa-chevron-left"></i> Trước</button>
+    <span class="px-3 py-1.5 font-bold text-slate-600">${prodPage} / ${totalPages}</span>
+    <button onclick="gotoProdPage(${prodPage + 1})" ${prodPage >= totalPages ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 disabled:opacity-40 font-bold">Sau <i class="fa-solid fa-chevron-right"></i></button>` : '';
 }
+function gotoProdPage(n) { prodPage = n; renderProductRows(); }
 
 function openProductForm(id) {
   _editingId = id || null;
@@ -208,9 +233,10 @@ function openProductForm(id) {
   document.getElementById('f_badge').value = p ? (p.badge || '') : '';
   document.getElementById('f_stock').value = p ? (p.stock || 'Còn hàng') : 'Còn hàng';
   document.getElementById('f_skuGroup').value = p ? (p.skuGroup || p.id) : '';
-  document.getElementById('f_flash').checked = p ? !!p.isFlashSale : false;
+  document.getElementById('f_sku').value = p ? (p.sku || p.code || '') : '';
   document.getElementById('f_images').value = p ? (p.images || []).join('\n') : '';
   document.getElementById('f_specs').value = p ? (p.specs || '') : '';
+  document.getElementById('f_desc').value = p ? (p.description || '') : '';
   document.getElementById('prodMsg').classList.add('hidden');
   document.getElementById('prodModal').classList.remove('hidden');
 }
@@ -238,8 +264,9 @@ async function saveProduct() {
     oldPrice: String(parseNum(document.getElementById('f_oldPrice').value) || 0),
     badge: document.getElementById('f_badge').value.trim(),
     stock: document.getElementById('f_stock').value.trim() || 'Còn hàng',
-    isFlashSale: document.getElementById('f_flash').checked,
     specs: document.getElementById('f_specs').value.trim(),
+    description: document.getElementById('f_desc').value.trim(),
+    sku: document.getElementById('f_sku').value.trim() || document.getElementById('f_id').value.trim(),
     skuGroup: document.getElementById('f_skuGroup').value.trim() || document.getElementById('f_id').value.trim(),
     images: document.getElementById('f_images').value.split(/\n|,/).map((s) => s.trim()).filter(Boolean)
   };
@@ -308,6 +335,61 @@ async function deletePost() {
   document.getElementById('postContent').value = '';
   document.getElementById('postTitle').dataset.mode = '';
   await refreshData();
+}
+
+// ---------- FLASH SALE ----------
+function syncFlashTab() {
+  // cài đặt hiện tại
+  document.getElementById('setFlashHours').value = _settings.flashHours || 12.75;
+  document.getElementById('setFlashMax').value = _settings.flashMax || 5;
+  renderFlashList();
+  renderFlashPool();
+}
+
+function renderFlashList() {
+  const items = _products.filter((p) => _flashSelected.has(String(p.id)));
+  setText('flashCount', items.length);
+  setText('flashSummary', `${items.length} sản phẩm đang sale · đếm ngược ${_settings.flashHours || 12.75} giờ/lượt · hiển thị tối đa ${_settings.flashMax || 5} sản phẩm trên trang chủ`);
+  document.getElementById('flashList').innerHTML = items.map((p) => `
+    <div class="flex items-center gap-3 border border-red-100 bg-red-50/50 rounded-xl p-2">
+      <img src="${driveUrl(p.image)}" onerror="this.src='images/no-image.svg'" class="w-10 h-10 object-contain rounded-lg border bg-white">
+      <div class="flex-1 min-w-0">
+        <p class="font-bold text-xs truncate">${(p.name || '').slice(0, 55)}</p>
+        <p class="text-[10px] text-slate-500 font-mono">${p.id}</p>
+      </div>
+      <p class="text-xs font-bold text-tohoRed whitespace-nowrap">${fmtVND(p.price)}</p>
+      <button onclick="flashRemove('${String(p.id).replace(/'/g, "\\'")}')" class="text-red-600 hover:underline font-bold text-xs whitespace-nowrap">Bỏ sale</button>
+    </div>`).join('') || '<p class="text-xs text-slate-400 p-3">Chưa có sản phẩm nào trong sale. Tìm &amp; bấm THÊM ở khung bên phải.</p>';
+}
+
+function renderFlashPool() {
+  const q = (document.getElementById('flashSearch').value || '').toLowerCase();
+  const pool = _products.filter((p) => !_flashSelected.has(String(p.id)) && (!q || String(p.id).toLowerCase().includes(q) || String(p.name).toLowerCase().includes(q)));
+  document.getElementById('flashPool').innerHTML = pool.slice(0, 40).map((p) => `
+    <div class="flex items-center gap-3 border border-slate-100 rounded-xl p-2 hover:bg-slate-50">
+      <img src="${driveUrl(p.image)}" onerror="this.src='images/no-image.svg'" class="w-9 h-9 object-contain rounded-lg border bg-white">
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-semibold truncate">${(p.name || '').slice(0, 45)}</p>
+        <p class="text-[10px] text-slate-400 font-mono truncate">${p.id} · ${fmtVND(p.price)}</p>
+      </div>
+      <button onclick="flashAdd('${String(p.id).replace(/'/g, "\\'")}')" class="btn bg-tohoRed text-white text-[10px] px-2.5 py-1.5 shrink-0">THÊM</button>
+    </div>`).join('') || '<p class="text-xs text-slate-400 p-3">Không còn sản phẩm nào khớp từ khóa.</p>';
+}
+
+function flashAdd(id) { _flashSelected.add(String(id)); renderFlashList(); renderFlashPool(); }
+function flashRemove(id) { _flashSelected.delete(String(id)); renderFlashList(); renderFlashPool(); }
+
+async function saveFlashSale() {
+  const settings = {
+    flashHours: document.getElementById('setFlashHours').value,
+    flashMax: document.getElementById('setFlashMax').value
+  };
+  const btn = event && event.target && event.target.closest ? event.target.closest('button') : null;
+  btn && (btn.disabled = true);
+  const r = await api('flash.save', { ids: [..._flashSelected], settings });
+  btn && (btn.disabled = false);
+  toast(r.ok ? r.msg : (r.error || 'Lỗi'), r.ok ? 'ok' : 'err');
+  if (r.ok) await refreshData();
 }
 
 // ---------- ĐỒNG BỘ / XUẤT ----------

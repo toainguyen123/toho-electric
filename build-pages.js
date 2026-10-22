@@ -101,6 +101,7 @@ function buildSeoBlock(p) {
     <p style="color:#E31837;font-weight:800;font-size:20px;margin:4px 0;">Giá: ${escapeHtml(formatVND(p.price))}${hasDiscount ? ` <s style="color:#64748b;font-size:14px;font-weight:400;">${escapeHtml(formatVND(oldPrice))}</s>` : ''}</p>
     <p style="color:#334155;margin:4px 0;"><b>Danh mục:</b> ${escapeHtml([p.category, p.subCategory, p.childCategory].filter(Boolean).join(' > '))}</p>
     ${p.specs ? `<p style="color:#334155;margin:4px 0;"><b>Thông số:</b> ${escapeHtml(String(p.specs).slice(0, 500))}</p>` : ''}
+    ${(p.description || p.specs) ? `<p style="color:#334155;margin:4px 0;"><b>Mô tả sản phẩm:</b> ${escapeHtml(String(p.description || p.specs).slice(0, 800))}</p>` : ''}
     <p style="color:#64748b;font-size:14px;margin:12px 0 0;">Xem chi tiết &amp; đặt hàng tại <a href="${baseURL}" style="color:#E31837;">${productName}</a> hoặc gọi hotline <b>${phone}</b>.</p>
   </div>
 </noscript>

@@ -509,9 +509,12 @@ function prevHeroSlide() { showHeroSlide(currentHeroSlideIndex - 1); }
 function goToHeroSlide(idx) { showHeroSlide(idx); }
 
 function initFlashSaleTimer() {
-    let duration = 12 * 3600 + 45 * 60 + 30;
+    // Thời lượng đếm ngược đọc từ cấu hình admin (Hệ thống > Flash Sale), mặc định 12h45'30"
+    const cfg = window.SITE_SETTINGS || {};
+    const totalSecs = Math.max(60, Math.round(((cfg.flashHours || 12.75) * 3600)));
+    let duration = totalSecs;
     setInterval(() => {
-        if (duration <= 0) duration = 24 * 3600;
+        if (duration <= 0) duration = totalSecs;
         duration--;
         const h = Math.floor(duration / 3600);
         const m = Math.floor((duration % 3600) / 60);
@@ -887,7 +890,8 @@ function renderFlashSale() {
     if (!container) return;
 
     const flashProducts = getGroupedUniqueProducts(products.filter(p => p.isFlashSale));
-    const displayList = flashProducts.length > 0 ? flashProducts.slice(0, 5) : getGroupedUniqueProducts(products).slice(0, 5);
+    const maxShow = (window.SITE_SETTINGS && window.SITE_SETTINGS.flashMax) || 5;
+    const displayList = flashProducts.length > 0 ? flashProducts.slice(0, maxShow) : getGroupedUniqueProducts(products).slice(0, 5);
 
     container.innerHTML = displayList.map(p => renderProductCard(p)).join('');
 }
@@ -1024,6 +1028,12 @@ function openProductDetail(id) {
                         ` : ''}
                     </div>
                 ` : ''}
+
+                ${(p.description || p.specs) ? `
+                <div class="bg-white p-4 rounded-2xl border border-slate-200">
+                    <h3 class="font-black text-slate-800 uppercase text-sm mb-2"><i class="fa-solid fa-circle-info text-starRed mr-2"></i>MÔ TẢ SẢN PHẨM</h3>
+                    <div class="whitespace-pre-line text-sm text-slate-600 leading-relaxed">${((p.description && p.description.trim()) || p.specs || '').replace(/</g, '&lt;')}</div>
+                </div>` : ''}
 
                 <div class="space-y-2 text-xs text-slate-600 bg-white p-4 rounded-2xl border border-slate-200">
                     <p class="whitespace-pre-line"><i class="fa-solid fa-shield-check text-green-600 mr-2"></i><strong>Thông số:</strong><br>${p.specs}</p>

@@ -1,0 +1,1 @@
+window.SITE_SETTINGS = {"flashHours":12.75,"flashMax":5};

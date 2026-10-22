@@ -50,16 +50,35 @@ function writePolicies(p) {
   fs.writeFileSync(path.join(DATA, 'policies.js'), 'window.POLICIES_DATA = ' + JSON.stringify(p) + ';', 'utf-8');
 }
 
-// Tạo file CSV (mở bằng Excel) từ danh sách sản phẩm
+// Cấu hình website (Flash Sale...)
+function readSettings() {
+  try { return JSON.parse(fs.readFileSync(path.join(DATA, 'settings.json'), 'utf8')); }
+  catch { return {}; }
+}
+function writeSettings(s) {
+  fs.writeFileSync(path.join(DATA, 'settings.json'), JSON.stringify(s, null, 2), 'utf-8');
+  fs.writeFileSync(path.join(DATA, 'settings.js'), 'window.SITE_SETTINGS = ' + JSON.stringify(s) + ';', 'utf-8');
+}
+
+// Tạo file bảng tính (mở bằng Excel, chia cột rõ ràng bằng dấu ;)
 function productsToCSV(list) {
-  const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
-  const head = ['id', 'name', 'category', 'subCategory', 'childCategory', 'price', 'oldPrice', 'badge', 'stock', 'specs', 'images'];
+  const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""').replace(/\r?\n/g, ' | ') + '"';
+  const head = ['MÃ SP (SKU)', 'TÊN SẢN PHẨM', 'MÔ TẢ SẢN PHẨM', 'DANH MỤC', 'DANH MỤC CON', 'GIÁ BÁN (đ)', 'GIÁ GỐC (đ)', 'MÃ HÀNG', 'TÌNH TRẠNG', 'FLASH SALE', 'SỐ LƯỢNG ĐÃ BÁN', 'TỒN KHO', 'LINK ẢNH'];
   const rows = list.map((p) => [
-    p.id, p.name, p.category, p.subCategory, p.childCategory,
-    p.price, p.oldPrice, p.badge, p.stock, p.specs,
-    (p.images || []).join(' | ')
-  ].map(esc).join(','));
-  return head.map(esc).join(',') + '\n' + rows.join('\n');
+    p.sku || p.code || p.id,
+    p.name,
+    p.description || '',
+    p.category,
+    p.subCategory,
+    p.price,
+    p.oldPrice,
+    p.code || '',
+    p.stock,
+    p.isFlashSale ? 'CÓ' : 'KHÔNG',
+    p.soldCount, p.totalCount,
+    (p.images || []).join(' , ')
+  ].map(esc).join(';'));
+  return head.map(esc).join(';') + '\n' + rows.join('\n');
 }
 
 // ============ API ============
@@ -152,7 +171,7 @@ const server = http.createServer((req, res) => {
         return json(res, 200, { ok: true });
       }
       case 'data': {
-        return json(res, 200, { ok: true, products: readProducts(), policies: readPolicies() });
+        return json(res, 200, { ok: true, products: readProducts(), policies: readPolicies(), settings: readSettings() });
       }
       case 'product.save': {
         const p = body.product || {};
@@ -212,7 +231,22 @@ const server = http.createServer((req, res) => {
         return;
       }
 
-      // === XUẤT TIA ĐỒNG BỘ TỪ LIOA.COM.VN: nhập biến áp về source ===
+      // === FLASH SALE CỤM: đặt/bỏ sale cho sản phẩm theo trang tab Flash Sale của admin ===
+      case 'flash.save': {
+        const ids = new Set((body.ids || []).map((x) => String(x)));
+        const list = readProducts();
+        list.forEach((p) => { p.isFlashSale = ids.has(String(p.id)); });
+        writeProducts(list);
+        const s = readSettings();
+        if (body.settings && typeof body.settings === 'object') {
+          if (body.settings.flashHours !== undefined) s.flashHours = Math.max(0.1, parseFloat(body.settings.flashHours) || 12.75);
+          if (body.settings.flashMax !== undefined) s.flashMax = Math.max(1, parseInt(body.settings.flashMax, 10) || 5);
+          writeSettings(s);
+        }
+        const count = list.filter((p) => p.isFlashSale).length;
+        return json(res, 200, { ok: true, msg: `Flash Sale cập nhật: ${count} sản phẩm trong khu sale`, count });
+      }
+      // (Đã ẩn khỏi admin — trường hợp cũ giữ lại để tương thích)
       case 'scrape.lioa': {
         const out = spawn('node', ['tools/scrape-lioa.js'], { cwd: ROOT });
         let log = '';

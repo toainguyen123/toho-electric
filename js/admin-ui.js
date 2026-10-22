@@ -205,11 +205,12 @@ function renderProductRows() {
       <td class="p-3 font-bold whitespace-nowrap">${fmtVND(p.price)}</td>
       <td class="p-3 text-slate-500">${((p.category || '') + (p.subCategory ? ' <span class="text-slate-300">/</span> ' + p.subCategory : '')).slice(0, 60)}</td>
       <td class="p-3 whitespace-nowrap">${p.stock ? `<span class="text-green-600 font-bold text-[10px]">${p.stock}</span>` : '—'}</td>
+      <td class="p-3 text-center whitespace-nowrap"><span class="font-bold">${(parseInt(p.soldCount) || 0) + (parseInt(p.virtualSold) || 0)}</span>${(parseInt(p.virtualSold) || 0) > 0 ? `<span class="text-[9px] text-slate-400 block">+${parseInt(p.virtualSold)} ảo</span>` : ''}</td>
       <td class="p-3 whitespace-nowrap">
         <button onclick="openProductForm('${String(p.id).replace(/'/g, "\\'")}')" class="text-blue-600 hover:underline mr-2 font-bold">Sửa</button>
         <button onclick="deleteProduct('${String(p.id).replace(/'/g, "\\'")}')" class="text-red-600 hover:underline font-bold">Xóa</button>
       </td>
-    </tr>`).join('') || '<tr><td colspan="8" class="p-6 text-center text-slate-400">Không tìm thấy sản phẩm</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="9" class="p-6 text-center text-slate-400">Không tìm thấy sản phẩm</td></tr>';
 
   // Bộ đếm + phân trang
   setText('prodCount', list.length ? `Tổng ${list.length} sản phẩm — trang ${prodPage}/${totalPages}` : 'Không có sản phẩm nào');
@@ -232,6 +233,7 @@ function openProductForm(id) {
   document.getElementById('f_price').value = p ? parseNum(p.price) : '';
   document.getElementById('f_oldPrice').value = p ? parseNum(p.oldPrice) : '';
   document.getElementById('f_badge').value = p ? (p.badge || '') : '';
+  document.getElementById('f_vsold').value = p ? (parseInt(p.virtualSold) || 0) : 0;
   document.getElementById('f_stock').value = p ? (p.stock || 'Còn hàng') : 'Còn hàng';
   document.getElementById('f_skuGroup').value = p ? (p.skuGroup || p.id) : '';
   document.getElementById('f_sku').value = p ? (p.sku || p.code || '') : '';
@@ -264,6 +266,7 @@ async function saveProduct() {
     price: String(parseNum(document.getElementById('f_price').value) || 0),
     oldPrice: String(parseNum(document.getElementById('f_oldPrice').value) || 0),
     badge: document.getElementById('f_badge').value.trim(),
+    virtualSold: parseInt(document.getElementById('f_vsold').value) || 0,
     stock: document.getElementById('f_stock').value.trim() || 'Còn hàng',
     specs: document.getElementById('f_specs').value.trim(),
     description: document.getElementById('f_desc').value.trim(),
@@ -356,9 +359,15 @@ function renderFlashList() {
       <img src="${driveUrl(p.image)}" onerror="this.src='images/no-image.svg'" class="w-10 h-10 object-contain rounded-lg border bg-white">
       <div class="flex-1 min-w-0">
         <p class="font-bold text-xs truncate">${(p.name || '').slice(0, 55)}</p>
-        <p class="text-[10px] text-slate-500 font-mono">${p.id}</p>
+        <p class="text-[10px] text-slate-500 font-mono">${p.id} · Giá thường: <b>${fmtVND(p.price)}</b></p>
       </div>
-      <p class="text-xs font-bold text-tohoRed whitespace-nowrap">${fmtVND(p.price)}</p>
+      <div class="shrink-0 text-right">
+        <label class="text-[9px] font-bold text-slate-400 uppercase block">Giá Flash Sale (đ)</label>
+        <input data-flash-price="${String(p.id).replace(/"/g, '')}" type="number" min="0" step="1000"
+               value="${(p.flashPrice && parseFloat(p.flashPrice) > 0) ? p.flashPrice : ''}"
+               placeholder="Trống = giá thường"
+               class="w-28 border border-slate-300 rounded-lg px-2 py-1.5 text-xs text-right font-bold text-tohoRed">
+      </div>
       <button onclick="flashRemove('${String(p.id).replace(/'/g, "\\'")}')" class="text-red-600 hover:underline font-bold text-xs whitespace-nowrap">Bỏ sale</button>
     </div>`).join('') || '<p class="text-xs text-slate-400 p-3">Chưa có sản phẩm nào trong sale. Tìm &amp; bấm THÊM ở khung bên phải.</p>';
 }
@@ -383,13 +392,19 @@ function flashAdd(id) { _flashSelected.add(String(id)); renderFlashList(); rende
 function flashRemove(id) { _flashSelected.delete(String(id)); renderFlashList(); renderFlashPool(); }
 
 async function saveFlashSale() {
+  // Thu thập bảng Giá Flash Sale tùy chỉnh theo từng sản phẩm từ ô nhập
+  const prices = {};
+  document.querySelectorAll('#flashList [data-flash-price]').forEach((el) => {
+    const v = parseFloat(el.value);
+    if (isFinite(v) && v > 0) prices[el.dataset.flashPrice] = v;
+  });
   const settings = {
     flashHours: document.getElementById('setFlashHours').value,
     flashMax: document.getElementById('setFlashMax').value
   };
   const btn = event && event.target && event.target.closest ? event.target.closest('button') : null;
   btn && (btn.disabled = true);
-  const r = await api('flash.save', { ids: [..._flashSelected], settings });
+  const r = await api('flash.save', { ids: [..._flashSelected], prices, settings });
   btn && (btn.disabled = false);
   toast(r.ok ? r.msg : (r.error || 'Lỗi'), r.ok ? 'ok' : 'err');
   if (r.ok) await refreshData();

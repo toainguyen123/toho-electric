@@ -63,7 +63,7 @@ function writeSettings(s) {
 // Tạo file bảng tính (mở bằng Excel, chia cột rõ ràng bằng dấu ;)
 function productsToCSV(list) {
   const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""').replace(/\r?\n/g, ' | ') + '"';
-  const head = ['MÃ SP (SKU)', 'TÊN SẢN PHẨM', 'MÔ TẢ SẢN PHẨM', 'DANH MỤC', 'DANH MỤC CON', 'GIÁ BÁN (đ)', 'GIÁ GỐC (đ)', 'MÃ HÀNG', 'TÌNH TRẠNG', 'FLASH SALE', 'SỐ LƯỢNG ĐÃ BÁN', 'TỒN KHO', 'LINK ẢNH'];
+  const head = ['MÃ SP (SKU)', 'TÊN SẢN PHẨM', 'MÔ TẢ SẢN PHẨM', 'DANH MỤC', 'DANH MỤC CON', 'GIÁ BÁN (đ)', 'GIÁ GỐC (đ)', 'MÃ HÀNG', 'TÌNH TRẠNG', 'FLASH SALE', 'GIÁ FLASH SALE (đ)', 'SỐ LƯỢNG ĐÃ BÁN', 'BÁN ẢO', 'TỒN KHO', 'LINK ẢNH'];
   const rows = list.map((p) => [
     p.sku || p.code || p.id,
     p.name,
@@ -75,7 +75,10 @@ function productsToCSV(list) {
     p.code || '',
     p.stock,
     p.isFlashSale ? 'CÓ' : 'KHÔNG',
-    p.soldCount, p.totalCount,
+    (p.isFlashSale && parseFloat(p.flashPrice) > 0) ? p.flashPrice : '',
+    p.soldCount,
+    p.virtualSold || 0,
+    p.totalCount,
     (p.images || []).join(' , ')
   ].map(esc).join(';'));
   return head.map(esc).join(';') + '\n' + rows.join('\n');
@@ -234,8 +237,19 @@ const server = http.createServer((req, res) => {
       // === FLASH SALE CỤM: đặt/bỏ sale cho sản phẩm theo trang tab Flash Sale của admin ===
       case 'flash.save': {
         const ids = new Set((body.ids || []).map((x) => String(x)));
+        // Bảng giá Flash Sale tùy chỉnh: { 'id sản phẩm': giá sale }
+        const prices = body.prices && typeof body.prices === 'object' ? body.prices : {};
         const list = readProducts();
-        list.forEach((p) => { p.isFlashSale = ids.has(String(p.id)); });
+        list.forEach((p) => {
+          const inSale = ids.has(String(p.id));
+          p.isFlashSale = inSale;
+          // Bỏ khỏi sale → xóa giá sale; đang sale → nhận giá tùy chỉnh (nếu có nhập)
+          if (!inSale) p.flashPrice = 0;
+          else {
+            const v = parseFloat(prices[String(p.id)]);
+            p.flashPrice = (isFinite(v) && v > 0) ? v : 0;
+          }
+        });
         writeProducts(list);
         const s = readSettings();
         if (body.settings && typeof body.settings === 'object') {

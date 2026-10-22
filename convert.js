@@ -84,10 +84,10 @@ function buildHeaderMap(headerRow) {
         badge: col(['badge'], 7),
         isFlashSale: col(['isflashsale', 'flashsale', 'flash'], -1), // cột FLASH xóa được — không có thì qua
         stock: col(['stock'], 8),
-        // THÔNG SỐ = cột J, MÔ TẢ SẢN PHẨM = cột K, SKU = cột O (theo yêu cầu)
+        // THÔNG SỐ = cột J, MÔ TẢ SẢN PHẨM = cột K, SKU = cột L (theo yêu cầu)
         specs: col(['specs', 'thongso'], 9),
         description: col(['motasanpham', 'mota'], 10),
-        sku: col(['sku'], 14),
+        sku: col(['sku'], 11),
         soldCount: col(['soldcount'], -1),
         totalCount: col(['totalcount'], -1),
         variant1: col(['variant1'], -1),
@@ -152,13 +152,14 @@ async function convertSheetToJSON() {
         if (old) {
             // Sheet mới hơn → cập nhật các trường dữ liệu chính
             Object.assign(old, sheetData);
-            // THÔNG SỐ / MÔ TẢ / SKU: sheet có nội dung → lấy từ sheet (cột J/K/O);
+            // THÔNG SỐ / MÔ TẢ / SKU: sheet có nội dung → lấy từ sheet (cột J/K/L);
             // ô trống → giữ nội dung đang có trong source
             if (sheetSpecs) old.specs = sheetSpecs;
             if (sheetDesc) old.description = sheetDesc;
             if (sheetSku) {
                 old.sku = sheetSku;
-                old.skuGroup = old.skuGroup || sheetSku;
+                // SKU giống nhau → gom chung 1 sản phẩm trên web (như phiên bản trước)
+                old.skuGroup = sheetSku;
             }
             // FLASH SALE: sheet chỉ "TRUE" mới bật; xóa cột/bỏ trống → giữ giá trị admin đã đặt
             old.isFlashSale = sheetFlashTrue ? true : (old.isFlashSale === true);
@@ -167,7 +168,8 @@ async function convertSheetToJSON() {
             sheetData.isFlashSale = sheetFlashTrue;
             sheetData.specs = sheetSpecs || 'Bảo hành chính hãng';
             sheetData.description = sheetDesc || ''; // cột K
-            sheetData.sku = sheetSku || rawId;        // cột O
+            sheetData.sku = sheetSku || rawId;        // cột L
+            if (sheetSku) sheetData.skuGroup = sheetSku; // SKU giống nhau → gom chung 1 sản phẩm
             byId.set(String(rawId), sheetData);
             added++;
         }

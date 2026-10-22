@@ -216,7 +216,7 @@
         <div class="bg-white rounded-2xl shadow border border-slate-200 overflow-x-auto">
           <table class="w-full text-xs">
             <thead class="bg-navy-800 text-left text-slate-200 uppercase">
-              <tr><th class="p-3">Ảnh</th><th class="p-3">Mã SP</th><th class="p-3">SKU</th><th class="p-3">Tên</th><th class="p-3">Giá</th><th class="p-3">Danh mục</th><th class="p-3">Tình trạng</th><th class="p-3"></th></tr>
+              <tr><th class="p-3">Ảnh</th><th class="p-3">Mã SP</th><th class="p-3">SKU</th><th class="p-3">Tên</th><th class="p-3">Giá</th><th class="p-3">Danh mục</th><th class="p-3">Tình trạng</th><th class="p-3">Đã bán</th><th class="p-3"></th></tr>
             </thead>
             <tbody id="prodRows" class="divide-y divide-slate-100"></tbody>
           </table>
@@ -364,6 +364,8 @@
         <input id="f_oldPrice" type="number" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm"></div>
       <div><label class="text-[10px] font-bold text-slate-400 uppercase">Badge</label>
         <input id="f_badge" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" placeholder="BEST SELLER"></div>
+      <div><label class="text-[10px] font-bold text-slate-400 uppercase">Lượt bán ảo (+ số hiển thị thêm)</label>
+        <input id="f_vsold" type="number" min="0" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" placeholder="VD: 120"></div>
       <div><label class="text-[10px] font-bold text-slate-400 uppercase">Tình trạng</label>
         <input id="f_stock" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" value="Còn hàng"></div>
       <div><label class="text-[10px] font-bold text-slate-400 uppercase">SKU nhóm phân loại</label>

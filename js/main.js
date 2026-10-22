@@ -110,6 +110,17 @@ function formatVND(amount, fallbackAmount = 0) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
 }
 
+// Giá Flash Sale: nếu sản phẩm đang sale và có giá tùy chỉnh (flashPrice)
+// hợp lệ (nhỏ hơn giá gốc) → trả về giá sale, nếu không trả về 0
+function getFlashSalePrice(p) {
+    if (!p || !p.isFlashSale || p.flashPrice === undefined || p.flashPrice === null || p.flashPrice === '') return 0;
+    const fp = parsePrice(p.flashPrice);
+    const base = parsePrice(p.price);
+    if (fp <= 0) return 0;
+    if (base > 0 && fp >= base) return 0;
+    return fp;
+}
+
 function getDiscountPercent(price, oldPrice) {
     const p = parsePrice(price);
     const op = parsePrice(oldPrice);
@@ -850,11 +861,13 @@ function renderCustomProductsGrid(title, items) {
 function renderProductCard(p) {
     const discount = getDiscountPercent(p.price, p.oldPrice);
     const hasDiscount = discount > 0;
+    const fp = getFlashSalePrice(p); // giá Flash Sale tùy chỉnh (nếu có)
+    const shownOld = fp > 0 ? p.price : (hasDiscount ? p.oldPrice : '');
     const detailUrl = window.SITE_CONFIG ? window.SITE_CONFIG.productPathUrl(p.id) : (`san-pham/${encodeURIComponent(p.id)}`);
 
     return `
         <a href="${detailUrl}" onclick="openProductDetail('${p.id}'); return false;" class="block glass-card art-card p-3 flex flex-col justify-between cursor-pointer relative group overflow-hidden" title="${p.name}">
-            ${p.badge ? `<span class="absolute top-3 left-3 bg-starRed text-white text-[10px] font-extrabold px-2 py-0.5 rounded-lg shadow-md z-10 font-heading">${p.badge}</span>` : (hasDiscount ? `<span class="absolute top-3 left-3 bg-starRed text-white text-[10px] font-extrabold px-2 py-0.5 rounded-lg shadow-md z-10 font-heading">-${discount}%</span>` : '')}
+            ${p.badge ? `<span class="absolute top-3 left-3 bg-starRed text-white text-[10px] font-extrabold px-2 py-0.5 rounded-lg shadow-md z-10 font-heading">${p.badge}</span>` : (fp > 0 ? `<span class="absolute top-3 left-3 bg-gradient-to-r from-amber-400 to-red-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-lg shadow-md z-10 font-heading"><i class="fa-solid fa-bolt mr-0.5"></i>FLASH</span>` : (hasDiscount ? `<span class="absolute top-3 left-3 bg-starRed text-white text-[10px] font-extrabold px-2 py-0.5 rounded-lg shadow-md z-10 font-heading">-${discount}%</span>` : ''))}
             
            <div class="w-full h-70 md:h-72 flex items-center justify-center p-2 rounded-xl bg-slate-50 mb-2 overflow-hidden">
                 <img src="${p.image}" onerror="imgFallback(this)" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300" alt="${p.name} - ${p.code}">
@@ -866,12 +879,13 @@ function renderProductCard(p) {
                     <div class="text-[11px] text-slate-500 font-mono mt-1">
                         Mã: <span class="font-bold text-starRed">${p.code}</span>
                     </div>
+                    ${(parseInt(p.soldCount) || 0) + (parseInt(p.virtualSold) || 0) > 0 ? `<div class="text-[10px] text-orange-500 font-semibold mt-0.5"><i class="fa-solid fa-fire mr-1"></i>Đã bán ${(parseInt(p.soldCount) || 0) + (parseInt(p.virtualSold) || 0)}</div>` : ''}
                 </div>
 
                 <div class="pt-2">
                     <div class="flex items-baseline space-x-1.5 flex-wrap">
-                        <span class="product-price font-extrabold text-starRed text-sm">${formatVND(p.price)}</span>
-                        ${hasDiscount ? `<span class="text-[11px] text-slate-400 line-through">${formatVND(p.oldPrice)}</span>` : ''}
+                        <span class="product-price font-extrabold text-starRed text-sm">${formatVND(fp > 0 ? fp : p.price)}</span>
+                        ${shownOld ? `<span class="text-[11px] text-slate-400 line-through">${formatVND(shownOld)}</span>` : ''}
                     </div>
                     
                     <button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}', event)" class="mt-2 w-full bg-red-50 hover:bg-starRed text-starRed hover:text-white border border-red-200 text-xs font-bold py-1.5 rounded-xl transition flex items-center justify-center space-x-1">
@@ -888,10 +902,20 @@ function renderFlashSale() {
     if (!container) return;
 
     const flashProducts = getGroupedUniqueProducts(products.filter(p => p.isFlashSale));
+
+    // Không còn sản phẩm nào Flash Sale → ẨN TOÀN BỘ khu Flash Sale trên web
+    const flashSection = document.getElementById('flashSaleSection');
+    if (flashProducts.length === 0) {
+        if (flashSection) flashSection.classList.add('hidden');
+        container.innerHTML = '';
+        return;
+    }
+    if (flashSection) flashSection.classList.remove('hidden');
+
     // flashMax = 0 hoặc bỏ trống → hiện TẤT CẢ sản phẩm đang Flash Sale
     const cfgMax = parseInt(window.SITE_SETTINGS && window.SITE_SETTINGS.flashMax, 10);
     const maxShow = (cfgMax > 0) ? cfgMax : flashProducts.length;
-    const displayList = flashProducts.length > 0 ? flashProducts.slice(0, maxShow) : getGroupedUniqueProducts(products).slice(0, 5);
+    const displayList = flashProducts.slice(0, maxShow);
 
     container.innerHTML = displayList.map(p => renderProductCard(p)).join('');
 }
@@ -996,9 +1020,14 @@ function openProductDetail(id) {
                 </div>
 
                 <div class="bg-slate-50/80 p-4 rounded-2xl border border-slate-200 flex items-baseline space-x-3">
-                    <span id="detailPrice" class="text-2xl md:text-3xl font-extrabold text-starRed font-heading">${formatVND(p.price)}</span>
-                    ${discount > 0 ? `<span id="detailOldPrice" class="text-sm text-slate-400 line-through">${formatVND(p.oldPrice)}</span>` : ''}
-                    ${discount > 0 ? `<span class="bg-red-100 text-starRed text-xs font-bold px-2 py-0.5 rounded-lg">Tiết kiệm ${discount}%</span>` : ''}
+                    ${(() => {
+                        const fp = getFlashSalePrice(p);
+                        const disc = fp > 0 ? Math.round((1 - fp / parsePrice(p.price || fp)) * 100) : discount;
+                        return `${fp > 0 ? `<span class="bg-amber-400 text-white text-[10px] font-black px-2 py-1 rounded-lg uppercase"><i class="fa-solid fa-bolt mr-1"></i>Giá Flash Sale</span>` : ''}
+                        <span id="detailPrice" class="text-2xl md:text-3xl font-extrabold text-starRed font-heading">${formatVND(fp > 0 ? fp : p.price)}</span>
+                        ${disc > 0 ? `<span class="${fp > 0 ? 'text-sm text-slate-400 line-through' : 'text-sm text-slate-400 line-through'}">${formatVND(fp > 0 ? p.price : p.oldPrice)}</span>` : ''}
+                        ${disc > 0 ? `<span class="bg-red-100 text-starRed text-xs font-bold px-2 py-0.5 rounded-lg">Tiết kiệm ${disc}%</span>` : ''}`;
+                    })()}
                 </div>
 
                 ${hasVariants ? `
@@ -1106,7 +1135,9 @@ function addToCart(productId, event = null) {
     if (existing) {
         existing.quantity += 1;
     } else {
-        cart.push({ ...p, quantity: 1 });
+        // Đang Flash Sale + có giá tùy chỉnh → giỏ hàng dùng giá Flash Sale
+        const fp = getFlashSalePrice(p);
+        cart.push({ ...p, price: fp > 0 ? fp : p.price, quantity: 1 });
     }
 
     if (event) {

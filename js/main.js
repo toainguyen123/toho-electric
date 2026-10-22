@@ -145,6 +145,14 @@ function getStockDisplay(p) {
     return st >= getSoldDisplay(p) ? (st - getSoldDisplay(p)) : autoVirtualStock(p.id);
 }
 
+// --- SẢN PHẨM CHƯA ĐẶT GIÁ (giá 0/rỗng) → hiện "Giá liên hệ", không cho mua 0 đ ---
+function hasRealPrice(p) { return (parsePrice(p.price) || 0) > 0; }
+function siteHotline() { return (window.SITE_CONFIG && window.SITE_CONFIG.phone) || '0938992785'; }
+function contactForPrice(id) {
+    const p = (typeof products !== 'undefined' ? products : []).find(x => x.id === id);
+    showToast(`Sản phẩm hiện chưa có giá bán khung web — anh/chị vui lòng gọi ${siteHotline()} để được báo giá chính xác${p ? ': ' + p.name.slice(0, 50) : ''}`, 'info');
+}
+
 function getDiscountPercent(price, oldPrice) {
     const p = parsePrice(price);
     const op = parsePrice(oldPrice);
@@ -1073,9 +1081,9 @@ function renderProductCard(p) {
             <div class="space-y-1.5 flex-1 flex flex-col justify-between">
                 <div>
                     <h4 class="product-title line-clamp-2 hover:text-starRed transition font-bold text-xs text-slate-800">${p.name}</h4>
-                    <div class="text-[11px] text-slate-500 font-mono mt-1">
+                    ${p.code ? `<div class="text-[11px] text-slate-500 font-mono mt-1">
                         Mã: <span class="font-bold text-starRed">${p.code}</span>
-                    </div>
+                    </div>` : ''}
                     ${(() => {
                         const soldShown = getSoldDisplay(p);
                         if (p.isFlashSale) {
@@ -1097,13 +1105,17 @@ function renderProductCard(p) {
 
                 <div class="pt-2">
                     <div class="flex items-baseline space-x-1.5 flex-wrap">
-                        <span class="product-price font-extrabold text-starRed text-sm">${formatVND(fp > 0 ? fp : p.price)}</span>
-                        ${shownOld ? `<span class="text-[11px] text-slate-400 line-through">${formatVND(shownOld)}</span>` : ''}
+                        ${(() => {
+                            const noPrice = !(fp > 0) && !hasRealPrice(p);
+                            if (noPrice) return `<span class="font-extrabold text-slate-700 text-sm">Giá liên hệ</span>`;
+                            return `<span class="product-price font-extrabold text-starRed text-sm">${formatVND(fp > 0 ? fp : p.price)}</span>
+                            ${shownOld ? `<span class="text-[11px] text-slate-400 line-through">${formatVND(shownOld)}</span>` : ''}`;
+                        })()}
                     </div>
                     
-                    <button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}', event)" class="mt-2 w-full bg-red-50 hover:bg-starRed text-starRed hover:text-white border border-red-200 text-xs font-bold py-1.5 rounded-xl transition flex items-center justify-center space-x-1">
-                        <i class="fa-solid fa-cart-plus"></i>
-                        <span>Thêm vào giỏ</span>
+                    <button onclick="event.preventDefault(); event.stopPropagation(); ${(fp > 0 || hasRealPrice(p)) ? `addToCart('${p.id}', event)` : `contactForPrice('${p.id}')`}" class="mt-2 w-full ${(fp > 0 || hasRealPrice(p)) ? 'bg-red-50 hover:bg-starRed text-starRed hover:text-white border border-red-200' : 'bg-slate-50 hover:bg-slate-200 text-slate-700 border border-slate-200'} text-xs font-bold py-1.5 rounded-xl transition flex items-center justify-center space-x-1">
+                        <i class="fa-solid ${(fp > 0 || hasRealPrice(p)) ? 'fa-cart-plus' : 'fa-phone'}"></i>
+                        <span>${(fp > 0 || hasRealPrice(p)) ? 'Thêm vào giỏ' : 'Liên hệ báo giá'}</span>
                     </button>
                 </div>
             </div>
@@ -1244,9 +1256,12 @@ function openProductDetail(id) {
                     <p class="text-xs text-slate-400 mt-1">Mã sản phẩm: <span class="font-mono text-starRed font-bold bg-red-50 px-1.5 py-0.5 rounded border border-red-200">${p.code}</span></p>
                 </div>
 
-                <div class="bg-slate-50/80 p-4 rounded-2xl border border-slate-200 flex items-baseline space-x-3">
+                <div class="bg-slate-50/80 p-4 rounded-2xl border border-slate-200 flex items-baseline space-x-3 flex-wrap">
                     ${(() => {
                         const fp = getFlashSalePrice(p);
+                        const noPrice = !(fp > 0) && !hasRealPrice(p);
+                        if (noPrice) return `<span id="detailPrice" class="text-2xl md:text-3xl font-extrabold text-starRed font-heading">Giá liên hệ</span>
+                            <span class="text-xs text-slate-500 font-bold"><i class="fa-solid fa-phone text-starRed mr-1"></i>${siteHotline()}</span>`;
                         const disc = fp > 0 ? Math.round((1 - fp / parsePrice(p.price || fp)) * 100) : discount;
                         return `${fp > 0 ? `<span class="bg-amber-400 text-white text-[10px] font-black px-2 py-1 rounded-lg uppercase"><i class="fa-solid fa-bolt mr-1"></i>Giá Flash Sale</span>` : ''}
                         <span id="detailPrice" class="text-2xl md:text-3xl font-extrabold text-starRed font-heading">${formatVND(fp > 0 ? fp : p.price)}</span>
@@ -1289,13 +1304,18 @@ function openProductDetail(id) {
                 </div>
 
                 <div class="flex gap-3 pt-2">
-                    <button onclick="addToCart('${p.id}', event)" class="flex-1 bg-starRed hover:bg-starRedHover text-white font-bold py-3.5 rounded-2xl shadow-lg transition flex items-center justify-center space-x-2 text-sm uppercase font-heading">
-                        <i class="fa-solid fa-cart-plus"></i>
-                        <span>Thêm vào giỏ hàng</span>
-                    </button>
-                    <button onclick="addToCart('${p.id}', event); toggleCartModal();" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-2xl shadow-lg transition text-sm uppercase font-heading">
-                        Mua ngay
-                    </button>
+                    ${!hasRealPrice(p) ? `
+                        <button onclick="contactForPrice('${p.id}')" class="flex-1 bg-starRed hover:bg-starRedHover text-white font-bold py-3.5 rounded-2xl shadow-lg transition flex items-center justify-center space-x-2 text-sm uppercase font-heading">
+                            <i class="fa-solid fa-phone"></i>
+                            <span>Liên hệ báo giá</span>
+                        </button>` : `
+                        <button onclick="addToCart('${p.id}', event)" class="flex-1 bg-starRed hover:bg-starRedHover text-white font-bold py-3.5 rounded-2xl shadow-lg transition flex items-center justify-center space-x-2 text-sm uppercase font-heading">
+                            <i class="fa-solid fa-cart-plus"></i>
+                            <span>Thêm vào giỏ hàng</span>
+                        </button>
+                        <button onclick="addToCart('${p.id}', event); toggleCartModal();" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-2xl shadow-lg transition text-sm uppercase font-heading">
+                            Mua ngay
+                        </button>`}
                 </div>
             </div>
         </div>
@@ -1355,6 +1375,11 @@ function renderRecentlyViewed() {
 function addToCart(productId, event = null) {
     const p = products.find(x => x.id === productId);
     if (!p) return;
+    // Chưa có giá bán (0/rỗng) và không flash → không thêm vào giỏ, hướng dẫn liên hệ
+    if (!(getFlashSalePrice(p) > 0) && !hasRealPrice(p)) {
+        contactForPrice(p.id);
+        return;
+    }
 
     const existing = cart.find(item => item.id === productId);
     if (existing) {

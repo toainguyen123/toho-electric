@@ -273,21 +273,22 @@ const server = http.createServer((req, res) => {
           let added = 0, updated = 0, skipped = 0;
           rows.forEach(r => {
             r.h = head;
-            const id = pick(r, ['order_id', 'ma don', 'mã đơn', 'id đơn', 'id']);
-            const phone = pick(r, ['customer_phone', 'phone', 'sdt', 'số điện thoại']);
-            const total = parseInt(String(pick(r, ['total_amount', 'tổng', 'total'])).replace(/[^0-9]/g, ''), 10) || 0;
+            const id = pick(r, ['order_id', 'mã đơn', 'ma don', 'id đơn', 'id']);
+            const phone = pick(r, ['customer_phone', 'điện thoại', 'dien thoai', 'phone', 'sdt']);
+            const email = pick(r, ['customer_email', 'email']);
+            const total = parseInt(String(pick(r, ['total_amount', 'tổng tiền', 'tổng', 'total'])).replace(/[^0-9]/g, ''), 10) || 0;
             if (!id && !phone) { skipped++; return; }
             const items = pick(r, ['order_items', 'sản phẩm', 'items']) || '';
             const o = {
               id: id || ('TH' + Date.now().toString().slice(-6) + added),
               date: pick(r, ['timestamp', 'date', 'ngày']) || new Date().toLocaleString('vi-VN'),
-              name: pick(r, ['customer_name', 'name', 'tên']),
+              name: pick(r, ['customer_name', 'khách hàng', 'khach hang', 'name', 'tên']),
               phone,
-              email: pick(r, ['customer_email', 'email']),
-              address: pick(r, ['customer_address', 'address', 'địa chỉ']),
-              note: pick(r, ['customer_note', 'note', 'ghi chú']),
-              payment: pick(r, ['payment_method', 'payment']).toUpperCase().includes('QR') ? 'BANK' : 'COD',
-              items: items.split(/\s*\n\s*/).filter(Boolean).map(line => ({ name: line })),
+              email,
+              address: pick(r, ['customer_address', 'địa chỉ', 'dia chi', 'address']),
+              note: pick(r, ['customer_note', 'ghi chú', 'note']),
+              payment: (pick(r, ['payment_method', 'thanh toán', 'payment']).toUpperCase().includes('QR') || pick(r, ['payment_method', 'thanh toán', 'payment']).toUpperCase().includes('CHUYỂN')) ? 'BANK' : 'COD',
+              items: items.split(/\n|\s\|\s/).map(s => s.trim()).filter(Boolean).map(line => ({ name: line })),
               total,
               status: 'Chờ xác nhận',
               source: 'google-sheet'
@@ -297,7 +298,7 @@ const server = http.createServer((req, res) => {
             else { list.unshift(o); added++; }
           });
           writeOrders(list);
-          if (body.saveUrl) { const s = readSettings(); s.ordersSheetUrl = body.url; writeSettings(s); }
+          if (body.saveUrl) { const s = readSettings(); s.ordersSheetUrl = url; writeSettings(s); }
           return json(res, 200, { ok: true, msg: `Nhập sheet: ${added} đơn mới, ${updated} cập nhật, ${skipped} bỏ qua`, count: list.length });
         } catch (e) {
           return json(res, 500, { ok: false, error: 'Không đọc được sheet: ' + e.message });

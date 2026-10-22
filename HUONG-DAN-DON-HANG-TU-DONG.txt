@@ -1,0 +1,87 @@
+================================================================
+ CÁCH CHO ĐƠN HÀNG TỰ CHẢY VÀO GOOGLE SHEET (EXCEL) — 5 PHÚT
+================================================================
+
+Làm MỘT LẦN duy nhất. Xong từ đó: khách đặt hàng từ web (Vercel
+hoặc trên máy) → đơn TỰ ĐỘNG ghi vào sheet "ĐƠN HÀNG" của anh/chị,
+kèm cột TRẠNG THÁI "Chờ xác nhận".
+
+----------------------------------------------------------------
+BƯỚC 1 — Mở phần kịch bản của sheet
+----------------------------------------------------------------
+1. Mở link sheet ĐƠN HÀNG anh/chị đã tạo:
+   https://docs.google.com/spreadsheets/d/e/2PACX-1vTI173sA3nABb7n2Uh-0Ae37FhICLHqnEPWdcY__wwlsGEMBulXJtFNut_pIK_6HXZvZMY-u7xdKMgG/pubhtml
+   (nếu mở bằng link "pub" không thấy menu → mở file ĐƠN HÀNG
+    trong Google Drive của anh/chị thay thế)
+2. Trên menu: Tiện ích mở rộng (Extensions) → Apps Script.
+   → Mở ra một cái trình soạn code (tôi tên "Projects", có dòng
+   "function myFunction() {...}" sẵn).
+
+----------------------------------------------------------------
+BƯỚC 2 — Dán đoạn code dưới đây (xóa dòng cũ trước)
+----------------------------------------------------------------
+
+var SHEET_GID = '79695681'; // số hiệu tab ĐƠN HÀNG (không đổi)
+
+function doPost(e) {
+  try {
+    var o = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheets().filter(function (s) { return String(s.getSheetId()) === SHEET_GID; })[0] || ss.getSheets()[0];
+    var items = (o.items || []).map(function (it) {
+      var price = parseInt(it.price) || 0;
+      return (it.quantity ? it.quantity + ' x ' : '') + it.name +
+        (price ? ' — ' + (price * (it.quantity || 1)).toLocaleString('vi-VN') + 'đ' : '');
+    }).join('\n');
+    sheet.appendRow([
+      o.id || '',
+      o.date || Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'),
+      o.name || '', o.phone || '', o.email || '', o.address || '', o.note || '',
+      items,
+      o.total || 0,
+      o.payment === 'BANK' ? 'Chuyển khoản QR' : 'COD',
+      'Chờ xác nhận'
+    ]);
+    return ContentService.createTextOutput(JSON.stringify({ ok: true }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+----------------------------------------------------------------
+BƯỚC 3 — Lưu + Deploy
+----------------------------------------------------------------
+1. Bấm biểu tượng 💾 (Lưu project), đặt tên gì cũng được (VD: "nhan don").
+2. Bấm nút xanh **Triển khai (Deploy)** → "Triển khai mới (New deployment)".
+3. Ở ô "Chọn loại (Select type)" (bánh răng cạnh đó) chọn:
+      ❱ ỨNG DỤNG WEB (Web app)
+4. Điền:
+      - Mô tả: nhan don website (tùy ý)
+      - "Thực thi với tư cách (Execute as)": CỦA TÔI (Me)
+      - "Ai có quyền truy cập (Who has access)": MỌI NGƯỜI (Anyone)
+5. Bấm **Triển khai (Deploy)**.
+6. Google hỏi quyền → chọn "Cho phép / Allow" (nếu hiện tiếng Anh:
+   Advanced → Go to ... (unsafe) → Allow). Đây là quyền ghi vào
+   sheet TRONG TÀI KHOẢN CỦA ANH/CHỊ, bình thường và an toàn.
+7. Xong hiện ra một **URL Web App** dạng:
+      https://script.google.com/macros/s/AKfycb.../exec
+   👉 COPY URL NÀY và GỬI CHO EM (nhập vào chat).
+
+Em sẽ cắm URL đó vào website. Từ đó:
+- Khách đặt hàng trên web → Google Sheet ĐƠN HÀNG hiện dòng mới ngay.
+- Admin (máy anh/chị) cứ 45 giây tự kiểm tra: tự kéo đơn từ sheet
+  về + báo "🔔 Có đơn hàng mới" (kèm chấm đỏ số đơn chờ xác nhận
+  trên menu).
+
+----------------------------------------------------------------
+LƯU Ý NHỎ
+----------------------------------------------------------------
+- Dòng đầu của sheet (MÃ ĐƠN | NGÀY GIỜ | ...) là TIÊU ĐỀ — không
+  ghi đè, các đơn mới sẽ chèn NGƯỚC DƯỚI dòng cuối.
+- Muốn thử: đặt 1 đơn trên web (máy anh/chị) → sheet hiện dòng +
+  admin hiện đơn mới. Muốn xóa dòng chạy thử → xóa trong sheet rồi
+  mở admin tab Đơn Hàng bấm "Làm mới".
+- Trang tính "pub…" (link xuất bản) chỉ là BẢN ĐỌC; ghi dữ liệu là
+  Web App ở trên.

@@ -1,4 +1,5 @@
 {
   "flashHours": 12.75,
-  "flashMax": 15
+  "flashMax": 15,
+  "ordersSheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTI173sA3nABb7n2Uh-0Ae37FhICLHqnEPWdcY__wwlsGEMBulXJtFNut_pIK_6HXZvZMY-u7xdKMgG/pub?gid=79695681&single=true&output=csv"
 }

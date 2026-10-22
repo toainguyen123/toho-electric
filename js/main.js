@@ -14,6 +14,8 @@ const GOOGLE_SHEET_COUPON_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2P
 const GOOGLE_SHEET_DEVICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8R7cVFNzYCQSaFr2Qebvp55YQV35S7AuxTx8v49S3qsgDu7BDaR8fa5K8pUjLztJPBhWrMbYFfo75/pubhtml?gid=242716168&single=true';
 
 const SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzth1uAlb4AaxDKmi_Wb0RDdfTPU7ZaqDx6epOz4SRFZeBBYPIWqx2HtsSta479mzLW/exec';
+// Web App của sheet ĐƠN HÀNG (ghi đơn tự động vào Google Sheet) — dán URL sau khi Deploy
+const ORDER_SHEET_WEB_APP_URL = '';
 
 // CẤU HÌNH EMAILJS KHÔNG ĐỔI
 const EMAILJS_SERVICE_ID = 'service_w02rs0l';
@@ -1716,6 +1718,23 @@ async function submitOrder(e) {
                 body: JSON.stringify(templateParams)
             }).catch(err => console.warn("Lỗi đồng bộ Sheet:", err));
         }
+        // Ghi đơn vào sheet ĐƠN HÀNG tự động (khi đã cấu hình Web App)
+        try {
+            if (ORDER_SHEET_WEB_APP_URL) {
+                fetch(ORDER_SHEET_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        id: orderId, date: new Date().toLocaleString('vi-VN'),
+                        name, phone, email, address, note,
+                        payment: paymentMethod === 'COD' ? 'COD' : 'BANK',
+                        items: cart.map((it) => ({ name: it.name, code: it.code, quantity: it.quantity, price: it.price })),
+                        total: grandTotal, subTotal, shippingFee, discount
+                    })
+                }).catch(() => {});
+            }
+        } catch (e) { /* bỏ qua */ }
 
         try {
             if (typeof emailjs !== 'undefined' && EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID) {

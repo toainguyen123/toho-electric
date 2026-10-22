@@ -64,6 +64,7 @@ async function doLogin(pass) {
       document.getElementById('loginGate').classList.add('hidden');
       document.getElementById('adminApp').classList.remove('hidden');
       await refreshData();
+      startOrderWatchdog(); // giữ admin mở → tự báo & tự kéo đơn mới mỗi 45 giây
     } else {
       const msg = document.getElementById('loginMsg');
       msg.textContent = r.error || 'Đăng nhập thất bại';
@@ -629,11 +630,53 @@ async function importOrdersSheet() {
   toast(r.msg, 'ok');
 }
 
+// ---------- TỰ BÁO ĐƠN MỚI + TỰ KÉO ĐƠN TỪ SHEETS ----------
+let _knownOrderIds = null; // mảng id các đơn đã biết (đánh dấu đơn mới khi admin bật sẵn)
+
+async function ordersWatchdog() {
+  if (document.getElementById('adminApp').classList.contains('hidden')) return; // chưa đăng nhập → bỏ qua
+  try {
+    // 1) Nhập đơn đặt từ web Vercel (nếu đã cấu hình link sheet)
+    if (_settings.ordersSheetUrl) {
+      await api('orders.import', {});
+      // lệnh api('data') bên dưới sẽ nạp lại danh sách đơn mới nhất
+    }
+    // 2) Nạp dữ liệu mới nhất (đơn gửi về server admin + từ sheet vừa nhập)
+    const r = await api('data');
+    if (!r.ok) return;
+    const before = _knownOrderIds;
+    _orders = r.orders || [];
+    _knownOrderIds = _orders.map((o) => String(o.id));
+    // Lần đầu chỉ học danh sách, không báo
+    if (before === null) return;
+    const newIds = _knownOrderIds.filter((id) => !before.includes(id));
+    if (newIds.length) {
+      toast(`🔔 Có ${newIds.length} đơn hàng mới: ${newIds.join(', ')}`, 'ok');
+      renderOrderRows();
+    } else if (document.getElementById('tab-orders') && !document.getElementById('tab-orders').classList.contains('hidden')) {
+      renderOrderRows(); // đang ở tab Đơn Hàng → cập nhật bảng luôn
+    }
+    // 3) Thống kê-dashboard nhẹ nhàng
+    renderDashboard();
+  } catch (e) { /* mạng chập chờn → bỏ qua lượt này */ }
+}
+
 // ---------- khởi động ----------
+let _watchdogStarted = false;
+function startOrderWatchdog() {
+  if (_watchdogStarted) return;
+  _watchdogStarted = true;
+  ordersWatchdog();
+  setInterval(ordersWatchdog, 45000); // giữ admin mở → 45 giây tự kiểm tra đơn mới
+}
+
 (function init() {
   if (sessionStorage.getItem('tohoAdmin') === '1') {
     document.getElementById('loginGate').classList.add('hidden');
     document.getElementById('adminApp').classList.remove('hidden');
-    refreshData().then(() => switchTab('dashboard'));
+    refreshData().then(() => {
+      switchTab('dashboard');
+      startOrderWatchdog();
+    });
   }
 })();

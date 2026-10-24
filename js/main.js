@@ -7,7 +7,7 @@ const categoryBannerMap = {
 };
 const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWm2p0bF1cb1jjEdiol9BUZzVnH53XEvwpj9DW9QfOmgmbgj9VIX-QqoXXA6QCP-YvPQQQDGOaVrEW/pub?gid=1881975737&single=true&output=csv';
 const GOOGLE_SHEET_POLICY_CSV_URL = ''; // (đã tắt) bài viết chỉ quản lý từ Admin cục bộ
-const GOOGLE_SHEET_DEVICES_CSV_URL = ''; // (để trống = dùng 8 thiết bị mặc định; dán link Sheet csv vào nếu muốn nạp danh sách riêng)
+const GOOGLE_SHEET_DEVICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8R7cVFNzYCQSaFr2Qebvp55YQV35S7AuxTx8v49S3qsgDu7BDaR8fa5K8pUjLztJPBhWrMbYFfo75/pubhtml?gid=242716168&single=true'; // Sheet DANH SÁCH THIẾT BỊ (nhiều thiết bị)
 const GOOGLE_SHEET_COUPON_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwd1vDetlRkcIJlVh_kJSPjOkelKivMYZ_t6F_6lj6B9DJZwq9qCcf1Bqv6C8JQ50lOUKwqWaMBuuL/pub?gid=242716168&single=true&output=csv'; 
 
 // === ĐƯỜNG DẪN GOOGLE SHEET THIẾT BỊ CÔNG SUẤT ===

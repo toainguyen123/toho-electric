@@ -385,6 +385,14 @@ function loadProductsFallback() {
 }
 // === NẠP DANH SÁCH THIẾT BỊ TỪ GOOGLE SHEET (ĐÃ XỬ LÝ LỖI HOÀN CHỈNH) ===
 async function loadDevicesFromSheet() {
+    // hàm lấy danh sách thiết bị đã lưu lần trước (bộ nhớ đệm) trong trình duyệt
+    function lấyCacheThiếtBị() {
+        try {
+            const c = JSON.parse(localStorage.getItem('tohoDevicesCache') || 'null');
+            return (Array.isArray(c) && c.length > 0) ? c : null;
+        } catch (e) { return null; }
+    }
+
     const defaultDevices = [
         { id: 'dev_1', name: 'Quạt máy', power: 60, icon: 'fa-fan' },
         { id: 'dev_2', name: 'Tivi LED', power: 150, icon: 'fa-tv' },
@@ -412,9 +420,18 @@ async function loadDevicesFromSheet() {
         }
 
         const cacheBusterUrl = targetUrl + (targetUrl.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
-        const res = await fetch(cacheBusterUrl);
+
+        // Hủy bỏ chờ nếu Sheet chậm quá 8 giây -> trả về danh sách mặc định
+        const ctl = new AbortController();
+        const timeRegister = setTimeout(() => ctl.abort(), 8000);
+        let res;
+        try {
+            res = await fetch(cacheBusterUrl, { signal: ctl.signal });
+        } finally {
+            clearTimeout(timeRegister);
+        }
         if (!res.ok) {
-            deviceList = defaultDevices;
+            deviceList = lấyCacheThiếtBị() || defaultDevices;
             return;
         }
 
@@ -441,11 +458,20 @@ async function loadDevicesFromSheet() {
         }
 
         if (deviceList.length === 0) {
-            deviceList = defaultDevices;
+            deviceList = lấyCacheThiếtBị() || defaultDevices;
+        } else {
+            // Lưu bộ nhớ đệm: nếu có lúc Sheet không tải được vẫn còn danh sách đầy đủ
+            try { localStorage.setItem('tohoDevicesCache', JSON.stringify(deviceList)); } catch (e) { /* bỏ qua */ }
         }
     } catch (e) {
-        console.warn("Lỗi nạp danh sách thiết bị từ Sheet, dùng mặc định:", e);
-        deviceList = defaultDevices;
+        console.warn("Lỗi nạp danh sách thiết bị từ Sheet, dùng bản đã lưu hoặc mặc định:", e);
+        deviceList = lấyCacheThiếtBị() || defaultDevices;
+    }
+
+    // Nếu cửa sổ máy tính công suất đang mở mà danh sách vừa nạp xong -> vẽ lại ngay
+    const pm = document.getElementById('pcBuilderModal');
+    if (pm && !pm.classList.contains('hidden')) {
+        try { renderPowerCalculator(); } catch (e) { /* bỏ qua */ }
     }
 }
 

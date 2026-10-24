@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tính toán công suất — chọn ổ cắm phù hợp | TOHO ELECTRIC VN</title>
+    <meta name="description" content="Công cụ tính công suất (W) và dòng điện (A) của thiết bị điện trong nhà — gợi ý ổ cắm phù hợp 5A/10A/15A/20A/25A/30A đang bán tại TOHO ELECTRIC VN.">
+    <meta name="robots" content="index, follow">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>tailwind.config={theme:{extend:{colors:{starRed:'#E31837',starRedHover:'#C0132C'}}}};</script>
+    <style>
+        body { font-family: 'Segoe UI', system-ui, sans-serif; }
+        .font-heading { font-family: 'Segoe UI Black', 'Segoe UI', system-ui, sans-serif; letter-spacing: -0.01em; }
+        /* ===== VÒNG XOAY CHỌN THIẾT BỊ (thiết kế gốc TOHO) ===== */
+        .wheel-stage { position: relative; width: 340px; height: 340px; margin: 0 auto; }
+        .wheel-disc { position: absolute; inset: 0; transition: transform .7s cubic-bezier(.22,.9,.32,1); }
+        .wheel-slice {
+            position: absolute; top: 50%; left: 50%;
+            width: 78px; height: 78px; margin: -39px 0 0 -39px;
+            border-radius: 9999px; background: #fff;
+            border: 2px solid #e5e7eb; box-shadow: 0 4px 14px rgba(15,23,42,.08);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: box-shadow .25s, border-color .25s;
+            line-height: 1.05; text-align: center; user-select: none;
+        }
+        .wheel-slice:hover { border-color: #fca5a5; box-shadow: 0 6px 18px rgba(227,24,55,.18); }
+        .wheel-slice.sel { border-color: #E31837; box-shadow: 0 0 0 4px rgba(227,24,55,.15), 0 6px 18px rgba(227,24,55,.22); }
+        .wheel-slice.sel .w-icon { color: #E31837; }
+        .w-icon { font-size: 1.25rem; color: #475569; }
+        .w-name { font-size: 9px; font-weight: 800; color: #334155; margin-top: 3px; padding: 0 4px; }
+        .w-watt { font-size: 9px; font-weight: 700; color: #94a3b8; }
+        .wheel-center {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 118px; height: 118px; border-radius: 9999px;
+            background: radial-gradient(circle at 30% 25%, #ff5470, #C0132C);
+            color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 14px 34px rgba(227,24,55,.4); z-index: 5; text-align: center;
+        }
+        .wheel-pointer {
+            position: absolute; top: -8px; left: 50%; transform: translateX(-50%) rotate(180deg);
+            color: #E31837; font-size: 1.35rem; z-index: 6; filter: drop-shadow(0 2px 3px rgba(0,0,0,.25));
+        }
+        .wheel-hub-ring { position: absolute; inset: 22px; border-radius: 9999px; border: 2px dashed #fecdd3; pointer-events: none; }
+        .slide-up { animation: slideUp .35s ease both; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+        .qty-badge { min-width: 20px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- HEADER -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+            <a href="index.html" class="flex items-center gap-2 shrink-0">
+                <img src="images/logo.png" alt="TOHO ELECTRIC VN" class="h-11 w-auto object-contain">
+                <div class="leading-tight hidden sm:block">
+                    <p class="font-black text-starRed text-sm font-heading uppercase">TOHO ELECTRIC VN</p>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Thiết bị điện chính hãng</p>
+                </div>
+            </a>
+            <div class="flex items-center gap-2">
+                <span class="text-[11px] font-bold text-slate-500 hidden md:inline">Công cụ miễn phí — tính công suất &amp; chọn ổ cắm</span>
+                <a href="index.html" class="text-xs font-bold text-slate-600 hover:text-starRed border border-slate-200 rounded-xl px-3 py-2 bg-white transition"><i class="fa-solid fa-store mr-1"></i>Vào cửa hàng</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- BƯỚC -->
+    <div class="max-w-6xl mx-auto px-4 pt-5">
+        <div class="flex items-center gap-2 text-[11px] font-bold">
+            <span class="bg-starRed text-white rounded-full w-6 h-6 flex items-center justify-center">1</span>
+            <span class="text-starRed">Tính công suất thiết bị</span>
+            <i class="fa-solid fa-angles-right text-slate-300"></i>
+            <span class="bg-slate-200 text-slate-400 rounded-full w-6 h-6 flex items-center justify-center">2</span>
+            <span class="text-slate-400">Chọn ổ cắm phù hợp</span>
+            <i class="fa-solid fa-angles-right text-slate-300"></i>
+            <span class="bg-slate-200 text-slate-400 rounded-full w-6 h-6 flex items-center justify-center">3</span>
+            <span class="text-slate-400">Mua hàng</span>
+        </div>
+    </div>
+
+    <main class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+        <!-- TRÁI: VÒNG XOAY THIẾT BỊ -->
+        <section class="bg-white rounded-3xl border border-slate-200 shadow-sm p-5">
+            <h1 class="text-lg font-black font-heading text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-plug-circle-bolt text-starRed"></i> Tính công suất thiết bị điện
+            </h1>
+            <p class="text-xs text-slate-500 mt-1">Bấm vào thiết bị trên vòng xoay để thêm vào bảng tính — bấm lại để cộng thêm số lượng.</p>
+
+            <div class="wheel-stage mt-5 mb-2 md:scale-100 scale-[.82] origin-top" id="wheelStage">
+                <div class="wheel-pointer"><i class="fa-solid fa-caret-down"></i></div>
+                <div class="wheel-disc" id="wheelDisc"><div class="wheel-hub-ring"></div></div>
+                <div class="wheel-center">
+                    <img src="images/logo.png" alt="" class="h-9 w-auto object-contain bg-white rounded-lg px-1.5 py-1 mb-1 shadow">
+                    <p class="text-[9px] font-bold uppercase tracking-wide opacity-90" id="centerWatt">Chọn thiết bị<br>trên vòng xoay</p>
+                </div>
+            </div>
+
+            <p class="text-center text-[10px] text-slate-400 font-semibold -mt-1 mb-3"><i class="fa-solid fa-hand-pointer mr-1"></i>Bấm thiết bị bất kỳ — vòng xoay tự quay đưa lên mũi tên</p>
+
+            <!-- Thêm thiết bị thủ công -->
+            <div class="flex gap-2 items-center bg-red-50/60 border border-red-100 rounded-2xl p-2.5">
+                <label class="text-[10px] font-black text-slate-600 uppercase shrink-0 px-1">Thiết bị khác<br><span class="text-[9px] font-bold text-slate-400">nhập W</span></label>
+                <input id="customW" type="number" min="1" placeholder="VD: 3000" class="w-24 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-starRed bg-white">
+                <button onclick="addCustom()" class="bg-starRed hover:bg-starRedHover text-white text-xs font-black px-3.5 py-2.5 rounded-xl transition shadow"><i class="fa-solid fa-plus mr-1"></i>Thêm</button>
+            </div>
+        </section>
+
+        <!-- PHẢI: BẢNG TÍNH + KẾT QUẢ -->
+        <section class="space-y-4">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-5">
+                <h2 class="font-black font-heading text-slate-900 text-sm uppercase flex items-center gap-2"><i class="fa-solid fa-list-check text-starRed"></i>Danh sách thiết bị</h2>
+                <div id="devList" class="mt-3 space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+                <div id="devEmpty" class="text-center py-8">
+                    <i class="fa-regular fa-hand-point-up text-3xl text-slate-200 mb-2 block"></i>
+                    <p class="text-xs text-slate-400 font-bold">Chưa có thiết nào — bấm vòng xoay bên trái để bắt đầu</p>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-5 text-white shadow-xl" id="resultBox">
+                <h2 class="font-black font-heading text-sm uppercase flex items-center gap-2"><i class="fa-solid fa-bolt text-amber-400"></i>Kết quả tính</h2>
+                <div class="grid grid-cols-3 gap-3 mt-3 text-center">
+                    <div class="bg-white/10 rounded-2xl py-3">
+                        <p class="text-[10px] font-bold text-slate-300 uppercase">Công suất</p>
+                        <p id="sumW" class="text-xl font-black font-heading text-amber-400">0 W</p>
+                    </div>
+                    <div class="bg-white/10 rounded-2xl py-3">
+                        <p class="text-[10px] font-bold text-slate-300 uppercase">Dòng chạy</p>
+                        <p id="sumA" class="text-xl font-black font-heading">0 A</p>
+                    </div>
+                    <div class="bg-white/10 rounded-2xl py-3">
+                        <p class="text-[10px] font-bold text-slate-300 uppercase">Khi khởi động</p>
+                        <p id="sumAStart" class="text-xl font-black font-heading">0 A</p>
+                    </div>
+                </div>
+                <div class="mt-4 bg-amber-400 text-slate-900 rounded-2xl p-3.5" id="suggestBox">
+                    <p class="text-[10px] font-black uppercase tracking-wide opacity-70">Ổ cắm khuyên dùng</p>
+                    <p id="suggestText" class="text-sm font-black font-heading mt-0.5">— Chọn thiết bị để xem gợi ý —</p>
+                </div>
+            </div>
+
+            <a id="goSockets" href="#" class="hidden block text-center bg-starRed hover:bg-starRedHover text-white font-black font-heading text-sm uppercase py-4 rounded-3xl shadow-lg shadow-red-200 transition">
+                <i class="fa-solid fa-arrow-right-arrow-left mr-1"></i> Chọn ổ cắm phù hợp <span id="goAmpTxt"></span> <i class="fa-solid fa-angles-right"></i>
+            </a>
+            <p id="goHint" class="text-center text-[11px] text-slate-400 font-bold">Thêm thiết bị → nút chọn ổ cắm sẽ hiện ra ở đây</p>
+        </section>
+    </main>
+
+    <footer class="max-w-6xl mx-auto px-4 pb-8 pt-2 text-center">
+        <p class="text-[10px] text-slate-400 font-semibold">Số liệu là công suất DANH NGHĨA phổ biến của từng thiết bị — thiết bị của bạn có thể khác. Có thắc mắc? Gọi <span class="text-starRed font-black">0938 992 785</span> (TOHO ELECTRIC VN)</p>
+    </footer>
+
+<script>
+// ============ DANH MỤC THIẾT BỊ THƯỜNG GẶP (công suất danh nghĩa VN) ============
+// factor = hệ số tr(PHỤ TẢI KHỞI ĐỘNG) cho thiết bị có động cơ/máy nén
+const APPLIANCES = [
+    { name: 'Điều hòa 12k', icon: 'fa-snowflake',    watt: 1200, factor: 2 },
+    { name: 'Bình nóng lạnh', icon: 'fa-shower',     watt: 2500, factor: 1 },
+    { name: 'Bếp từ', icon: 'fa-fire-burner',        watt: 2000, factor: 1 },
+    { name: 'Ấm siêu tốc', icon: 'fa-mug-hot',       watt: 1800, factor: 1 },
+    { name: 'Nồi chiên', icon: 'fa-drumstick-bite',  watt: 1500, factor: 1 },
+    { name: 'Lò vi sóng', icon: 'fa-bowl-food',      watt: 1200, factor: 1 },
+    { name: 'Nồi cơm điện', icon: 'fa-bowl-rice',    watt: 700,  factor: 1 },
+    { name: 'Máy giặt', icon: 'fa-shirt',            watt: 500,  factor: 2 },
+    { name: 'Máy bơm nước', icon: 'fa-water',        watt: 750,  factor: 2.5 },
+    { name: 'Tủ lạnh', icon: 'fa-temperature-low',   watt: 150,  factor: 3 },
+    { name: 'Quạt điện', icon: 'fa-fan',             watt: 80,   factor: 1.2 },
+    { name: 'Bàn ủi', icon: 'fa-tshirt',             watt: 1000, factor: 1 },
+];
+
+const VOLT = 220;
+const TIERS = [
+    { maxA: 5,  label: 'ổ cắm dòng nhỏ 5A — chịu 1.100W',  amp: 5 },
+    { maxA: 10, label: 'ổ cắm tiêu chuẩn 10A — chịu 2.200W', amp: 10 },
+    { maxA: 15, label: 'ổ cắm dòng lớn 15A — chịu 3.300W',   amp: 15 },
+    { maxA: 20, label: 'ổ cắm dòng lớn 20A — chịu 4.400W',  amp: 20 },
+    { maxA: 25, label: 'ổ cắm 25A — chịu 5.500W',            amp: 25 },
+    { maxA: 30, label: 'ổ cắm 30A — chịu 6.600W',            amp: 30 },
+];
+
+const picks = []; // { name, icon, watt, factor, qty }
+let wheelRotation = 0;
+
+// ---- dựng vòng xoay ----
+const disc = document.getElementById('wheelDisc');
+const N = APPLIANCES.length;
+const RADIUS = 132;
+const sliceEls = [];
+
+APPLIANCES.forEach((ap, i) => {
+    const angle = (360 / N) * i;
+    const el = document.createElement('div');
+    el.className = 'wheel-slice';
+    el.dataset.index = i;
+    el.innerHTML = `<i class="fa-solid ${ap.icon} w-icon"></i><span class="w-name">${ap.name}</span><span class="w-watt">${ap.watt}W</span>`;
+    el.addEventListener('click', () => selectSlice(i));
+    disc.appendChild(el);
+    sliceEls.push({ el, angle });
+});
+
+function layoutWheel() {
+    sliceEls.forEach(({ el, angle }) => {
+        el.style.transform = `rotate(${angle}deg) translate(${RADIUS}px) rotate(${-(angle + wheelRotation)}deg)`;
+    });
+}
+layoutWheel();
+
+function selectSlice(i) {
+    const target = -sliceEls[i].angle; // đưa thiết bị lên mũi tên 12 giờ
+    let delta = ((target - wheelRotation) % 360 + 360) % 360;
+    if (delta === 0) delta = 360;
+    wheelRotation += delta;
+    disc.style.transform = `rotate(${wheelRotation}deg)`;
+    layoutWheel();
+    sliceEls.forEach(({ el }, j) => el.classList.toggle('sel', j === i));
+    addToPicks(APPLIANCES[i]);
+}
+
+// ---- bảng tính ----
+function addToPicks(ap, wattOverride) {
+    const watt = wattOverride || ap.watt;
+    const found = picks.find(x => x.name === ap.name && x.watt === watt);
+    if (found) found.qty++;
+    else picks.push({ name: ap.name, icon: ap.icon, watt, factor: ap.factor || 1, qty: 1 });
+    renderPicks();
+}
+
+function addCustom() {
+    const w = parseInt(document.getElementById('customW').value, 10);
+    if (!(w > 0)) { alert('Nhập công suất (W) của thiết bị nhé, VD: 3000'); return; }
+    addToPicks({ name: 'Thiết bị ' + w + 'W', icon: 'fa-plug', factor: 1.5 }, w);
+    document.getElementById('customW').value = '';
+}
+
+function changeQty(idx, d) {
+    picks[idx].qty += d;
+    if (picks[idx].qty <= 0) picks.splice(idx, 1);
+    renderPicks();
+}
+
+function removePick(idx) { picks.splice(idx, 1); renderPicks(); }
+
+function renderPicks() {
+    const list = document.getElementById('devList');
+    const empty = document.getElementById('devEmpty');
+    empty.classList.toggle('hidden', picks.length > 0);
+    list.innerHTML = picks.map((p, i) => `
+        <div class="slide-up flex items-center gap-2.5 bg-slate-50 border border-slate-100 rounded-2xl px-3 py-2">
+            <span class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center shrink-0"><i class="fa-solid ${p.icon} text-slate-600 text-xs"></i></span>
+            <div class="min-w-0 flex-1">
+                <p class="text-xs font-black text-slate-700 truncate">${p.name}</p>
+                <p class="text-[10px] text-slate-400 font-bold">${p.watt.toLocaleString('vi-VN')} W ${p.factor > 1 ? '· có khởi động ×' + p.factor : ''}</p>
+            </div>
+            <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-full px-1.5 py-0.5 shrink-0">
+                <button onclick="changeQty(${i}, -1)" class="w-5 h-5 rounded-full hover:bg-slate-100 text-slate-500 font-black">−</button>
+                <span class="qty-badge text-[11px] font-black text-slate-800 text-center">${p.qty}</span>
+                <button onclick="changeQty(${i}, 1)" class="w-5 h-5 rounded-full hover:bg-slate-100 text-slate-500 font-black">+</button>
+            </div>
+            <button onclick="removePick(${i})" class="w-6 h-6 rounded-full hover:bg-red-50 text-red-400 hover:text-red-600 shrink-0"><i class="fa-solid fa-xmark text-xs"></i></button>
+        </div>`).join('');
+    renderResult();
+}
+
+function renderResult() {
+    const sumWEl = document.getElementById('sumW'), sumAEl = document.getElementById('sumA'), sumStartEl = document.getElementById('sumAStart');
+    const center = document.getElementById('centerWatt');
+    if (!picks.length) {
+        sumWEl.textContent = '0 W'; sumAEl.textContent = '0 A'; sumStartEl.textContent = '0 A';
+        suggest(null);
+        center.innerHTML = 'Chọn thiết bị<br>trên vòng xoay';
+        return;
+    }
+    const totalW = picks.reduce((s, p) => s + p.watt * p.qty, 0);
+    const ambientW = picks.reduce((s, p) => s + p.watt * p.qty * p.factor, 0); // công suất khi khởi động
+    const runA = totalW / VOLT, startA = ambientW / VOLT;
+    sumWEl.textContent = totalW.toLocaleString('vi-VN') + ' W';
+    sumAEl.textContent = runA.toFixed(1) + ' A';
+    sumStartEl.textContent = startA.toFixed(1) + ' A';
+    center.innerHTML = `<span class="text-sm font-black">${totalW.toLocaleString('vi-VN')}</span><span class="text-[10px] font-bold opacity-90">W tổng</span>`;
+    // chọn ổ: ưu tiên dòng KHỞI ĐỘNG để không nhảy aptomat, nhưng không nhỏ hơn dòng chạy + 25%
+    const need = Math.max(startA * 0.9, runA * 1.25);
+    suggest(need, runA, totalW);
+}
+
+function suggest(needA, runA, totalW) {
+    const box = document.getElementById('suggestBox');
+    const text = document.getElementById('suggestText');
+    const go = document.getElementById('goSockets');
+    const hint = document.getElementById('goHint');
+    const goAmpTxt = document.getElementById('goAmpTxt');
+    if (!needA) {
+        box.className = 'mt-4 bg-amber-400 text-slate-900 rounded-2xl p-3.5';
+        text.textContent = '— Chọn thiết bị để xem gợi ý —';
+        go.classList.add('hidden'); hint.classList.remove('hidden');
+        return;
+    }
+    const tier = TIERS.find(t => needA <= t.maxA);
+    if (tier) {
+        box.className = 'mt-4 bg-green-400 text-slate-900 rounded-2xl p-3.5';
+        text.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i>${tier.label}`;
+        goAmpTxt.textContent = `(${tier.amp}A)`;
+        go.classList.remove('hidden'); hint.classList.add('hidden');
+        go.setAttribute('href', 'chon-o-cam.html?amp=' + tier.amp + '&w=' + Math.round(totalW));
+    } else {
+        box.className = 'mt-4 bg-starRed text-white rounded-2xl p-3.5';
+        text.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i>Trên 30A — không nên ghim một ổ duy nhất! Dùng ổ 30A cho phần nhỏ, phần còn lại nối aptomat/tuần tự nhiều ổ. Gọi 0938 992 785 để được tư vấn.`;
+        go.classList.remove('hidden'); hint.classList.add('hidden');
+        goAmpTxt.textContent = '(30A)';
+        go.setAttribute('href', 'chon-o-cam.html?amp=30&w=' + Math.round(totalW));
+    }
+}
+
+renderPicks();
+</script>
+</body>
+</html>

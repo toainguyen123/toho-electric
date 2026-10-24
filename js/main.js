@@ -1510,10 +1510,10 @@ function toggleCartModal() {
         // Nếu modal đóng -> hiện lại thanh "Xem giỏ hàng"
         if (cartBar) {
             if (!isHidden) {
-                cartBar.style.transform = 'translateY(150%)';
+                cartBar.style.transform = 'translate(-50%, 150%)';
                 cartBar.style.transition = 'transform 0.3s ease';
             } else {
-                cartBar.style.transform = 'translateY(0)';
+                cartBar.style.transform = 'translate(-50%, 0)';
             }
         }
     }
@@ -1534,7 +1534,7 @@ function openCheckoutModal() {
     // Ẩn thanh xem giỏ hàng cố định ở dưới màn hình mobile khi mở bảng thanh toán
     const cartBar = document.getElementById('cartBar');
     if (cartBar) {
-        cartBar.style.transform = 'translateY(150%)';
+        cartBar.style.transform = 'translate(-50%, 150%)';
         cartBar.style.transition = 'transform 0.3s ease';
     }
 
@@ -1548,7 +1548,7 @@ function closeCheckoutModal() {
     // Hiện lại thanh xem giỏ hàng khi đóng bảng thanh toán
     const cartBar = document.getElementById('cartBar');
     if (cartBar) {
-        cartBar.style.transform = 'translateY(0)';
+        cartBar.style.transform = 'translate(-50%, 0)';
     }
 }
 function renderCheckoutSummary() {

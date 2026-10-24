@@ -303,13 +303,13 @@ function suggest(needA, runA, totalW) {
         text.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i>${tier.label}`;
         goAmpTxt.textContent = `(${tier.amp}A)`;
         go.classList.remove('hidden'); hint.classList.add('hidden');
-        go.setAttribute('href', 'chon-o-cam.html?amp=' + tier.amp + '&w=' + Math.round(totalW));
+        go.setAttribute('href', 'TÍNH CÔNG SUẤT/index.html');
     } else {
         box.className = 'mt-4 bg-starRed text-white rounded-2xl p-3.5';
         text.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i>Trên 30A — không nên ghim một ổ duy nhất! Dùng ổ 30A cho phần nhỏ, phần còn lại nối aptomat/tuần tự nhiều ổ. Gọi 0938 992 785 để được tư vấn.`;
         go.classList.remove('hidden'); hint.classList.add('hidden');
         goAmpTxt.textContent = '(30A)';
-        go.setAttribute('href', 'chon-o-cam.html?amp=30&w=' + Math.round(totalW));
+        go.setAttribute('href', 'TÍNH CÔNG SUẤT/index.html');
     }
 }
 

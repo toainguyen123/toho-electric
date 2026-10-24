@@ -1,0 +1,31 @@
+.table-surface  {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: url('table-marble.png') center / contain no-repeat;
+  filter: drop-shadow(0 7px 3px #79684920) drop-shadow(0 15px 22px #3e352617);
+}
+
+html[data-table="walnut"] .table-surface  {
+  background-image: url('table-walnut.png');
+  filter: saturate(.82) brightness(.94) drop-shadow(0 7px 3px #38271918) drop-shadow(0 17px 25px #3e35261a);
+}
+
+html[data-table="original"] .table-surface  {
+  background: radial-gradient(ellipse at 50% 44%, #ffffff28 0, transparent 62%),
+    repeating-linear-gradient(92deg, #bda57e09 0 2px, #fff5df12 2px 5px, transparent 5px 11px),
+    repeating-linear-gradient(88deg, transparent 0 66px, #a28c6420 67px, #fff3dc30 68px, transparent 69px 150px),
+    radial-gradient(circle at 45% 38%, #eae0ca, #ded0b3 66%, #d1bc98 98%);
+  border: 2px solid #eaddc5;
+  box-shadow: inset 0 0 0 12px #ffffff19, inset 0 0 0 14px #ab947517,
+    0 10px 0 #beab8c, 0 16px 30px #4a38231c;
+  filter: none;
+}
+
+html[data-table="original"] .table-surface::after  {
+  content: '';
+  position: absolute;
+  inset: 33px;
+  border: 1px solid #b29d791c;
+  border-radius: 50%;
+}

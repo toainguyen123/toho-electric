@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="vi" data-table="original">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta name="theme-color" content="#f5f1e8" />
+        <meta
+            name="description"
+            content="Khám phá ổ cắm điện chính hãng trên chiếc bàn xoay của TOHO ELECTRIC VN — chạm vào ổ cắm bạn thích để xem chi tiết và mua hàng."
+        />
+        <title>TOHO ELECTRIC VN — Vòng xoay chọn ổ cắm</title>
+        <link rel="stylesheet" href="assets/table-presets.css" />
+        <link rel="stylesheet" href="assets/styles.css" />
+    </head>
+    <body>
+        <header class="site-header">
+            <a class="brand" href="../index.html" aria-label="TOHO ELECTRIC VN — Về trang chủ"
+                ><img class="brand-logo" src="../images/logo.png" alt="TOHO ELECTRIC VN" width="224" height="60" /></a
+            ><span class="header-note">Ổ cắm điện chính hãng</span
+            ><a class="menu-link" href="../tinh-cong-suat.html" aria-label="Tính công suất" title="Tính công suất"
+                ><img class="icon" src="assets/icons/menu.svg" alt="" aria-hidden="true" /></a>
+        </header>
+
+        <main class="experience">
+            <section
+                class="stage"
+                aria-label="Xem chi tiết ổ cắm đang chọn"
+                aria-haspopup="dialog"
+                role="button"
+                tabindex="0"
+                id="stage"
+            >
+                <div class="table-wheel" id="wheel"><div class="table-surface"></div></div>
+                <div class="table-caption">
+                    <b>Chọn đúng dòng.<br />An toàn cho cả nhà.</b>Ổ cắm chính hãng<br />Phù hợp công suất
+                </div>
+                <div class="orbit-hint">
+                    <img class="icon" src="assets/icons/rotate.svg" alt="" aria-hidden="true" /><span>Bấm vào ổ cắm trên bàn xoay.<br />Xem chi tiết sản phẩm.</span>
+                </div>
+            </section>
+            <section class="details" id="details" aria-live="polite" aria-atomic="true">
+                <div class="eyebrow" id="category"></div>
+                <h1 id="dish-name"></h1>
+                <p class="description" id="description"></p>
+                <div class="dish-meta">
+                    <span class="price" id="price"></span><span class="meta-divider"></span
+                    ><span class="preparation"
+                        ><img class="icon" src="assets/icons/shopping-bag.svg" alt="" aria-hidden="true" /><span id="time"></span></span
+                    ><span class="preparation">Hàng chính hãng</span>
+                </div>
+                <div class="ingredient-tags" id="tags"></div>
+            </section>
+            <section class="menu-section" id="thuc-don" aria-label="Chọn ổ cắm">
+                <div class="menu-heading">
+                    <h2>Bạn muốn chọn <b>ổ cắm nào?</b></h2>
+                    <span class="menu-counter" id="counter" aria-live="polite">NHÓM 01 / 03</span>
+                </div>
+                <div class="carousel">
+                    <button class="arrow-button" id="previous" aria-label="Nhóm sản phẩm trước">
+                        <img class="icon" src="assets/icons/chevron-left.svg" alt="" aria-hidden="true" />
+                    </button>
+                    <div class="menu-track" id="menu-track" aria-label="Danh sách ổ cắm"></div>
+                    <button class="arrow-button" id="next" aria-label="Nhóm sản phẩm tiếp theo">
+                        <img class="icon" src="assets/icons/chevron-right.svg" alt="" aria-hidden="true" />
+                    </button>
+                </div>
+                <div class="pager" id="pager" aria-label="Chọn nhóm sản phẩm"></div>
+            </section>
+        </main>
+
+        <footer>
+            <span class="footer-mark">Chọn đúng dòng điện — thiết bị bền, nhà an toàn.</span
+            ><span>TOHO ELECTRIC VN · Ổ CẮM ĐIỆN CHÍNH HÃNG</span>
+        </footer>
+
+        <dialog class="dish-dialog" id="dish-dialog" aria-labelledby="modal-name" tabindex="-1">
+            <div class="flying-plate" id="flying-plate" aria-hidden="true">
+                <img alt="" /><span class="plate-solid"></span>
+            </div>
+            <span class="sr-only" id="detail-status" role="status"></span>
+            <article class="detail-panel" id="detail-panel" hidden>
+                <button type="button" class="dialog-close" aria-label="Đóng chi tiết sản phẩm">×</button>
+                <div class="detail-kicker" id="modal-category"></div>
+                <h2 id="modal-name"></h2>
+                <p class="detail-copy" id="modal-description"></p>
+                <section class="detail-section">
+                    <h3 id="ingredients-heading">Thông số nổi bật</h3>
+                    <ul class="detail-ingredients" id="modal-ingredients" aria-labelledby="ingredients-heading"></ul>
+                </section>
+                <div class="detail-facts">
+                    <div><small>Mã sản phẩm</small><strong id="modal-time"></strong></div>
+                    <div><small>Số lượng</small><strong>1 chiếc</strong></div>
+                </div>
+                <div class="detail-bottom">
+                    <div>
+                        <span class="detail-price-label">Giá bán</span>
+                        <div class="detail-price" id="modal-price"></div>
+                    </div>
+                    <button type="button" class="order-button" id="order-dish">
+                        <img class="icon" src="assets/icons/shopping-bag.svg" alt="" aria-hidden="true" />Mua trên website
+                    </button>
+                </div>
+            </article>
+        </dialog>
+
+        <script src="assets/demo-menu-data.js"></script>
+        <script src="assets/app.js"></script>
+    </body>
+</html>

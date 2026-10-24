@@ -7,6 +7,7 @@ const categoryBannerMap = {
 };
 const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWm2p0bF1cb1jjEdiol9BUZzVnH53XEvwpj9DW9QfOmgmbgj9VIX-QqoXXA6QCP-YvPQQQDGOaVrEW/pub?gid=1881975737&single=true&output=csv';
 const GOOGLE_SHEET_POLICY_CSV_URL = ''; // (đã tắt) bài viết chỉ quản lý từ Admin cục bộ
+const GOOGLE_SHEET_DEVICES_CSV_URL = ''; // (để trống = dùng 8 thiết bị mặc định; dán link Sheet csv vào nếu muốn nạp danh sách riêng)
 const GOOGLE_SHEET_COUPON_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwd1vDetlRkcIJlVh_kJSPjOkelKivMYZ_t6F_6lj6B9DJZwq9qCcf1Bqv6C8JQ50lOUKwqWaMBuuL/pub?gid=242716168&single=true&output=csv'; 
 
 // === ĐƯỜNG DẪN GOOGLE SHEET THIẾT BỊ CÔNG SUẤT ===
@@ -32,7 +33,9 @@ let couponsList = [];
 let appliedCoupon = null;
 let isFlying = false;
 
-// BIO (đã gỡ tính năng tính công suất — giữ chỗ trống cho mục tiêu sau)
+// DANH SÁCH THIẾT BỊ CHO MÁY TÍNH CÔNG SUẤT
+let deviceList = [];
+let selectedDevices = {};
 
 // --- TIỆN ÍCH XỬ LÝ HÌNH ẢNH & GIÁ ---
 // Ảnh lỗi cho sạch: dùng file local thay vì dịch vụ placeholder ngoài (tránh thêm chậm/lỗi)
@@ -313,6 +316,7 @@ async function initData() {
     renderCategoryBlocks();
 
     await loadCouponsFromSheet();  // mã khuyến mãi (từ Sheet)
+    await loadDevicesFromSheet();  // danh sách thiết bị máy tính công suất
     await loadPolicies();          // bài viết / chính sách từ data/policies.js (local, admin quản lý)
 
     applyStartupRouting();
@@ -379,6 +383,72 @@ function loadProductsFallback() {
         document.head.appendChild(s);
     });
 }
+// === NẠP DANH SÁCH THIẾT BỊ TỪ GOOGLE SHEET (ĐÃ XỬ LÝ LỖI HOÀN CHỈNH) ===
+async function loadDevicesFromSheet() {
+    const defaultDevices = [
+        { id: 'dev_1', name: 'Quạt máy', power: 60, icon: 'fa-fan' },
+        { id: 'dev_2', name: 'Tivi LED', power: 150, icon: 'fa-tv' },
+        { id: 'dev_3', name: 'Đèn chiếu sáng', power: 40, icon: 'fa-lightbulb' },
+        { id: 'dev_4', name: 'Tủ lạnh', power: 200, icon: 'fa-snowflake' },
+        { id: 'dev_5', name: 'Bếp từ / Bếp điện', power: 2000, icon: 'fa-fire-burner' },
+        { id: 'dev_6', name: 'Điều hòa / Máy lạnh', power: 1200, icon: 'fa-wind' },
+        { id: 'dev_7', name: 'Nồi cơm điện', power: 700, icon: 'fa-kitchen-set' },
+        { id: 'dev_8', name: 'Máy giặt', power: 500, icon: 'fa-shirt' }
+    ];
+
+    if (!GOOGLE_SHEET_DEVICES_CSV_URL) {
+        deviceList = defaultDevices;
+        return;
+    }
+
+    try {
+        // Tự động xử lý URL Google Sheet pubhtml sang dạng xuất CSV hợp lệ
+        let targetUrl = GOOGLE_SHEET_DEVICES_CSV_URL.trim();
+        if (targetUrl.includes('/pubhtml')) {
+            targetUrl = targetUrl.replace('/pubhtml', '/pub');
+            if (!targetUrl.includes('output=csv')) {
+                targetUrl += (targetUrl.includes('?') ? '&' : '?') + 'output=csv';
+            }
+        }
+
+        const cacheBusterUrl = targetUrl + (targetUrl.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+        const res = await fetch(cacheBusterUrl);
+        if (!res.ok) {
+            deviceList = defaultDevices;
+            return;
+        }
+
+        const csvText = await res.text();
+        const rows = parseCSV(csvText);
+
+        deviceList = [];
+        for (let i = 1; i < rows.length; i++) {
+            const cols = rows[i];
+            if (cols && cols.length >= 2) {
+                const nameStr = cols[0].replace(/^["']|["']$/g, '').trim();
+                const powerVal = parseInt(cols[1].replace(/[^0-9]/g, ''), 10) || 0;
+                
+                // Lọc bỏ dữ liệu rác/mã lệnh JS không hợp lệ
+                if (nameStr && !nameStr.includes('function') && !nameStr.includes('prototype') && powerVal >= 0) {
+                    deviceList.push({
+                        id: 'dev_' + i,
+                        name: nameStr,
+                        power: powerVal,
+                        icon: (cols[2] && !cols[2].includes('function')) ? cols[2].trim() : 'fa-plug'
+                    });
+                }
+            }
+        }
+
+        if (deviceList.length === 0) {
+            deviceList = defaultDevices;
+        }
+    } catch (e) {
+        console.warn("Lỗi nạp danh sách thiết bị từ Sheet, dùng mặc định:", e);
+        deviceList = defaultDevices;
+    }
+}
+
 async function loadCouponsFromSheet() {
     if (!GOOGLE_SHEET_COUPON_CSV_URL) return;
     try {
@@ -1719,6 +1789,149 @@ function closeLightbox() {
     if (modal) modal.classList.add('hidden');
 }
 
+// === TÍNH NĂNG TÍNH CÔNG SUẤT BẰNG JS HOÀN CHỈNH ===
+function openPcBuilderModal() {
+    const modal = document.getElementById('pcBuilderModal');
+    if (modal) modal.classList.remove('hidden');
+    renderPowerCalculator();
+}
+
+function closePcBuilderModal() {
+    const modal = document.getElementById('pcBuilderModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+// Biến lưu từ khóa tìm kiếm thiết bị trong modal
+let deviceSearchQuery = '';
+
+function renderPowerCalculator() {
+    const container = document.getElementById('pcBuilderComponentsList');
+    if (!container) return;
+
+    if (deviceList.length === 0) {
+        container.innerHTML = `<p class="text-slate-400 text-center py-4">Đang tải danh sách thiết bị...</p>`;
+        return;
+    }
+
+    // Lọc danh sách thiết bị theo từ khóa tìm kiếm
+    const filteredDevices = deviceList.filter(dev => 
+        dev.name.toLowerCase().includes(deviceSearchQuery.toLowerCase())
+    );
+
+    container.innerHTML = `
+        <div class="space-y-4">
+            <p class="text-slate-600 text-xs">Nhập tìm kiếm hoặc chọn số lượng các thiết bị điện đang sử dụng:</p>
+            
+            <!-- Ô TÌM KIẾM THIẾT BỊ -->
+            <div class="relative">
+                <input type="text" 
+                       id="deviceSearchInput" 
+                       placeholder="Tìm nhanh thiết bị (vd: Quạt, Tivi, Máy lạnh...)..." 
+                       value="${deviceSearchQuery}"
+                       oninput="handleDeviceSearch(this.value)"
+                       class="w-full border border-slate-200 rounded-xl px-3.5 py-2 pl-9 text-xs focus:outline-none focus:border-starRed bg-slate-50">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-1">
+                ${filteredDevices.length > 0 ? filteredDevices.map(dev => {
+                    const qty = selectedDevices[dev.id] || 0;
+                    return `
+                        <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-200 bg-slate-50/50">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded-xl bg-red-100 text-starRed flex items-center justify-center shrink-0">
+                                    <i class="fa-solid ${dev.icon}"></i>
+                                </div>
+                                <div>
+                                    <h5 class="font-bold text-slate-800 text-xs">${dev.name}</h5>
+                                    <span class="text-[10px] text-slate-500 font-mono">${dev.power} W/cái</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2 bg-white rounded-xl border border-slate-200 p-1">
+                                <button onclick="updateDeviceQty('${dev.id}', -1)" class="w-6 h-6 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-100 rounded-lg">-</button>
+                                <span class="font-bold px-1 min-w-[20px] text-center text-xs">${qty}</span>
+                                <button onclick="updateDeviceQty('${dev.id}', 1)" class="w-6 h-6 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-100 rounded-lg">+</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('') : `<p class="col-span-2 text-center text-slate-400 text-xs py-4">Không tìm thấy thiết bị phù hợp</p>`}
+            </div>
+            
+            <div id="calculatorResultArea" class="pt-3 border-t border-slate-200 space-y-3"></div>
+        </div>
+    `;
+
+    calculateTotalPower();
+
+    // Giữ tiêu điểm (focus) vào ô tìm kiếm khi gõ
+    const input = document.getElementById('deviceSearchInput');
+    if (input && deviceSearchQuery) {
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+    }
+}
+
+// Xử lý sự kiện tìm kiếm thiết bị
+function handleDeviceSearch(val) {
+    deviceSearchQuery = val;
+    renderPowerCalculator();
+}
+function updateDeviceQty(devId, delta) {
+    const current = selectedDevices[devId] || 0;
+    const updated = Math.max(0, current + delta);
+    if (updated === 0) {
+        delete selectedDevices[devId];
+    } else {
+        selectedDevices[devId] = updated;
+    }
+    renderPowerCalculator();
+}
+
+function calculateTotalPower() {
+    let totalWatts = 0;
+    Object.keys(selectedDevices).forEach(id => {
+        const dev = deviceList.find(d => d.id === id);
+        if (dev) {
+            totalWatts += dev.power * selectedDevices[id];
+        }
+    });
+
+    const totalKva = (totalWatts / 1000 / 0.8).toFixed(1);
+    const recommendedKva = Math.ceil((totalWatts / 1000 / 0.8) * 1.25);
+
+    const resultArea = document.getElementById('calculatorResultArea');
+    const totalEl = document.getElementById('pcBuilderTotal');
+
+    if (totalEl) {
+        totalEl.innerText = `${totalWatts.toLocaleString('vi-VN')} W (~ ${totalKva} kVA)`;
+    }
+
+    if (!resultArea) return;
+
+    if (totalWatts === 0) {
+        resultArea.innerHTML = `<p class="text-xs text-slate-400 italic text-center">Vui lòng chọn ít nhất 1 thiết bị để tính toán công suất phù hợp.</p>`;
+        return;
+    }
+
+    // HIỂN THỊ KẾT QUẢ TÍNH TỔNG CÔNG SUẤT (ĐÃ XÓA PHẦN GỢI Ý SẢN PHẨM)
+    resultArea.innerHTML = `
+        <div class="bg-red-50/80 border border-red-200 p-4 rounded-2xl space-y-2">
+            <div class="flex justify-between items-center text-xs font-bold text-slate-800">
+                <span>Tổng công suất sử dụng:</span>
+                <span class="text-starRed text-sm font-mono font-black">${totalWatts.toLocaleString('vi-VN')} Watts</span>
+            </div>
+            <div class="flex justify-between items-center text-xs text-slate-600">
+                <span>Khuyến nghị chọn Ổn áp / Biến áp:</span>
+                <span class="font-bold text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200">Từ ${recommendedKva} kVA trở lên</span>
+            </div>
+            <p class="text-[11px] text-slate-500 italic">* Đã tính dự phòng 25% dòng khởi động và biến động điện áp.</p>
+        </div>
+    `;
+}
+function addPcBuildToCart() {
+    showToast("Đã tính toán xong công suất!");
+    closePcBuilderModal();
+}
 // --- LIGHTBOX ARTISTIC CONTROLLER ---
 let lightboxImages = [];
 let currentLightboxIndex = 0;

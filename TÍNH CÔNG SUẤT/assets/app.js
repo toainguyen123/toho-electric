@@ -147,14 +147,15 @@
     selectedDishIndex = index;
     document.querySelector('#dish-name').textContent = d.name;
     document.querySelector('#category').textContent = d.category;
-    document.querySelector('#description').textContent = d.description;
+    // Thông số hiển thị liền khối như trang sản phẩm (không tách từng ô)
+    const descEl = document.querySelector('#description');
+    descEl.textContent = d.specs;
+    descEl.style.whiteSpace = 'pre-line';
+    descEl.style.maxHeight = '150px';
+    descEl.style.overflowY = 'auto';
     document.querySelector('#price').innerHTML = priceText(d);
     document.querySelector('#time').textContent = d.time;
-    document.querySelector('#tags').replaceChildren(...d.tags.map(t => {
-      const el = document.createElement('span');
-      el.textContent = t;
-      return el;
-    }));
+    document.querySelector('#tags').replaceChildren();
     [...track.children].forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.index) === selectedDishIndex)));
     if (!initial) {
       details.classList.remove('changing');
@@ -198,19 +199,16 @@
   function renderDishDetails(d) {
     document.querySelector('#modal-name').textContent = d.name;
     document.querySelector('#modal-category').textContent = d.category;
-    document.querySelector('#modal-description').textContent = d.description;
+    // Khối mô tả -> dòng mã sản phẩm (theo yêu cầu)
+    document.querySelector('#modal-description').textContent = 'Mã Sản Phẩm: ' + d.time;
     document.querySelector('#modal-time').textContent = d.time;
     document.querySelector('#modal-price').innerHTML = priceText(d);
-    // Thông số nổi bật = gạch đầu dòng chữ (không dùng ảnh nguyên liệu món ăn nữa)
-    document.querySelector('#modal-ingredients').replaceChildren(...d.ingredients.map(text => {
-      const item = document.createElement('li');
-      item.className = 'ingredient-item';
-      const label = document.createElement('span');
-      label.className = 'ingredient-name';
-      label.textContent = text;
-      item.append(label);
-      return item;
-    }));
+    // Thông số trong sản phẩm: nguyên khối như trên trang sản phẩm, KHÔNG tách từng ô
+    const list = document.querySelector('#modal-ingredients');
+    const block = document.createElement('li');
+    block.textContent = d.specs;
+    block.style.cssText = 'grid-column: 1 / -1; list-style: none; border: none; background: transparent; padding: 2px 0; white-space: pre-line; font-size: 13px; line-height: 1.9; font-weight: 500; color: rgb(98, 88, 74); overflow-y: auto; max-height: 265px;';
+    list.replaceChildren(block);
   }
   async function runDetailAnimation(el, keyframes, options) {
     const animation = el.animate(keyframes, {

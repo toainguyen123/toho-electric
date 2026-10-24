@@ -324,11 +324,17 @@ function renderPostList() {
   const titles = Object.keys(_policies);
   const el = document.getElementById('postList');
   if (!el) return;
-  el.innerHTML = titles.map((t) => `
-    <button onclick="openPostEditor('${t.replace(/'/g, "\\'")}')" class="w-full text-left px-3 py-2.5 hover:bg-red-50 rounded-xl font-bold text-xs text-slate-700 hover:text-tohoRed transition">
-      <i class="fa-regular fa-newspaper mr-2 text-slate-400"></i>${t}
+  el.innerHTML = titles.map((t, i) => `
+    <button data-post-i="${i}" class="w-full text-left px-3 py-2.5 hover:bg-red-50 rounded-xl font-bold text-xs text-slate-700 hover:text-tohoRed transition">
+      <i class="fa-regular fa-newspaper mr-2 text-slate-400"></i>${t.length > 90 ? t.slice(0, 88) + '…' : t}
     </button>`).join('') || '<p class="text-xs text-slate-400 p-3">Chưa có bài viết. Bấm nút bài viết mới.</p>';
 }
+
+// Bấm chọn bài viết (đi theo data-index, tránh hỏng khi tiêu đề chứa dấu nháy/ký tự lạ)
+document.getElementById('postList').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-post-i]');
+  if (b) openPostEditor(Object.keys(_policies)[Number(b.dataset.postI)]);
+});
 
 function openPostEditor(title) {
   const t = title || '';

@@ -150,13 +150,25 @@ function serveStatic(req, res, urlPath) {
   if (p.endsWith('/')) p += 'index.html';
   const file = path.join(ROOT, p);
   if (!file.startsWith(ROOT)) { res.writeHead(403); return res.end('Forbidden'); }
-  fs.readFile(file, (err, data) => {
-    if (err) {
-      res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
-      return res.end('<h2 style="font-family:sans-serif">404 — Không thấy file: ' + p + '</h2>');
+  fs.stat(file, (err, st) => {
+    if (!err && st.isDirectory()) { // /san-pham/<id> -> /san-pham/<id>/index.html (trang SEO tĩnh)
+      return serveStatic(req, res, p + '/index.html');
     }
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream' });
-    res.end(data);
+    fs.readFile(file, (err, data) => {
+      if (err) {
+        // thử chạy kèm index.html trước khi báo 404
+        return fs.readFile(file + '/index.html', (e2, d2) => {
+          if (e2) {
+            res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+            return res.end('<h2 style="font-family:sans-serif">404 — Không thấy file: ' + p + '</h2>');
+          }
+          res.writeHead(200, { 'Content-Type': MIME['.html'] });
+          return res.end(d2);
+        });
+      }
+      res.writeHead(200, { 'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream' });
+      res.end(data);
+    });
   });
 }
 

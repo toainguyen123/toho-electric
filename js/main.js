@@ -6,12 +6,11 @@ const categoryBannerMap = {
     "THIẾT BỊ ĐIỆN": "images/opt/category-thiet-bi-dien.webp"
 };
 const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWm2p0bF1cb1jjEdiol9BUZzVnH53XEvwpj9DW9QfOmgmbgj9VIX-QqoXXA6QCP-YvPQQQDGOaVrEW/pub?gid=1881975737&single=true&output=csv';
-const GOOGLE_SHEET_POLICY_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWm2p0bF1cb1jjEdiol9BUZzVnH53XEvwpj9DW9QfOmgmbgj9VIX-QqoXXA6QCP-YvPQQQDGOaVrEW/pub?gid=607784045&single=true&output=csv'; 
+const GOOGLE_SHEET_POLICY_CSV_URL = ''; // (đã tắt) bài viết chỉ quản lý từ Admin cục bộ
 const GOOGLE_SHEET_COUPON_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwd1vDetlRkcIJlVh_kJSPjOkelKivMYZ_t6F_6lj6B9DJZwq9qCcf1Bqv6C8JQ50lOUKwqWaMBuuL/pub?gid=242716168&single=true&output=csv'; 
 
 // === ĐƯỜNG DẪN GOOGLE SHEET THIẾT BỊ CÔNG SUẤT ===
 // BẠN DÁN LINK CSV SHEETS THIẾT BỊ CỦA BẠN VÀO DÒNG DƯỚI DÂY:
-const GOOGLE_SHEET_DEVICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8R7cVFNzYCQSaFr2Qebvp55YQV35S7AuxTx8v49S3qsgDu7BDaR8fa5K8pUjLztJPBhWrMbYFfo75/pubhtml?gid=242716168&single=true';
 
 const SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzth1uAlb4AaxDKmi_Wb0RDdfTPU7ZaqDx6epOz4SRFZeBBYPIWqx2HtsSta479mzLW/exec';
 // Web App của sheet ĐƠN HÀNG (ghi đơn tự động vào Google Sheet) — dán URL sau khi Deploy
@@ -33,13 +32,23 @@ let couponsList = [];
 let appliedCoupon = null;
 let isFlying = false;
 
-// BIO CỦA TÍNH NĂNG TÍNH CÔNG SUẤT
-let deviceList = [];
-let selectedDevices = {};
+// BIO (đã gỡ tính năng tính công suất — giữ chỗ trống cho mục tiêu sau)
 
 // --- TIỆN ÍCH XỬ LÝ HÌNH ẢNH & GIÁ ---
 // Ảnh lỗi cho sạch: dùng file local thay vì dịch vụ placeholder ngoài (tránh thêm chậm/lỗi)
 const IMG_PLACEHOLDER = 'images/no-image.svg';
+
+// Ảnh Google Drive thi thoảng bị từ chối khi tải hàng loạt → thử lại 1 lần sau 1.2s,
+// hỏng hẳn mới thay bằng ảnh dự phòng (tránh khiếm khuyết "không đầy đủ" từ người dùng thấy)
+window.addEventListener('error', (e) => {
+  const img = e.target;
+  if (!(img instanceof HTMLImageElement)) return;
+  const src = String(img.currentSrc || img.src || '');
+  if (!/googleusercontent|drive\.google/.test(src)) return;
+  if (img.dataset.retried) { if (!img.src.includes('no-image')) img.src = IMG_PLACEHOLDER; return; }
+  img.dataset.retried = '1';
+  setTimeout(() => { img.src = IMG_PLACEHOLDER; setTimeout(() => { img.src = src; }, 30); }, 1200);
+}, true);
 
 // chống lặp vô hạn khi placeholder cũng lỗi
 function imgFallback(el) {
@@ -58,8 +67,9 @@ window.sanitizeAttr = sanitizeAttr;
 
 // Chèn tham số kích thước googleusercontent để tải nhẹ hơn (thay vì bản gốc to hàng chục MB)
 function googleImageSized(url, width) {
-    // Bỏ mọi tham số =w... cũ rồi thêm tham số mới
-    return url.replace(/=[^=]*$/, '') + '=w' + width;
+    // LƯU Ý: các file Drive của TOHO KHÔNG nhận tham số =w... (thử =w500/=w600/thumbnail đều lỗi)
+    // → trả về URL góc, chỉ khi ảnh đó là ảnh Drive dùng chung (lh3) có khả năng resize mới ghim tham số
+    return url.replace(/=[^=]*$/, '');
 }
 
 function formatImageUrl(url) {
@@ -302,33 +312,15 @@ async function initData() {
     renderFlashSale();
     renderCategoryBlocks();
 
-    await loadPolicies();          // bài viết / chính sách từ data/policies.js
     await loadCouponsFromSheet();  // mã khuyến mãi (từ Sheet)
-    await loadDevicesFromSheet();
+    await loadPolicies();          // bài viết / chính sách từ data/policies.js (local, admin quản lý)
 
     applyStartupRouting();
 }
 
-// Nạp bài viết / chính sách: ưu tiên source cục bộ (admin đăng), fallback sang Sheet cũ nếu có
+// Nạp bài viết / chính sách: HOÀN TOÀN từ source cục bộ (admin đăng) — không lấy từ Sheet nữa
 async function loadPolicies() {
-    loadDefaultPolicies();
-    if (window.POLICIES_DATA && Object.keys(window.POLICIES_DATA).length) {
-        policiesMap = Object.assign(policiesMap, window.POLICIES_DATA);
-    }
-    if (GOOGLE_SHEET_POLICY_CSV_URL) {
-        try {
-            const cacheBusterUrl = GOOGLE_SHEET_POLICY_CSV_URL + '&t=' + new Date().getTime();
-            const response = await fetch(cacheBusterUrl);
-            if (response.ok) {
-                const rows = parseCSV(await response.text());
-                rows.forEach(cols => {
-                    if (cols.length >= 2 && cols[0].trim() && cols[1].trim()) {
-                        policiesMap[cols[0].trim()] = cols[1].trim();
-                    }
-                });
-            }
-        } catch (e) { /* sheet không tải được vẫn còn bản local */ }
-    }
+    policiesMap = Object.assign({}, window.POLICIES_DATA || {});
     // Vẽ lại danh sách chính sách nếu đã render rồi
     if (typeof renderPolicies === 'function' && document.getElementById('policyList')) {
         try { renderPolicies(); } catch (e) { /* bỏ qua */ }
@@ -387,107 +379,6 @@ function loadProductsFallback() {
         document.head.appendChild(s);
     });
 }
-// === NẠP DANH SÁCH THIẾT BỊ TỪ GOOGLE SHEET (ĐÃ XỬ LÝ LỖI HOÀN CHỈNH) ===
-async function loadDevicesFromSheet() {
-    const defaultDevices = [
-        { id: 'dev_1', name: 'Quạt máy', power: 60, icon: 'fa-fan' },
-        { id: 'dev_2', name: 'Tivi LED', power: 150, icon: 'fa-tv' },
-        { id: 'dev_3', name: 'Đèn chiếu sáng', power: 40, icon: 'fa-lightbulb' },
-        { id: 'dev_4', name: 'Tủ lạnh', power: 200, icon: 'fa-snowflake' },
-        { id: 'dev_5', name: 'Bếp từ / Bếp điện', power: 2000, icon: 'fa-fire-burner' },
-        { id: 'dev_6', name: 'Điều hòa / Máy lạnh', power: 1200, icon: 'fa-wind' },
-        { id: 'dev_7', name: 'Nồi cơm điện', power: 700, icon: 'fa-kitchen-set' },
-        { id: 'dev_8', name: 'Máy giặt', power: 500, icon: 'fa-shirt' }
-    ];
-
-    if (!GOOGLE_SHEET_DEVICES_CSV_URL) {
-        deviceList = defaultDevices;
-        return;
-    }
-
-    try {
-        // Tự động xử lý URL Google Sheet pubhtml sang dạng xuất CSV hợp lệ
-        let targetUrl = GOOGLE_SHEET_DEVICES_CSV_URL.trim();
-        if (targetUrl.includes('/pubhtml')) {
-            targetUrl = targetUrl.replace('/pubhtml', '/pub');
-            if (!targetUrl.includes('output=csv')) {
-                targetUrl += (targetUrl.includes('?') ? '&' : '?') + 'output=csv';
-            }
-        }
-
-        const cacheBusterUrl = targetUrl + (targetUrl.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
-        const res = await fetch(cacheBusterUrl);
-        if (!res.ok) {
-            deviceList = defaultDevices;
-            return;
-        }
-
-        const csvText = await res.text();
-        const rows = parseCSV(csvText);
-
-        deviceList = [];
-        for (let i = 1; i < rows.length; i++) {
-            const cols = rows[i];
-            if (cols && cols.length >= 2) {
-                const nameStr = cols[0].replace(/^["']|["']$/g, '').trim();
-                const powerVal = parseInt(cols[1].replace(/[^0-9]/g, ''), 10) || 0;
-                
-                // Lọc bỏ dữ liệu rác/mã lệnh JS không hợp lệ
-                if (nameStr && !nameStr.includes('function') && !nameStr.includes('prototype') && powerVal >= 0) {
-                    deviceList.push({
-                        id: 'dev_' + i,
-                        name: nameStr,
-                        power: powerVal,
-                        icon: (cols[2] && !cols[2].includes('function')) ? cols[2].trim() : 'fa-plug'
-                    });
-                }
-            }
-        }
-
-        if (deviceList.length === 0) {
-            deviceList = defaultDevices;
-        }
-    } catch (e) {
-        console.warn("Lỗi nạp danh sách thiết bị từ Sheet, dùng mặc định:", e);
-        deviceList = defaultDevices;
-    }
-}
-
-async function loadPoliciesFromSheet() {
-    loadDefaultPolicies();
-    if (!GOOGLE_SHEET_POLICY_CSV_URL) return;
-
-    try {
-        const cacheBusterUrl = GOOGLE_SHEET_POLICY_CSV_URL + '&t=' + new Date().getTime();
-        const res = await fetch(cacheBusterUrl);
-        if (!res.ok) throw new Error("Không thể kết nối tập tin chính sách CSV.");
-
-        const csvText = await res.text();
-        const rows = parseCSV(csvText);
-
-        rows.forEach(cols => {
-            if (cols.length >= 2) {
-                const policyTitle = cols[0].trim();
-                const policyContent = cols[1].trim();
-                if (policyTitle && policyContent) {
-                    policiesMap[policyTitle] = policyContent;
-                }
-            }
-        });
-    } catch (e) {
-        console.warn("Dùng dữ liệu chính sách mặc định do lỗi:", e);
-    }
-}
-
-function loadDefaultPolicies() {
-    policiesMap = {
-        "CHÍNH SÁCH GIAO HÀNG": "Chúng tôi giao hàng toàn quốc. Khách hàng được kiểm tra hàng trước khi thanh toán.\nMiễn phí vận chuyển cho đơn hàng từ 300.000đ.",
-        "ĐỔI TRẢ DỄ DÀNG": "Sản phẩm được đổi mới 1 đổi 1 trong vòng 7 ngày kể từ khi nhận hàng nếu có lỗi từ nhà sản xuất.",
-        "GIÁ LUÔN LUÔN RẺ NHẤT": "Cam kết mang đến sản phẩm chất lượng tốt nhất với mức giá cạnh tranh nhất trên thị trường.",
-        "HỖ TRỢ NHIỆT TÌNH": "Đội ngũ kỹ thuật viên tư vấn 24/7 qua Zalo và Hotline 076 871 8896."
-    };
-}
-
 async function loadCouponsFromSheet() {
     if (!GOOGLE_SHEET_COUPON_CSV_URL) return;
     try {
@@ -1075,7 +966,7 @@ function renderProductCard(p) {
             ${p.badge ? `<span class="absolute top-3 left-3 bg-starRed text-white text-[10px] font-extrabold px-2 py-0.5 rounded-lg shadow-md z-10 font-heading">${p.badge}</span>` : (fp > 0 ? `<span class="absolute top-3 left-3 bg-gradient-to-r from-amber-400 to-red-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-lg shadow-md z-10 font-heading"><i class="fa-solid fa-bolt mr-0.5"></i>FLASH</span>` : (hasDiscount ? `<span class="absolute top-3 left-3 bg-starRed text-white text-[10px] font-extrabold px-2 py-0.5 rounded-lg shadow-md z-10 font-heading">-${discount}%</span>` : ''))}
             
            <div class="w-full h-70 md:h-72 flex items-center justify-center p-2 rounded-xl bg-slate-50 mb-2 overflow-hidden">
-                <img src="${p.image}" onerror="imgFallback(this)" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300" alt="${p.name} - ${p.code}">
+                <img src="${p.image || IMG_PLACEHOLDER}" onerror="imgFallback(this)" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300" alt="${p.name} - ${p.code}">
            </div>
 
             <div class="space-y-1.5 flex-1 flex flex-col justify-between">
@@ -1238,7 +1129,7 @@ function openProductDetail(id) {
         <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div class="md:col-span-5 space-y-4">
                 <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-inner flex items-center justify-center min-h-[300px]">
-                    <img id="mainDetailImage" src="${p.image}" onerror="imgFallback(this)" decoding="async" class="max-h-80 object-contain hover:scale-105 transition cursor-pointer" onclick="openLightbox('${p.image}')" alt="${p.name} - ${p.code}">
+                    <img id="mainDetailImage" src="${p.image || IMG_PLACEHOLDER}" onerror="imgFallback(this)" decoding="async" class="max-h-80 object-contain hover:scale-105 transition cursor-pointer" onclick="openLightbox('${p.image}')" alt="${p.name} - ${p.code}">
                 </div>
                 ${p.images && p.images.length > 1 ? `
                     <div class="flex space-x-2 overflow-x-auto pb-2">
@@ -1828,149 +1719,6 @@ function closeLightbox() {
     if (modal) modal.classList.add('hidden');
 }
 
-// === TÍNH NĂNG TÍNH CÔNG SUẤT BẰNG JS HOÀN CHỈNH ===
-function openPcBuilderModal() {
-    const modal = document.getElementById('pcBuilderModal');
-    if (modal) modal.classList.remove('hidden');
-    renderPowerCalculator();
-}
-
-function closePcBuilderModal() {
-    const modal = document.getElementById('pcBuilderModal');
-    if (modal) modal.classList.add('hidden');
-}
-
-// Biến lưu từ khóa tìm kiếm thiết bị trong modal
-let deviceSearchQuery = '';
-
-function renderPowerCalculator() {
-    const container = document.getElementById('pcBuilderComponentsList');
-    if (!container) return;
-
-    if (deviceList.length === 0) {
-        container.innerHTML = `<p class="text-slate-400 text-center py-4">Đang tải danh sách thiết bị...</p>`;
-        return;
-    }
-
-    // Lọc danh sách thiết bị theo từ khóa tìm kiếm
-    const filteredDevices = deviceList.filter(dev => 
-        dev.name.toLowerCase().includes(deviceSearchQuery.toLowerCase())
-    );
-
-    container.innerHTML = `
-        <div class="space-y-4">
-            <p class="text-slate-600 text-xs">Nhập tìm kiếm hoặc chọn số lượng các thiết bị điện đang sử dụng:</p>
-            
-            <!-- Ô TÌM KIẾM THIẾT BỊ -->
-            <div class="relative">
-                <input type="text" 
-                       id="deviceSearchInput" 
-                       placeholder="Tìm nhanh thiết bị (vd: Quạt, Tivi, Máy lạnh...)..." 
-                       value="${deviceSearchQuery}"
-                       oninput="handleDeviceSearch(this.value)"
-                       class="w-full border border-slate-200 rounded-xl px-3.5 py-2 pl-9 text-xs focus:outline-none focus:border-starRed bg-slate-50">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-1">
-                ${filteredDevices.length > 0 ? filteredDevices.map(dev => {
-                    const qty = selectedDevices[dev.id] || 0;
-                    return `
-                        <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-200 bg-slate-50/50">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-8 h-8 rounded-xl bg-red-100 text-starRed flex items-center justify-center shrink-0">
-                                    <i class="fa-solid ${dev.icon}"></i>
-                                </div>
-                                <div>
-                                    <h5 class="font-bold text-slate-800 text-xs">${dev.name}</h5>
-                                    <span class="text-[10px] text-slate-500 font-mono">${dev.power} W/cái</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2 bg-white rounded-xl border border-slate-200 p-1">
-                                <button onclick="updateDeviceQty('${dev.id}', -1)" class="w-6 h-6 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-100 rounded-lg">-</button>
-                                <span class="font-bold px-1 min-w-[20px] text-center text-xs">${qty}</span>
-                                <button onclick="updateDeviceQty('${dev.id}', 1)" class="w-6 h-6 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-100 rounded-lg">+</button>
-                            </div>
-                        </div>
-                    `;
-                }).join('') : `<p class="col-span-2 text-center text-slate-400 text-xs py-4">Không tìm thấy thiết bị phù hợp</p>`}
-            </div>
-            
-            <div id="calculatorResultArea" class="pt-3 border-t border-slate-200 space-y-3"></div>
-        </div>
-    `;
-
-    calculateTotalPower();
-
-    // Giữ tiêu điểm (focus) vào ô tìm kiếm khi gõ
-    const input = document.getElementById('deviceSearchInput');
-    if (input && deviceSearchQuery) {
-        input.focus();
-        input.setSelectionRange(input.value.length, input.value.length);
-    }
-}
-
-// Xử lý sự kiện tìm kiếm thiết bị
-function handleDeviceSearch(val) {
-    deviceSearchQuery = val;
-    renderPowerCalculator();
-}
-function updateDeviceQty(devId, delta) {
-    const current = selectedDevices[devId] || 0;
-    const updated = Math.max(0, current + delta);
-    if (updated === 0) {
-        delete selectedDevices[devId];
-    } else {
-        selectedDevices[devId] = updated;
-    }
-    renderPowerCalculator();
-}
-
-function calculateTotalPower() {
-    let totalWatts = 0;
-    Object.keys(selectedDevices).forEach(id => {
-        const dev = deviceList.find(d => d.id === id);
-        if (dev) {
-            totalWatts += dev.power * selectedDevices[id];
-        }
-    });
-
-    const totalKva = (totalWatts / 1000 / 0.8).toFixed(1);
-    const recommendedKva = Math.ceil((totalWatts / 1000 / 0.8) * 1.25);
-
-    const resultArea = document.getElementById('calculatorResultArea');
-    const totalEl = document.getElementById('pcBuilderTotal');
-
-    if (totalEl) {
-        totalEl.innerText = `${totalWatts.toLocaleString('vi-VN')} W (~ ${totalKva} kVA)`;
-    }
-
-    if (!resultArea) return;
-
-    if (totalWatts === 0) {
-        resultArea.innerHTML = `<p class="text-xs text-slate-400 italic text-center">Vui lòng chọn ít nhất 1 thiết bị để tính toán công suất phù hợp.</p>`;
-        return;
-    }
-
-    // HIỂN THỊ KẾT QUẢ TÍNH TỔNG CÔNG SUẤT (ĐÃ XÓA PHẦN GỢI Ý SẢN PHẨM)
-    resultArea.innerHTML = `
-        <div class="bg-red-50/80 border border-red-200 p-4 rounded-2xl space-y-2">
-            <div class="flex justify-between items-center text-xs font-bold text-slate-800">
-                <span>Tổng công suất sử dụng:</span>
-                <span class="text-starRed text-sm font-mono font-black">${totalWatts.toLocaleString('vi-VN')} Watts</span>
-            </div>
-            <div class="flex justify-between items-center text-xs text-slate-600">
-                <span>Khuyến nghị chọn Ổn áp / Biến áp:</span>
-                <span class="font-bold text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200">Từ ${recommendedKva} kVA trở lên</span>
-            </div>
-            <p class="text-[11px] text-slate-500 italic">* Đã tính dự phòng 25% dòng khởi động và biến động điện áp.</p>
-        </div>
-    `;
-}
-function addPcBuildToCart() {
-    showToast("Đã tính toán xong công suất!");
-    closePcBuilderModal();
-}
 // --- LIGHTBOX ARTISTIC CONTROLLER ---
 let lightboxImages = [];
 let currentLightboxIndex = 0;

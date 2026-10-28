@@ -55,6 +55,7 @@
       <button class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-gauge-high"></i>Dashboard</button>
       <button class="nav-item" data-tab="products" onclick="switchTab('products')"><i class="fa-solid fa-boxes-stacked"></i>Sản Phẩm</button>
       <button class="nav-item" data-tab="orders" onclick="switchTab('orders')"><i class="fa-solid fa-receipt"></i>Đơn Hàng <span id="ordersNavBadge" class="hidden ml-auto bg-white text-tohoRed text-[10px] font-black px-1.5 py-0.5 rounded-full">0</span></button>
+      <button class="nav-item" data-tab="warranty" onclick="switchTab('warranty')"><i class="fa-solid fa-shield-halved"></i>Bảo Hành <span id="warrantyNavBadge" class="hidden ml-auto bg-white text-tohoRed text-[10px] font-black px-1.5 py-0.5 rounded-full">0</span></button>
       <button class="nav-item" data-tab="flash" onclick="switchTab('flash')"><i class="fa-solid fa-bolt"></i>Flash Sale</button>
       <button class="nav-item" data-tab="posts" onclick="switchTab('posts')"><i class="fa-solid fa-newspaper"></i>Bài Viết</button>
       <button class="nav-item" data-tab="sync" onclick="switchTab('sync')"><i class="fa-solid fa-cloud-arrow-down"></i>Đồng Bộ &amp; Xuất</button>
@@ -394,6 +395,192 @@
         </div>
       </section>
 
+      <!-- ============ BẢO HÀNH (phiếu + in thẻ + voucher) ============ -->
+      <section id="tab-warranty" class="hidden space-y-4">
+        <div class="bg-gradient-to-r from-tohoRed to-amber-500 rounded-2xl shadow p-6 text-white flex items-center justify-between flex-wrap gap-4">
+          <div class="flex items-center gap-4">
+            <span class="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-2xl"><i class="fa-solid fa-shield-halved"></i></span>
+            <div>
+              <p class="font-black text-lg uppercase">Khu vực Bảo Hành</p>
+              <p class="text-white/80 text-xs">Phiếu khách đăng ký tại <b>/bao-hanh/</b> → lưu Google Sheets — xử lý &amp; in thẻ ngay tại đây</p>
+            </div>
+          </div>
+          <button id="btnRefresh" class="btn bg-white/15 hover:bg-white/25 text-white border border-white/30 rounded-xl">↻ Làm mới</button>
+          <button onclick="window.open('https://docs.google.com/spreadsheets/d/e/2PACX-1vTJC1JSQqDc9xMbqzLWIPw1csHtwkQ95vTeQiMabe8L8R5vt1T3Yi6Q5penOOh_5qpmZGNfa_C8711i/pubhtml?gid=1943665480&single=true','_blank')" class="btn bg-white/15 hover:bg-white/25 text-white border border-white/30 rounded-xl">
+            <i class="fa-solid fa-table"></i> Mở Google Sheets
+          </button>
+        </div>
+
+        <!-- chuyển mục con -->
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-1.5 flex gap-1 w-fit">
+          <button id="wTabPhi" class="w-sub-btn active" onclick="wSwitch('phi')">🛠️ PHIẾU &amp; VOUCHER</button>
+          <button id="wTabCard" class="w-sub-btn" onclick="wSwitch('card')">🖨️ IN THẺ BẢO HÀNH</button>
+        </div>
+
+        <div id="wBannerWarn" class="banner-warn" style="display:none">
+          ⚠️ Chưa gán <b>APPS_SCRIPT_URL</b> trong <b>bao-hanh/config.js</b> → chưa đọc được phiếu / chưa lưu mã lên Sheets.
+        </div>
+        <div id="wBannerErr" class="banner-err" style="display:none"></div>
+
+        <!-- ====== VIEW PHIẾU + VOUCHER ====== -->
+        <div id="wViewPhi" class="space-y-4">
+          <section class="stats" id="stats"></section>
+
+          <div class="toolbar">
+            <div class="search"><input type="text" id="qSearch" placeholder="Tìm theo mã phiếu, tên, SĐT, sản phẩm..."></div>
+            <select id="fStatus"><option value="">Tất cả tình trạng</option></select>
+            <select id="fPlatform"><option value="">Tất cả nền tảng</option></select>
+            <label class="tgl"><input type="checkbox" id="autoReload" checked> Tự làm mới 60s</label>
+            <span class="count-note" id="countNote"></span>
+            <button class="btn-tb primary" id="btnReload2" style="margin-left:auto">Đọc lại phiếu</button>
+            <button class="btn-tb" id="btnExport">⬇ Xuất file</button>
+          </div>
+
+          <div class="tbl-card">
+            <div class="tbl-scroll">
+              <table>
+                <thead><tr>
+                  <th>MÃ PHIẾU</th><th>KHÁCH HÀNG</th><th>SẢN PHẨM</th><th>GỬI LÚC</th>
+                  <th>NGÀY MUA</th><th>LỖI / MÔ TẢ</th><th>ẢNH/VIDEO</th><th>TÌNH TRẠNG</th><th>GHI CHÚ</th>
+                </tr></thead>
+                <tbody id="tbody"></tbody>
+              </table>
+              <div class="empty-state" id="emptyState">
+                <div class="em">📭</div>
+                <b>Chưa có phiếu nào</b>
+                Khi khách đăng ký bảo hành, phiếu sẽ hiện tại đây (bấm "Đọc lại phiếu").
+              </div>
+            </div>
+          </div>
+
+          <div class="tbl-title">🎟️ Trạng thái voucher — tab <b>VOUCHER</b> trên Google Sheets</div>
+          <div class="tbl-card">
+            <div class="tbl-act" style="padding:14px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)">
+              <input type="text" id="vouInput" placeholder="Nhập mã khách xuất trình... VD: VC-000001" maxlength="30"
+                style="flex:1;min-width:220px;font:inherit;font-size:14px;border:1.6px solid var(--line);border-radius:12px;padding:10px 14px;outline:none;text-transform:uppercase;font-weight:700;letter-spacing:.5px">
+              <button class="btn-tb primary" id="btnVouUsed">✔ Đánh dấu ĐÃ SỬ DỤNG</button>
+            </div>
+            <div class="tbl-act" style="border-bottom:1px solid var(--line)">
+              <div class="search" style="flex:1"><input type="text" id="vouSearch" placeholder="Tìm trong danh sách voucher..." style="text-transform:none"></div>
+              <button class="btn-tb" id="btnVouReload">↻ Đọc lại từ Sheets</button>
+              <span class="count-note" id="vouCount"></span>
+            </div>
+            <div class="tbl-scroll">
+              <table>
+                <thead><tr><th>MÃ VOUCHER</th><th>MÃ THẺ</th><th>TRẠNG THÁI</th><th>NGÀY IN</th><th>HIỆU LỰC ĐẾN</th><th>NGÀY DÙNG</th><th>GỬI QUA PHIẾU</th></tr></thead>
+                <tbody id="vouTbody"></tbody>
+              </table>
+              <div class="empty-state" id="vouEmpty">
+                <div class="em">🎟️</div>
+                <b>Chưa có voucher nào</b>
+                Bấm mục <b>IN THẺ BẢO HÀNH</b> → <b>Cập nhật Sheets &amp; In</b> — mã voucher + mã thẻ sẽ ghi vào tab <b>VOUCHER</b>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ====== VIEW IN THẺ ====== -->
+        <div id="wViewCard" style="display:none">
+          <div class="setup-panel">
+            <div class="setup-grid">
+              <div class="fld"><label>CHỮ HIỆU NGẮN (dải đen)</label><input id="inBrandShort" value="TOHO" maxlength="8"></div>
+              <div class="fld"><label>TÊN ĐẦY ĐỦ (thương hiệu)</label><input id="inShop" placeholder="TOHO ELECTRIC VN"></div>
+              <div class="fld"><label>NGÀNH HÀNG / MÔ TẢ</label><input id="inDesc" placeholder="Ổ CẮM - THIẾT BỊ ĐIỆN CHÍNH HÃNG"></div>
+              <div class="fld"><label>WEBSITE (hiện trên thẻ)</label><input id="inWebsite" placeholder="https://toho-electric.vercel.app/"></div>
+              <div class="fld"><label>SLOGAN (chữ viết tay đỏ)</label><input id="inSlogan" value="Chất lượng là uy tín"></div>
+
+              <div class="fld"><label>VOUCHER GIẢM (%)</label><input id="inVoucherPct" value="15%"></div>
+              <div class="fld"><label>VOUCHER ÁP DỤNG CHO</label><input id="inVoucherLine" placeholder="CHO ĐƠN HÀNG TIẾP THEO"></div>
+              <div class="fld"><label>DÒNG ★ KHÔNG GIỚI HẠN</label><input id="inUnlimited" placeholder="KHÔNG GIỚI HẠN SỐ LƯỢNG • ..."></div>
+              <div class="fld"><label>ZALO / HOTLINE</label><input id="inHotline" placeholder="0768718896"></div>
+              <div class="fld"><label>TÊN FACEBOOK</label><input id="inFb" placeholder="TOHO ELECTRIC VN"></div>
+
+              <div class="fld"><label>KHỔ GIẤY</label>
+                <select id="inPaper">
+                  <option value="a4p">A4 dọc</option>
+                  <option value="a4l">A4 ngang</option>
+                  <option value="a5p">A5 dọc</option>
+                  <option value="a5l">A5 ngang — 4 thẻ/trang</option>
+                </select>
+              </div>
+              <div class="fld"><label>BỐ CỤC THẺ/TRANG</label><select id="inLayout"></select></div>
+              <div class="fld"><label>CÁCH SINH MÃ</label>
+                <select id="inGenMode">
+                  <option value="seq">Số liên tiếp</option>
+                  <option value="rand">Số ngẫu nhiên</option>
+                  <option value="manual">Nhập tay</option>
+                </select>
+              </div>
+              <div class="fld"><label>SỐ LƯỢNG THẺ</label><input id="inCount" type="number" value="8" min="1" max="200"></div>
+              <div class="fld"><label>TIỀN TỐ MÃ</label><input id="inPrefix" value="TOHO15-" maxlength="12"></div>
+
+              <div class="fld" id="grpSeqFrom"><label>SINH LIÊN TIẾP — BẮT ĐẦU TỪ SỐ</label>
+                <input id="inSeqFrom" type="number" value="202501" min="0" max="99999999">
+                <span class="hint">Lần sinh sau <b>tự tiếp tục số</b> — muốn in lại lô cũ thì nhập lại.</span>
+              </div>
+              <div class="fld" id="grpManual" style="display:none"><label>NHẬP MÃ TAY (ngăn cách , ; hoặc xuống dòng)</label>
+                <input id="inManual" placeholder="TOHO15-202501, TOHO15-202502, ...">
+              </div>
+
+              <div class="fld"><label>CÁCH SINH VOUCHER</label>
+                <select id="inVouMode">
+                  <option value="seq">Số liên tiếp</option>
+                  <option value="rand">Số ngẫu nhiên</option>
+                </select>
+                <span class="hint">Số lượng mã voucher = số thẻ.</span>
+              </div>
+              <div class="fld"><label>TIỀN TỐ MÃ VOUCHER</label>
+                <input id="inVouPrefix" value="VC-" maxlength="12">
+                <span class="hint">Khác tiền tố mã BH → không lo hiểu nhầm.</span>
+              </div>
+              <div class="fld"><label>VOUCHER — BẮT ĐẦU TỪ SỐ</label>
+                <input id="inVouFrom" type="number" value="1" min="0" max="99999999">
+              </div>
+              <div class="fld"><label>HIỆU LỰC VOUCHER (NGÀY)</label>
+                <input id="inVouValid" type="number" value="30" min="1" max="3650">
+                <span class="hint">Ghi cột "HIỆU LỰC ĐẾN" = ngày in + số ngày này.</span>
+              </div>
+              <div class="fld"><label>VOUCHER GIẢM (VD: 50000 HOẶC 10%)</label>
+                <input id="inVouDiscount" placeholder="50000 hoặc 10%">
+                <span class="hint">Cột DISCOUNT_VALUE — khách áp mã được giảm số tiền này.</span>
+              </div>
+              <div class="fld"><label>ĐƠN TỐI THIỂU (MIN_ORDER)</label>
+                <input id="inVouMinOrder" type="number" value="0" min="0" step="1000">
+                <span class="hint">0 = áp dụng cho mọi đơn hàng.</span>
+              </div>
+              <div class="fld"><label>SỐ LƯỢNG LƯỢT DÙNG / MÃ</label>
+                <input id="inVouQty" type="number" value="1" min="1" max="100000">
+                <span class="hint">Cột SỐ LƯỢNG — hết lượt thì mã tự vô hiệu.</span>
+              </div>
+              <div class="fld full"><label>LINK QR (TRANG ĐĂNG KÝ BẢO HÀNH — bắt buộc)</label>
+                <input id="inUrl" placeholder="https://toho-electric.vercel.app/bao-hanh/">
+              </div>
+            </div>
+
+            <div class="gen-row">
+              <button class="btn-big btn-gen" id="btnGen">✨ TẠO THẺ XEM TRƯỚC</button>
+              <button class="btn-big btn-in" id="btnPrint">🖨️ IN THẺ NGAY</button>
+              <button class="btn-big btn-copy" id="btnCopyCodes">📋 Copy mã BH</button>
+              <button class="btn-big btn-copy" id="btnCopyVou">📋 Copy mã VOUCHER</button>
+            </div>
+            <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div>
+                <textarea id="codeList" rows="3" readonly style="width:100%;font:inherit;font-size:12px;border:1.6px solid var(--line);border-radius:11px;padding:9px 12px;outline:none;font-weight:700;color:#e11d1d;background:#fbfbfe" placeholder="MÃ BẢO HÀNH (lưu lại theo lô hàng)"></textarea>
+              </div>
+              <div>
+                <textarea id="codeListVou" rows="3" readonly style="width:100%;font:inherit;font-size:12px;border:1.6px solid var(--line);border-radius:11px;padding:9px 12px;outline:none;font-weight:700;color:#92400e;background:#fffbeb" placeholder="MÃ VOUCHER (lưu lại theo lô hàng)"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="tip">
+            💡 <b>In chuẩn, không lệch:</b> bấm <b>🖨️ IN THẺ NGAY</b> → chọn khổ giấy <b>đúng như đã chọn</b>, khoảng cách <b>None / Không</b>, tỉ lệ <b>100%</b>, bỏ tick <b>Headers and footers</b>, <b>BẮT BUỘC tick "Background graphics / Đồ họa nền"</b> — nếu không tick, dải đen sẽ mất khi in. Thẻ 148 × 105 mm (A6 ngang), tự co vừa bố cục.
+          </div>
+          <div class="stage-info" id="stageInfo">Điền thông tin → bấm <b>✨ TẠO THẺ XEM TRƯỚC</b>.</div>
+          <div class="sheet-frame" id="stage"></div>
+        </div>
+      </section>
+
     </main>
   </div>
 </div>
@@ -455,6 +642,32 @@
 <!-- toast -->
 <div id="toast" class="fixed bottom-6 right-6 z-50 space-y-2"></div>
 
+<!-- ===== MODAL XÁC NHẬN IN THẺ + CẬP NHẬT MÃ LÊN SHEETS ===== -->
+<div class="overlay" id="printOverlay">
+  <div class="modal">
+    <h3>🖨️ Sẵn sàng in — cập nhật mã lên Sheets?</h3>
+    <p class="msub">Danh sách mã bên dưới sẽ được ghi vào tab <b>VOUCHER</b> và <b>MÃ THẺ BẢO HÀNH</b> trên Google Sheets.
+      Khi khách đăng ký bảo hành / áp mã thanh toán, dòng đó được tự cập nhật.</p>
+    <div class="mstats">
+      <div class="mstat"><b id="mCountCards">0</b><span>thẻ bảo hành</span></div>
+      <div class="mstat"><b id="mCountVou">0</b><span>mã voucher</span></div>
+    </div>
+    <div class="mcols">
+      <div><small style="font-size:11px;font-weight:700;color:var(--muted)">MÃ BẢO HÀNH</small><div class="mbox" id="mBoxesCode"></div></div>
+      <div><small style="font-size:11px;font-weight:700;color:#92400e">MÃ VOUCHER</small><div class="mbox" id="mBoxesVou"></div></div>
+    </div>
+    <div class="mwarn" id="mWarn" style="display:none">⚠️ Config chưa có APPS_SCRIPT_URL → chỉ in, không lưu được mã lên Sheets.</div>
+    <div class="mrow">
+      <button class="mbtn main" id="mBtnSyncPrint">✅ CẬP NHẬT SHEETS &amp; IN</button>
+      <button class="mbtn ghost" id="mBtnPrintOnly">🖨️ IN NGAY (không cập nhật)</button>
+      <button class="mbtn ghost" id="mBtnCancel">Hủy</button>
+    </div>
+    <div class="mprog" id="mProg"></div>
+  </div>
+</div>
+
+<script src="bao-hanh/config.js"></script>
+<script src="js/admin-warranty.js"></script>
 <script src="js/admin-ui.js"></script>
 </body>
 </html>

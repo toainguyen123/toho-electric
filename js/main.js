@@ -8,7 +8,7 @@ const categoryBannerMap = {
 const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWm2p0bF1cb1jjEdiol9BUZzVnH53XEvwpj9DW9QfOmgmbgj9VIX-QqoXXA6QCP-YvPQQQDGOaVrEW/pub?gid=1881975737&single=true&output=csv';
 const GOOGLE_SHEET_POLICY_CSV_URL = ''; // (đã tắt) bài viết chỉ quản lý từ Admin cục bộ
 const GOOGLE_SHEET_DEVICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8R7cVFNzYCQSaFr2Qebvp55YQV35S7AuxTx8v49S3qsgDu7BDaR8fa5K8pUjLztJPBhWrMbYFfo75/pubhtml?gid=242716168&single=true'; // Sheet DANH SÁCH THIẾT BỊ (nhiều thiết bị)
-const GOOGLE_SHEET_COUPON_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwd1vDetlRkcIJlVh_kJSPjOkelKivMYZ_t6F_6lj6B9DJZwq9qCcf1Bqv6C8JQ50lOUKwqWaMBuuL/pub?gid=242716168&single=true&output=csv'; 
+const GOOGLE_SHEET_COUPON_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJC1JSQqDc9xMbqzLWIPw1csHtwkQ95vTeQiMabe8L8R5vt1T3Yi6Q5penOOh_5qpmZGNfa_C8711i/pub?gid=881258041&single=true&output=csv'; // tab VOUCHER của file BẢO HÀNH
 
 // === ĐƯỜNG DẪN GOOGLE SHEET THIẾT BỊ CÔNG SUẤT ===
 // BẠN DÁN LINK CSV SHEETS THIẾT BỊ CỦA BẠN VÀO DÒNG DƯỚI DÂY:
@@ -485,22 +485,67 @@ async function loadCouponsFromSheet() {
         const csvText = await res.text();
         const rows = parseCSV(csvText);
 
+        // Bố cục tab VOUCHER (10 cột A–J):
+        // A MÃ VOUCHER | B MÃ THẺ | C TRẠNG THÁI | D NGÀY IN | E NGÀY SỬ DỤNG
+        // F GỬI QUA PHIẾU | G HIỆU LỰC ĐẾN | H DISCOUNT_VALUE | I MIN_ORDER | J SỐ LƯỢNG
         couponsList = [];
         for (let i = 1; i < rows.length; i++) {
             const cols = rows[i];
-            if (cols.length >= 3) {
-                couponsList.push({
-                    code: cols[0].trim().toUpperCase(),
-                    type: (cols[1] || 'AMOUNT').trim().toUpperCase(),
-                    value: parsePrice(cols[2]),
-                    minOrder: parsePrice(cols[3] || 0),
-                    quantity: parsePrice(cols[4] || 0)
-                });
+            const code = (cols[0] || '').trim().toUpperCase();
+            if (!code || code.includes('MÃ VOUCHER')) continue; // bỏ dòng header
+
+            const status = (cols[2] || '').trim();
+            // HIỆU LỰC ĐẾN dạng dd/mm/yyyy (hoặc ISO)
+            let validTo = null;
+            const vtStr = (cols[6] || '').trim();
+            if (vtStr) {
+                const m = vtStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+                if (m) validTo = new Date(+m[3], +m[2] - 1, +m[1], 23, 59, 59);
+                else { const d = new Date(vtStr); if (!isNaN(d)) validTo = d; }
             }
+            // DISCOUNT_VALUE: "10%" → giảm theo %, số thường → giảm tiền (VND)
+            const discStr = (cols[7] || '').trim();
+            const value = parsePrice(discStr);
+            if (!(value > 0)) continue; // chưa set giảm giá → không dùng được
+            const minOrder = parsePrice(cols[8] || 0);
+            const qtyRaw = (cols[9] || '').trim();
+            const quantity = qtyRaw === '' ? null : parseInt(qtyRaw, 10);
+
+            couponsList.push({
+                code,
+                type: discStr.includes('%') ? 'PERCENT' : 'AMOUNT',
+                value,
+                minOrder,
+                quantity,
+                status,
+                validTo
+            });
         }
     } catch (e) {
-        console.warn("Không thể tải danh sách mã khuyến mãi:", e);
+        console.warn("Không thể tải danh sách voucher từ Google Sheets:", e);
     }
+}
+
+// === VOUCHER — ghi nhận đã dùng lên Google Sheets (trừ SỐ LƯỢNG) sau khi đặt hàng ===
+const WARRANTY_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0C8zN8-E_aSVAwn1NOp9GNq0KOb6lu9DyJgIR-EnTg-jmnmNwOLecAw2fKPMtpsnh3w/exec';
+const WARRANTY_APPS_KEY = 'shop2026';
+function jsonpGet(url) {
+    return new Promise((resolve, reject) => {
+        const cb = 'toho_cb_' + Math.random().toString(36).slice(2) + Date.now();
+        const s = document.createElement('script');
+        const timer = setTimeout(() => { cleanup(); reject(new Error('TIMEOUT')); }, 15000);
+        function cleanup() { s.remove(); try { delete window[cb]; } catch (e) {} }
+        window[cb] = (data) => { clearTimeout(timer); cleanup(); resolve(data); };
+        s.onerror = () => { clearTimeout(timer); cleanup(); reject(new Error('NETWORK')); };
+        s.src = url + '&callback=' + cb;
+        document.body.appendChild(s);
+    });
+}
+async function markVoucherUsed(code) {
+    try {
+        const p = new URLSearchParams({ key: WARRANTY_APPS_KEY, action: 'usevoucher', code: String(code || '').trim().toUpperCase() });
+        await jsonpGet(WARRANTY_APPS_SCRIPT_URL + '?' + p.toString());
+    } catch (e) { /* lỗi mạng / chưa cấu hình → bỏ qua yên lặng, không ảnh hưởng đơn */ }
 }
 
 // --- SLIDER & TIMER ---
@@ -544,6 +589,11 @@ function showHeroSlide(index) {
 function nextHeroSlide() { showHeroSlide(currentHeroSlideIndex + 1); }
 function prevHeroSlide() { showHeroSlide(currentHeroSlideIndex - 1); }
 function goToHeroSlide(idx) { showHeroSlide(idx); }
+
+// ============ BẢO HÀNH — trang riêng theo địa chỉ /bao-hanh/ ============
+function goWarranty() {
+    window.location.href = '/bao-hanh/';
+}
 
 function initFlashSaleTimer() {
     // Thời lượng đếm ngược đọc từ cấu hình admin (Hệ thống > Flash Sale), mặc định 12h45'30"
@@ -1621,7 +1671,31 @@ function applyCoupon() {
 
     if (!coupon) {
         msg.className = "block text-[11px] font-medium text-red-500 mt-1";
-        msg.innerText = "Mã voucher không tồn tại";
+        msg.innerText = "❌ Mã voucher không tồn tại trên hệ thống";
+        msg.classList.remove('hidden');
+        return;
+    }
+
+    // Đã sử dụng chưa (cột TRẠNG THÁI trên Sheets)
+    if (coupon.status && coupon.status.toUpperCase().includes('ĐÃ SỬ DỤNG')) {
+        msg.className = "block text-[11px] font-medium text-red-500 mt-1";
+        msg.innerText = "❌ Mã voucher này đã được sử dụng";
+        msg.classList.remove('hidden');
+        return;
+    }
+
+    // Hết hiệu lực chưa (cột HIỆU LỰC ĐẾN trên Sheets)
+    if (coupon.validTo && coupon.validTo < new Date()) {
+        msg.className = "block text-[11px] font-medium text-red-500 mt-1";
+        msg.innerText = "❌ Mã đã hết hiệu lực từ ngày " + coupon.validTo.toLocaleDateString('vi-VN');
+        msg.classList.remove('hidden');
+        return;
+    }
+
+    // Hết lượt sử dụng chưa (cột SỐ LƯỢNG trên Sheets)
+    if (coupon.quantity !== null && coupon.quantity <= 0) {
+        msg.className = "block text-[11px] font-medium text-red-500 mt-1";
+        msg.innerText = "❌ Mã đã hết lượt sử dụng";
         msg.classList.remove('hidden');
         return;
     }
@@ -1635,7 +1709,9 @@ function applyCoupon() {
 
     appliedCoupon = coupon;
     msg.className = "block text-[11px] font-medium text-green-600 mt-1";
-    msg.innerText = `Áp dụng thành công mã ${code}!`;
+    msg.innerText = `✔ Áp dụng thành công mã ${code}: ` +
+        (coupon.type === 'PERCENT' ? `giảm ${coupon.value}%` : `giảm ${formatVND(coupon.value)}`) +
+        (coupon.quantity !== null ? ` (còn ${coupon.quantity} lượt)` : '');
     msg.classList.remove('hidden');
 
     renderCheckoutSummary();
@@ -1712,7 +1788,7 @@ async function submitOrder(e) {
                         id: orderId, date: new Date().toLocaleString('vi-VN'),
                         name, phone, email, address, note,
                         payment: paymentMethod,
-                        items: cart.map((it) => ({ name: it.name, code: it.code, quantity: it.quantity, price: it.price })),
+                        items: cart.map((it) => ({ name: it.name, code: it.code || '', quantity: it.quantity || 1, price: parsePrice(it.price) })),
                         subTotal, shippingFee, discount, total: grandTotal,
                         status: 'Chờ xác nhận', source: 'web'
                     }
@@ -1741,7 +1817,7 @@ async function submitOrder(e) {
                         id: orderId, date: new Date().toLocaleString('vi-VN'),
                         name, phone, email, address, note,
                         payment: paymentMethod === 'COD' ? 'COD' : 'BANK',
-                        items: cart.map((it) => ({ name: it.name, code: it.code, quantity: it.quantity, price: it.price })),
+                        items: cart.map((it) => ({ name: it.name, code: it.code || '', quantity: it.quantity || 1, price: parsePrice(it.price) })),
                         total: grandTotal, subTotal, shippingFee, discount
                     })
                 }).catch(() => {});
@@ -1757,6 +1833,15 @@ async function submitOrder(e) {
         }
 
         showToast("Đặt hàng thành công! Mã đơn của bạn là: " + orderId, "success");
+        // Trừ 1 lượt dùng voucher trên Google Sheets (sau khi đơn đã ghi nhận)
+        if (appliedCoupon && appliedCoupon.code) {
+            markVoucherUsed(appliedCoupon.code);
+            appliedCoupon = null;
+            const cIn = document.getElementById('couponCodeInput');
+            const cMsg = document.getElementById('couponMsg');
+            if (cIn) cIn.value = '';
+            if (cMsg) cMsg.classList.add('hidden');
+        }
         // Đăng nhập rồi → lưu đơn vào "Đơn hàng của tôi" trên máy
         saveMyOrder({
             id: orderId,

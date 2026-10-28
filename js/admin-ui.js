@@ -89,6 +89,7 @@ function switchTab(tab) {
   if (tab === 'dashboard') renderDashboard();
   if (tab === 'flash') syncFlashTab();
   if (tab === 'orders') renderOrderRows();
+  if (tab === 'warranty' && window.initWarrantyTab) window.initWarrantyTab();
   window.scrollTo({ top: 0 });
 }
 
@@ -591,11 +592,15 @@ function openOrderDetail(id) {
     </div>
     <div class="border border-slate-200 rounded-xl p-3">
       <p class="text-xs font-black text-slate-400 uppercase mb-2">Sản phẩm</p>
-      ${(o.items || []).map((it) => `
+      ${(o.items || []).map((it) => {
+        // Giá lưu dạng "75.000" (chuỗi có dấu chấm) — phải tách số trước khi nhân, nếu không sẽ mất số 0
+        const unit = parseInt(String(it.price || '0').replace(/[^0-9]/g, ''), 10) || 0;
+        return `
         <div class="flex justify-between text-xs py-1 border-b border-slate-50 last:border-0">
-          <span>${it.quantity ? `<b>x${it.quantity}</b> ` : ''}${it.name}</span>
-          ${it.price ? `<span class="font-mono text-slate-500 shrink-0 ml-2">${fmtVND(it.price * (it.quantity || 1))}</span>` : ''}
-        </div>`).join('')}
+          <span class="font-mono">${it.quantity ? `<b>x${it.quantity}</b> ` : ''}${it.code || it.name || ''}</span>
+          ${it.price ? `<span class="font-mono text-slate-500 shrink-0 ml-2">${fmtVND(unit * (it.quantity || 1))}</span>` : ''}
+        </div>`;
+      }).join('')}
     </div>
     <div class="bg-slate-50 rounded-xl p-3 text-xs space-y-1">
       ${o.subTotal ? `<div class="flex justify-between"><span>Tạm tính</span><b>${fmtVND(o.subTotal)}</b></div>` : ''}

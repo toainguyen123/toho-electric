@@ -130,6 +130,34 @@ function parseCSV(text) {
   return rows.map(r => r.map(s => s.trim()));
 }
 
+// Tách từng dòng sản phẩm trong ô SẢN PHẨM của sheet thành {code, name, quantity, price}
+// Hỗ trợ 2 định dạng:
+//   mới: "3TN3.2.5 x2 - 150.000"   (mã x số lượng - giá)
+//   cũ : "1 x Ổ cắm điện LiOA... — 60đ"  (số lượng x tên — giá, có thể bị mất số 0)
+function parseSheetItemLine(line, products) {
+  line = String(line).trim().replace(/^[-•*]\s*/, '');
+  if (!line) return null;
+  // Giá tiền = cụm số CUỐI trong dòng ("150.000" / "150000" / "60đ")
+  const numChunks = line.match(/\d+(?:[.,]\d{3})*|\d+/g) || [];
+  let price = 0;
+  if (numChunks.length) {
+    price = parseInt(numChunks[numChunks.length - 1].replace(/[.,]/g, ''), 10) || 0;
+    if (price > 0 && price < 1000) price *= 1000; // dữ liệu cũ mất số 0: "60đ" → 60.000đ
+  }
+  // Định dạng mới: "MÃ x2 - giá" (token đầu KHÔNG thuần số)
+  let m = line.match(/^(\S+?)\s+x\s*(\d+)\s*(?:[-—–]\s*(.*))?$/i);
+  if (m && !/^\d+$/.test(m[1])) {
+    return { code: m[1], name: String(m[3] || '').trim(), quantity: parseInt(m[2], 10) || 1, price };
+  }
+  // Định dạng cũ: "1 x Tên... — 60đ" → bỏ đuôi giá, tìm mã theo tên sản phẩm
+  m = line.match(/^(\d+)\s*x\s*(.+)$/i);
+  const quantity = m ? (parseInt(m[1], 10) || 1) : 1;
+  let name = (m ? m[2] : line).trim();
+  name = name.replace(/\s*[—–-]\s*[\d.,]+\s*(?:đ|₫|vnd)?\s*$/i, '').trim();
+  const p = (products || []).find(x => String(x.name || '').trim().toLowerCase() === name.toLowerCase());
+  return { code: (p && (p.code || p.id)) || '', name, quantity, price };
+}
+
 // ============ API ============
 const json = (res, code, obj) => {
   res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
@@ -282,6 +310,7 @@ const server = http.createServer((req, res) => {
           const pick = (r, names) => { for (const n of names) { const i = r.h.findIndex(h => String(h).toLowerCase().includes(String(n).toLowerCase())); if (i >= 0 && r[i] !== undefined) return String(r[i] || '').trim(); } return ''; };
           const head = rows.shift() || [];
           const list = readOrders();
+          const products = readProducts();
           let added = 0, updated = 0, skipped = 0;
           rows.forEach(r => {
             r.h = head;
@@ -300,7 +329,7 @@ const server = http.createServer((req, res) => {
               address: pick(r, ['customer_address', 'địa chỉ', 'dia chi', 'address']),
               note: pick(r, ['customer_note', 'ghi chú', 'note']),
               payment: (pick(r, ['payment_method', 'thanh toán', 'payment']).toUpperCase().includes('QR') || pick(r, ['payment_method', 'thanh toán', 'payment']).toUpperCase().includes('CHUYỂN')) ? 'BANK' : 'COD',
-              items: items.split(/\n|\s\|\s/).map(s => s.trim()).filter(Boolean).map(line => ({ name: line })),
+              items: items.split(/\n|\s\|\s/).map(s => s.trim()).filter(Boolean).map(line => parseSheetItemLine(line, products)).filter(Boolean),
               total,
               status: 'Chờ xác nhận',
               source: 'google-sheet'

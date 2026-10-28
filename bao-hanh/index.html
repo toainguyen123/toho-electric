@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng ký bảo hành — TOHO ELECTRIC VN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand1:#6d28d9; --brand2:#4f46e5; --brand3:#0ea5e9;
+  --ink:#1e1b36; --muted:#6b7191; --line:#e6e7f2;
+  --card:#ffffff; --bg:#f4f5fb;
+  --ok:#10b981; --err:#e11d48;
+  --radius:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Be Vietnam Pro',system-ui,sans-serif;color:var(--ink);
+  background:
+    radial-gradient(900px 400px at 90% -10%, #ede9fe66, transparent),
+    radial-gradient(700px 380px at -10% 20%, #e0f2fe66, transparent),
+    var(--bg);
+  min-height:100vh;
+}
+/* ============ HEADER ============ */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:linear-gradient(100deg,var(--brand1),var(--brand2) 55%,var(--brand3));
+  color:#fff;box-shadow:0 6px 24px #4f46e533;
+}
+.topbar-in{max-width:960px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:12px;background:#ffffff2b;display:grid;place-items:center;font-size:22px;flex:none;border:1px solid #ffffff40}
+.brand h1{font-size:17px;font-weight:800;letter-spacing:.2px}
+.brand p{font-size:12px;opacity:.85;font-weight:500}
+.hero-badge{margin-left:auto;font-size:12px;font-weight:600;background:#ffffff22;border:1px solid #ffffff45;padding:7px 12px;border-radius:999px;display:flex;gap:6px;align-items:center;white-space:nowrap}
+/* ============ MAIN ============ */
+.wrap{max-width:960px;margin:0 auto;padding:26px 20px 90px}
+.steps{display:flex;gap:8px;margin:0 0 18px;align-items:center;justify-content:center;flex-wrap:wrap}
+.step{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);
+  background:#fff;border:1px solid var(--line);padding:8px 14px;border-radius:999px}
+.step b{width:22px;height:22px;border-radius:50%;background:var(--line);color:var(--muted);
+  display:grid;place-items:center;font-size:12px}
+.step.active{color:var(--brand2);border-color:#c7d2fe;background:#eef2ff;box-shadow:0 4px 14px #4f46e51a}
+.step.active b{background:var(--brand2);color:#fff}
+.arrow{color:#b6b9d4;font-weight:700}
+/* ============ FORM CARD ============ */
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;
+  box-shadow:0 20px 60px #1e1b3612;overflow:hidden}
+.card-banner{
+  background:linear-gradient(100deg,var(--brand1),var(--brand2) 60%,var(--brand3));
+  color:#fff;padding:22px 28px;position:relative;
+}
+.card-banner::after{content:'🛡️';position:absolute;right:22px;top:50%;transform:translateY(-50%);font-size:56px;opacity:.18}
+.card-banner h2{font-size:21px;font-weight:800}
+.card-banner p{font-size:13.5px;opacity:.92;margin-top:4px;max-width:520px}
+.card-banner .warranty-pill{display:inline-flex;align-items:center;gap:7px;margin-top:12px;
+  background:#ffffff26;border:1px solid #ffffff40;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700}
+form{padding:26px 28px 28px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+.field label{font-size:12.5px;font-weight:700;color:#494e7a;display:flex;align-items:center;gap:6px}
+.field label .req{color:var(--err)}
+.hint{font-size:11.5px;color:var(--muted);font-weight:500}
+.field input,.field select,.field textarea{
+  font:inherit;font-size:14.5px;color:var(--ink);
+  border:1.6px solid var(--line);background:#fbfbfe;border-radius:13px;
+  padding:11px 14px;width:100%;outline:none;transition:border-color .15s,box-shadow .15s,background .15s;
+}
+.field textarea{resize:vertical;min-height:86px}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--brand2);background:#fff;box-shadow:0 0 0 4px #4f46e51a;
+}
+.field input.err,.field select.err{border-color:var(--err);box-shadow:0 0 0 4px #e11d4814}
+.err-msg{font-size:12px;color:var(--err);font-weight:600;display:none}
+.field.has-err .err-msg{display:block}
+/* code input đặc biệt */
+.code-wrap{display:flex;gap:10px;align-items:stretch}
+.code-wrap input{letter-spacing:2px;text-transform:uppercase;font-weight:700;flex:1}
+.btn-ghost{
+  flex:none;border:1.6px solid var(--line);background:#fff;border-radius:13px;padding:0 16px;
+  font:inherit;font-size:13px;font-weight:700;color:var(--brand2);cursor:pointer;transition:.15s;
+}
+.btn-ghost:hover{border-color:var(--brand2);background:#eef2ff}
+.policy{margin-top:18px;display:flex;gap:10px;align-items:flex-start;background:#eef2ff;
+  border:1px solid #c7d2fe;border-radius:13px;padding:12px 14px;font-size:13px;color:#3730a3}
+.policy input{width:18px;height:18px;margin-top:1px;accent-color:var(--brand2);flex:none;cursor:pointer}
+.submit-row{margin-top:20px}
+.btn-main{
+  width:100%;border:0;border-radius:15px;padding:15px 20px;cursor:pointer;
+  font:inherit;font-size:16px;font-weight:800;letter-spacing:.3px;color:#fff;
+  background:linear-gradient(100deg,var(--brand1),var(--brand2) 60%,var(--brand3));
+  box-shadow:0 12px 28px #4f46e540;transition:transform .12s,box-shadow .2s,filter .2s;
+  display:flex;gap:10px;align-items:center;justify-content:center;
+}
+.btn-main:hover{transform:translateY(-1px);box-shadow:0 16px 34px #4f46e555;filter:brightness(1.05)}
+.btn-main:active{transform:translateY(1px)}
+.btn-main:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.spinner{width:18px;height:18px;border:2.5px solid #ffffff55;border-top-color:#fff;border-radius:50%;
+  animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.api-warn{display:none;margin-top:14px;background:#fff7d6;border:1px solid #fde68a;color:#92400e;
+  border-radius:13px;padding:12px 15px;font-size:13px;line-height:1.5}
+/* ============ FOOTER ============ */
+footer{max-width:960px;margin:0 auto;padding:0 20px 34px;text-align:center;color:var(--muted);font-size:12.5px}
+.footer-links{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.footer-links a{color:var(--brand2);font-weight:700;text-decoration:none}
+.footer-links a:hover{text-decoration:underline}
+/* ============ MODAL THÀNH CÔNG ============ */
+.overlay{position:fixed;inset:0;background:#1e1b36cc;backdrop-filter:blur(4px);
+  display:none;place-items:center;z-index:100;padding:20px}
+.overlay.show{display:grid}
+.success-card{background:#fff;border-radius:26px;max-width:470px;width:100%;padding:36px 30px 30px;
+  text-align:center;box-shadow:0 30px 80px #00000055;animation:pop .45s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.check-big{width:82px;height:82px;margin:0 auto 18px;border-radius:50%;
+  background:linear-gradient(135deg,#059669,#10b981);display:grid;place-items:center;
+  box-shadow:0 14px 32px #10b98166;animation:pop .6s .1s cubic-bezier(.2,1.4,.4,1) backwards}
+.check-big::after{content:'✓';color:#fff;font-size:44px;font-weight:800}
+.success-card h3{font-size:22px;font-weight:800;margin-bottom:8px}
+.success-card .sub{color:var(--muted);font-size:14px;line-height:1.6}
+.code-box{margin:18px auto 6px;background:#fef9c3;border:2px dashed #eab308;border-radius:14px;
+  padding:12px 18px;display:inline-block;min-width:230px}
+.code-box small{display:block;font-size:11.5px;color:#a16207;font-weight:700;letter-spacing:.6px}
+.code-box b{font-size:22px;letter-spacing:2.5px;color:#854d0e}
+.contact-row{display:flex;gap:10px;margin-top:20px}
+.contact-row a{flex:1;text-decoration:none;border-radius:13px;padding:12px 10px;font-weight:700;
+  font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:7px;transition:transform .12s}
+.contact-row a:hover{transform:translateY(-2px)}
+.btn-zalo{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}
+.btn-fb{background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe}
+.again-link{margin-top:16px;font-size:13.5px;background:none;border:0;color:var(--brand2);
+  font-weight:700;cursor:pointer;font:inherit;font-size:13.5px;font-weight:700}
+.again-link:hover{text-decoration:underline}
+.ok-x{margin-top:16px;background:#f1f2f8;border:1.6px solid var(--line);border-radius:999px;
+  padding:9px 20px;font:inherit;font-size:13px;font-weight:800;color:#39415c;cursor:pointer;display:inline-flex;gap:8px;align-items:center;transition:.15s}
+.ok-x:hover{background:#e8eaf3;border-color:#cfd3e8}
+/* ============ MODAL THÔNG BÁO (lỗi / đã đăng ký) — có nút tắt ============ */
+.err-card{background:#fff;border-radius:24px;max-width:430px;width:100%;padding:32px 26px 24px;
+  text-align:center;box-shadow:0 30px 80px #00000055;animation:pop .4s cubic-bezier(.2,1.4,.4,1);position:relative}
+.err-x{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;border:0;
+  background:#f1f2f8;color:#6b7191;font-size:15px;font-weight:800;cursor:pointer;transition:.15s}
+.err-x:hover{background:#ffe4e4;color:#b91c1c}
+.err-ico{width:70px;height:70px;margin:0 auto 14px;border-radius:50%;background:#fff7d6;
+  display:grid;place-items:center;font-size:34px;border:2px solid #fde68a}
+.err-card h3{font-size:19px;font-weight:800;padding-right:18px}
+.err-detail{margin-top:10px;color:#5a5f7d;font-size:13.5px;line-height:1.65;white-space:pre-line}
+.err-btn{margin-top:18px;width:100%;border:0;border-radius:13px;padding:13px 16px;cursor:pointer;
+  font:inherit;font-size:14px;font-weight:800;color:#fff;background:linear-gradient(100deg,#7f1010,#b31313)}
+.err-btn:hover{filter:brightness(1.08)}
+.err-contact{margin-top:12px;font-size:12.5px;color:var(--muted)}
+.err-contact a{color:var(--brand2);font-weight:700;text-decoration:none}
+/* ============ RESPONSIVE ============ */
+@media (max-width:640px){
+  .grid{grid-template-columns:1fr}
+  .hero-badge{display:none}
+  .card-banner h2{font-size:19px}
+  form{padding:20px 18px}
+  .steps{font-size:12px}
+  .step:nth-child(n+6){display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="logo">🛡️</div>
+    <div class="brand">
+      <h1 id="brandName">SHOP CỦA BẠN</h1>
+      <p>Kích hoạt &amp; tra cứu phiếu bảo hành</p>
+    </div>
+    <a href="../" id="homeBtn" style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:11px;
+       background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:12.5px;font-weight:800;
+       text-decoration:none;white-space:nowrap" onmouseover="this.style.background='rgba(255,255,255,.22)'"
+       onmouseout="this.style.background='rgba(255,255,255,.12)'">🏠 Về trang chủ</a>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="steps" aria-hidden="true">
+    <div class="step active"><b>1</b> Điền thông tin</div>
+    <span class="arrow">›</span>
+    <div class="step"><b>2</b> Gửi phiếu</div>
+    <span class="arrow">›</span>
+    <div class="step"><b>3</b> Nhận xác nhận</div>
+  </div>
+
+  <div class="card">
+    <div class="card-banner">
+      <h2>Đăng ký bảo hành sản phẩm</h2>
+      <p>Điền đầy đủ thông tin bên dưới theo <b>Thẻ bảo hành</b> kèm trong gói hàng. Phiếu của bạn sẽ được kích hoạt ngay sau khi gửi.</p>
+      <div class="warranty-pill">✨ Ưu đãi độc quyền khi kích hoạt bảo hành online</div>
+    </div>
+
+    <form id="warrantyForm" novalidate>
+      <div class="grid">
+
+        <div class="field">
+          <label>🎫 Mã phiếu bảo hành <span class="req">*</span></label>
+          <div class="code-wrap">
+            <input type="text" id="code" name="code" placeholder="VD: BH-2026-0001" maxlength="30" autocomplete="off">
+            <button type="button" class="btn-ghost" id="btnPasteTip">Xem thẻ 🎫</button>
+          </div>
+          <span class="hint">Mã in trên <b>Thẻ bảo hành</b> kèm theo gói hàng — nhập đúng như in trên thẻ.</span>
+          <span class="err-msg" id="errCode">Vui lòng nhập mã phiếu trên thẻ bảo hành.</span>
+        </div>
+
+        <div class="field">
+          <label>👤 Họ và tên <span class="req">*</span></label>
+          <input type="text" id="name" name="name" placeholder="Nguyễn Văn A" autocomplete="name">
+          <span class="err-msg">Vui lòng nhập họ tên.</span>
+        </div>
+
+        <div class="field">
+          <label>📱 Số điện thoại <span class="req">*</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="09xx xxx xxx" maxlength="11" inputmode="numeric" autocomplete="tel">
+          <span class="err-msg">Số điện thoại 10 số, bắt đầu bằng 0.</span>
+        </div>
+
+        <div class="field">
+          <label>📦 Tên sản phẩm <span class="req">*</span></label>
+          <input type="text" id="product" name="product" placeholder="VD: Áo thun nam trên tay dài" >
+          <span class="err-msg">Vui lòng nhập tên sản phẩm.</span>
+        </div>
+
+        <div class="field">
+          <label>🔢 Mã đơn hàng</label>
+          <input type="text" id="order" name="order" placeholder="VD: 250123456789 (trên Shopee)">
+          <span class="hint">Mã đơn trên ứng dụng sàn — nếu không nhớ có thể bỏ trống.</span>
+        </div>
+
+        <div class="field">
+          <label>🛒 Bạn mua trên nền tảng nào? <span class="req">*</span></label>
+          <select id="platform" name="platform">
+            <option value="Shopee">Shopee</option>
+            <option value="TikTok Shop">TikTok Shop</option>
+            <option value="Facebook">Facebook</option>
+            <option value="Website">Website</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>📅 Ngày mua / nhận hàng</label>
+          <input type="date" id="buyDate" name="buyDate">
+          <span class="hint">Nếu bỏ trống, ghi ngày ghi trên phiếu.</span>
+        </div>
+
+        <div class="field full">
+          <label>🏠 Địa chỉ giao hàng</label>
+          <input type="text" id="address" name="address" placeholder="Số nhà, đường, phường/xã, tỉnh" autocomplete="street-address">
+        </div>
+
+        <div class="field full">
+          <label>🛠️ Mô tả lỗi / hư hại (nếu có)</label>
+          <textarea id="issue" name="issue" placeholder="VD: Sau 2 lần giặt, đường may vai đã bung nhẹ..."></textarea>
+        </div>
+
+        <div class="field full">
+          <label>🔗 Link ảnh / video sản phẩm</label>
+          <input type="url" id="media" name="media" placeholder="Dán link ảnh/video minh chứng (không bắt buộc)">
+        </div>
+      </div>
+
+      <label class="policy">
+        <input type="checkbox" id="agree" checked>
+        <span>Tôi xác nhận thông tin khai ở trên là <b>trung thực</b> và đồng ý với chính sách bảo hành của shop.</span>
+      </label>
+
+      <div class="api-warn" id="apiWarn">
+        ⚠️ Shop chưa cài liên kết lưu dữ liệu (APPS_SCRIPT_URL trong <b>config.js</b>). Dữ liệu chưa gửi được — dán Apps Script (file <b>bao-hanh/apps-script.gs</b>) và Deploy để hoàn tất.
+      </div>
+
+      <div class="submit-row">
+        <button type="submit" class="btn-main" id="btnSubmit">
+          <span class="spinner" id="spin"></span>
+          <span id="btnText">✨ GỬI PHIẾU BẢO HÀNH</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<footer>
+  © <span id="yr"></span> <b id="brandName2">SHOP CỦA BẠN</b> — Hotline <b id="hotline"></b>
+  <div class="footer-links">
+    <a id="lnkZalo" target="_blank" rel="noopener">💬 Zalo</a>
+    <a id="lnkFb" target="_blank" rel="noopener">📘 Facebook</a>
+  </div>
+</footer>
+
+<!-- Modal thành công -->
+<div class="overlay" id="overlay">
+  <div class="success-card">
+    <div class="check-big"></div>
+    <h3>Kích hoạt bảo hành thành công! 🎉</h3>
+    <p class="sub">Cảm ơn bạn đã tin dùng sản phẩm của shop.<br>Phiếu bảo hành của bạn đã được ghi nhận.</p>
+    <div class="code-box"><small>MÃ PHIẾU CỦA BẠN</small><b id="okCode">—</b></div>
+    <button class="ok-x" id="okClose" type="button" title="Tắt cửa sổ">✕ Tắt cửa sổ</button>
+    <div class="contact-row">
+      <a class="btn-zalo" id="okZalo" target="_blank" rel="noopener">💬 Gửi ảnh minh chứng qua Zalo</a>
+      <a class="btn-fb" id="okFb" target="_blank" rel="noopener">📘 Fanpage shop</a>
+    </div>
+    <button class="again-link" id="btnAgain">↺ Đăng ký phiếu khác</button>
+  </div>
+</div>
+
+<!-- Modal thông báo (mã không tồn tại / đã đăng ký / lỗi) — có nút tắt -->
+<div class="overlay" id="errOverlay">
+  <div class="err-card">
+    <button class="err-x" id="errX" type="button" title="Tắt">✕</button>
+    <div class="err-ico" id="errIco">⚠️</div>
+    <h3 id="errTitle">Thông báo</h3>
+    <p class="err-detail" id="errDetail"></p>
+    <button class="err-btn" id="errClose" type="button">TẮT CỬA SỔ NÀY</button>
+    <p class="err-contact">Cần hỗ trợ?
+      <a id="errZalo" target="_blank" rel="noopener">Zalo</a> ·
+      <a id="errFb" target="_blank" rel="noopener">Facebook</a>
+    </p>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+/* ---- nạp thông tin shop ---- */
+document.getElementById('brandName').textContent = CONFIG.SHOP_NAME;
+document.getElementById('brandName2').textContent = CONFIG.SHOP_NAME;
+document.getElementById('hotline').textContent = CONFIG.SHOP_HOTLINE;
+document.getElementById('lnkZalo').href = CONFIG.SHOP_ZALO;
+document.getElementById('lnkFb').href = CONFIG.SHOP_FACEBOOK;
+document.getElementById('okZalo').href = CONFIG.SHOP_ZALO;
+document.getElementById('okFb').href = CONFIG.SHOP_FACEBOOK;
+document.getElementById('errZalo').href = CONFIG.SHOP_ZALO;
+document.getElementById('errFb').href = CONFIG.SHOP_FACEBOOK;
+document.getElementById('yr').textContent = new Date().getFullYear();
+if (!CONFIG.APPS_SCRIPT_URL) document.getElementById('apiWarn').style.display = 'block';
+
+/* ---- điền sẵn mã phiếu nếu khách quét QR ?code=XXXX ---- */
+(function(){
+  const q = new URLSearchParams(location.search);
+  if (q.get('code')) document.getElementById('code').value = q.get('code').toUpperCase();
+  if (q.get('name')) document.getElementById('name').value = q.get('name');
+})();
+
+/* ---- tự động điền lại thông tin cá nhân từ lần trước ---- */
+(function(){
+  try{
+    const saved = JSON.parse(localStorage.getItem('bh_info') || 'null');
+    if (saved){
+      ['name','phone','address','platform'].forEach(k => { if(saved[k]) document.getElementById(k).value = saved[k]; });
+    }
+  }catch(e){}
+})();
+
+/* ---- tiện ích ---- */
+const $ = id => document.getElementById(id);
+$('btnPasteTip').addEventListener('click', () => {
+  $('code').focus();
+  $('code').setCustomValidity('');
+});
+$('code').addEventListener('input', e => {
+  e.target.value = e.target.value.toUpperCase().replace(/\s+/g,'-');
+});
+$('phone').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g,''); });
+document.querySelectorAll('#warrantyForm input, #warrantyForm select, #warrantyForm textarea')
+  .forEach(el => el.addEventListener('input', () => {
+    el.classList.remove('err');
+    el.closest('.field').classList.remove('has-err');
+  }));
+
+function setFieldError(el){
+  el.classList.add('err');
+  el.closest('.field').classList.add('has-err');
+}
+
+/* ---- GỬI PHIẾU ---- */
+$('warrantyForm').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const code = $('code').value.trim().toUpperCase();
+  const name = $('name').value.trim();
+  const phone = $('phone').value.trim();
+  const product = $('product').value.trim();
+
+  let valid = true;
+  if (!code)          { setFieldError($('code')); valid = false; }
+  if (!name)          { setFieldError($('name')); valid = false; }
+  if (!/^0\d{9}$/.test(phone)) { setFieldError($('phone')); valid = false; }
+  if (!product)       { setFieldError($('product')); valid = false; }
+  if (!$('agree').checked){ $('agree').parentElement.style.boxShadow='0 0 0 3px #e11d4833'; setTimeout(()=> $('agree').parentElement.style.boxShadow='',1500); valid = false; }
+  if (!valid){
+    document.querySelector('.field.has-err, .field .err')?.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+
+  const btn = $('btnSubmit'), spin = $('spin'), txt = $('btnText');
+  btn.disabled = true; spin.style.display = 'inline-block'; txt.textContent = 'Đang gửi phiếu...';
+
+  try{
+    // 1) kiểm tra mã BH đã tồn tại trong HỆ THỐNG (tab VOUCHER — từng được in ra chưa)
+    let known = null;
+    try { known = await appsGet({ action:'checkbh', code: code }); } catch(e){ /* bỏ qua nếu chưa cấu hình */ }
+    if (known && known.ok && !known.exists){
+      btn.disabled = false; spin.style.display='none'; txt.textContent = '✨ GỬI PHIẾU BẢO HÀNH';
+      showCodeError('❌ Mã “' + code + '” không có trong hệ thống!',
+        'Vui lòng kiểm tra lại mã in trên Thẻ bảo hành trong gói hàng (nhập chính xác, không thừa thiếu ký tự).\nNếu đúng vẫn báo lỗi, hãy chụp thẻ gửi cho shop qua Zalo/Facebook để được kiểm tra và bổ sung.');
+      return;
+    }
+
+    // 2) kiểm tra phiếu này đã đăng ký chưa
+    let dup = null;
+    try { dup = await appsGet({ action:'check', code: code }); } catch(e){ /* bỏ qua nếu chưa cấu hình */ }
+    if (dup && dup.ok && dup.exists){
+      btn.disabled = false; spin.style.display='none'; txt.textContent = '✨ GỬI PHIẾU BẢO HÀNH';
+      showCodeError('ℹ️ Mã phiếu “' + code + '” đã được đăng ký rồi.',
+        'Nếu đó là của bạn và cần hỗ trợ thêm, hãy nhắn tin cho shop nhé 😊');
+      return;
+    }
+
+    // gửi phiếu
+    const payload = {
+      action:'save',
+      code: code,
+      name: name,
+      phone: phone,
+      product: product,
+      order: $('order').value.trim(),
+      platform: $('platform').value,
+      buyDate: $('buyDate').value,
+      address: $('address').value.trim(),
+      issue: $('issue').value.trim(),
+      media: $('media').value.trim()
+    };
+    const res = await appsGet(payload);
+
+    if (res && res.ok){
+      try{
+        localStorage.setItem('bh_info', JSON.stringify({name, phone, address: payload.address, platform: payload.platform}));
+      }catch(e){}
+      showSuccess(code);
+    } else {
+      const msg = (res && res.error) || 'Không xác định';
+      if (String(msg).toUpperCase().includes('ĐÃ ĐƯỢC ĐĂNG KÝ')){
+        showSuccess(code);
+      } else {
+        showCodeError('❌ Không lưu được phiếu', msg + '\n\nVui lòng thử lại sau ít phút hoặc nhắn tin cho shop.');
+      }
+    }
+  }catch(err){
+    if (err.message === 'NOT_CONFIGURED'){
+      $('apiWarn').style.display = 'block';
+      $('apiWarn').scrollIntoView({behavior:'smooth', block:'center'});
+    } else {
+      showCodeError('⚠️ Lỗi kết nối', 'Vui lòng thử lại sau ít phút.\n(Chi tiết kỹ thuật: ' + err.message + ')');
+    }
+  }
+  btn.disabled = false; spin.style.display='none'; txt.textContent = '✨ GỬI PHIẾU BẢO HÀNH';
+});
+
+function showSuccess(code){
+  $('okCode').textContent = code;
+  $('overlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+/* ---- Hộp thoại thông báo lỗi/đã có — có nút ✕ TẮT ---- */
+function showCodeError(title, detail){
+  $('errTitle').textContent = title;
+  $('errDetail').textContent = detail;
+  $('errOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeErrBox(){
+  $('errOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+  window.scrollTo({top:$('warrantyForm').offsetTop - 80, behavior:'smooth'});
+}
+$('errClose').addEventListener('click', closeErrBox);
+$('errX').addEventListener('click', closeErrBox);
+$('errOverlay').addEventListener('click', e => { if (e.target.id === 'errOverlay') closeErrBox(); });
+
+/* ---- Nút ✕ Tắt khung thành công ---- */
+$('okClose').addEventListener('click', () => {
+  $('overlay').classList.remove('show');
+  document.body.style.overflow = '';
+});
+
+$('btnAgain').addEventListener('click', () => {
+  $('overlay').classList.remove('show');
+  document.body.style.overflow = '';
+  $('code').value = '';
+  $('product').value = '';
+  $('issue').value = '';
+  $('media').value = '';
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+</script>
+</body>
+</html>

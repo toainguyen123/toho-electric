@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Đang chuyển trang — TOHO ELECTRIC VN</title>
+<script>
+/* Trang bảo hành đã chuyển sang địa chỉ mới: /bao-hanh/
+   Trang này chỉ giữ lại để THẺ BẢO HÀNH cũ (in môn trước đó) quét QR vẫn hoạt động. */
+(function () {
+  var u = new URLSearchParams(location.search);
+  var qs = '';
+  var code = u.get('code');
+  if (code) qs = '?code=' + encodeURIComponent(code);
+  location.replace('/bao-hanh/' + qs);
+})();
+</script>
+</head>
+<body style="font-family:system-ui;display:grid;place-items:center;height:100vh;color:#1e293b">
+  <p>🛡️ Trang bảo hành đã chuyển sang địa chỉ mới — đang chuyển tiếp...</p>
+</body>
+</html>

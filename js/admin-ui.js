@@ -89,6 +89,11 @@ function switchTab(tab) {
   if (tab === 'dashboard') renderDashboard();
   if (tab === 'flash') syncFlashTab();
   if (tab === 'orders') renderOrderRows();
+  if (tab === 'chonmau') {
+    // Nạp trang quản lý chọn mẫu lần đầu bấm vào tab (không tải sẵn khi mở admin)
+    const f = document.getElementById('chonMauFrame');
+    if (f && (!f.src || f.src === 'about:blank')) f.src = 'chon mau/admin.html?embed=1';
+  }
   if (tab === 'warranty' && window.initWarrantyTab) window.initWarrantyTab();
   window.scrollTo({ top: 0 });
 }

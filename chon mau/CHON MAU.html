@@ -1,0 +1,2152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chọn mẫu - LiOA</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Custom Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f9f9fb',
+              100: '#f2f2f5',
+              900: '#0f0f11',
+              accent: '#d97706'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom CSS for smooth 3D Perspective Lookbook Slider */
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      background-color: #0d0e12;
+      color: #f3f4f6;
+    }
+
+    /* Carousel 3D Container */
+    .carousel-stage {
+      perspective: 1200px;
+      /* KHÔNG dùng preserve-3d ở đây: bug hit-test của Chrome khiến
+         các thẻ trái/phải KHÔNG nhận click喔 khi đứng im */
+    }
+
+    .look-card {
+      transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      will-change: transform, opacity;
+    }
+
+    /* Active & Inactive Card Positions */
+    .look-card.active {
+      transform: translateX(0) scale(1) translateZ(50px);
+      opacity: 1;
+      z-index: 30;
+      filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.65)) blur(0px);
+    }
+
+    .look-card.prev-1 {
+      transform: translateX(-65%) scale(0.8) rotateY(18deg) translateZ(-40px);
+      opacity: 0.5;
+      z-index: 20;
+      cursor: pointer;
+      filter: grayscale(30%) blur(6px);
+    }
+
+    .look-card.next-1 {
+      transform: translateX(65%) scale(0.8) rotateY(-18deg) translateZ(-40px);
+      opacity: 0.5;
+      z-index: 20;
+      cursor: pointer;
+      filter: grayscale(30%) blur(6px);
+    }
+
+    .look-card.far-left {
+      transform: translateX(-130%) scale(0.6) rotateY(36deg) translateZ(-100px);
+      opacity: 0.2;
+      visibility: hidden;   /* thẻ xa: ngừng hẳn vẽ → đỡ nghẽn GPU khi 200+ thẻ */
+      z-index: 10;
+      pointer-events: none;
+      filter: blur(12px);
+    }
+
+    .look-card.far-right {
+      transform: translateX(130%) scale(0.6) rotateY(-36deg) translateZ(-100px);
+      opacity: 0.2;
+      visibility: hidden;   /* thẻ xa: ngừng hẳn vẽ → đỡ nghẽn GPU khi 200+ thẻ */
+      z-index: 10;
+      pointer-events: none;
+      filter: blur(12px);
+    }
+
+    /* Thẻ PNG trong suốt (model dạng sticker — nền phông hiện xuyên qua) */
+    .look-card.mode-png {
+      background: transparent; border-color: transparent;
+      box-shadow: none !important; backdrop-filter: none !important;
+    }
+    .look-card.mode-png img { object-fit: contain !important; filter: drop-shadow(0 16px 26px rgba(0,0,0,.45)); transform: scale(1.08); }
+    .look-card.mode-png .vignette { display: none; }
+
+    /* ==== CÔNG TẮC NGÀY/ĐÊM (Galahhad switch) ==== */
+    .theme-switch {
+      --toggle-size: 10px; --container-width: 5.625em; --container-height: 2.5em;
+      --container-radius: 6.25em; --container-light-bg: #3D7EAE; --container-night-bg: #1D1F2C;
+      --circle-container-diameter: 3.375em; --sun-moon-diameter: 2.125em; --sun-bg: #ECCA2F;
+      --moon-bg: #C4C9D1; --spot-color: #959DB1;
+      --circle-container-offset: calc((var(--circle-container-diameter) - var(--container-height)) / 2 * -1);
+      --stars-color: #fff; --clouds-color: #F3FDFF; --back-clouds-color: #AACADF;
+      --transition: .5s cubic-bezier(0, -0.02, 0.4, 1.25);
+      --circle-transition: .3s cubic-bezier(0, -0.02, 0.35, 1.17);
+      display: inline-block; vertical-align: middle; user-select: none;
+    }
+    .theme-switch, .theme-switch *, .theme-switch *::before, .theme-switch *::after {
+      box-sizing: border-box; margin: 0; padding: 0; font-size: var(--toggle-size);
+    }
+    .theme-switch__container { width: var(--container-width); height: var(--container-height);
+      background-color: var(--container-light-bg); border-radius: var(--container-radius); overflow: hidden;
+      cursor: pointer; box-shadow: 0em -0.062em 0.062em rgba(0,0,0,0.25), 0em 0.062em 0.125em rgba(255,255,255,0.94);
+      transition: var(--transition); position: relative; }
+    .theme-switch__container::before { content: ""; position: absolute; z-index: 1; inset: 0;
+      box-shadow: 0em 0.05em 0.187em rgba(0,0,0,0.25) inset, 0em 0.05em 0.187em rgba(0,0,0,0.25) inset;
+      border-radius: var(--container-radius); }
+    .theme-switch__checkbox { display: none; }
+    .theme-switch__circle-container { width: var(--circle-container-diameter); height: var(--circle-container-diameter);
+      background-color: rgba(255,255,255,0.1); position: absolute; left: var(--circle-container-offset);
+      top: var(--circle-container-offset); border-radius: var(--container-radius);
+      box-shadow: inset 0 0 0 3.375em rgba(255,255,255,0.1), inset 0 0 0 3.375em rgba(255,255,255,0.1), 0 0 0 0.625em rgba(255,255,255,0.1), 0 0 0 1.25em rgba(255,255,255,0.1);
+      display: flex; transition: var(--circle-transition); pointer-events: none; }
+    .theme-switch__sun-moon-container { pointer-events: auto; position: relative; z-index: 2;
+      width: var(--sun-moon-diameter); height: var(--sun-moon-diameter); margin: auto;
+      border-radius: var(--container-radius); background-color: var(--sun-bg);
+      box-shadow: 0.062em 0.062em 0.062em 0em rgba(254,255,239,0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset;
+      filter: drop-shadow(0.062em 0.125em 0.125em rgba(0,0,0,0.25)) drop-shadow(0em 0.062em 0.125em rgba(0,0,0,0.25));
+      overflow: hidden; transition: var(--transition); }
+    .theme-switch__moon { transform: translateX(100%); width: 100%; height: 100%;
+      background-color: var(--moon-bg); border-radius: inherit;
+      box-shadow: 0.062em 0.062em 0.062em 0em rgba(254,255,239,0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
+      transition: var(--transition); position: relative; }
+    .theme-switch__spot { position: absolute; top: 0.75em; left: 0.312em; width: 0.75em; height: 0.75em;
+      border-radius: var(--container-radius); background-color: var(--spot-color);
+      box-shadow: 0em 0.0312em 0.062em rgba(0,0,0,0.25) inset; }
+    .theme-switch__spot:nth-of-type(2) { width: 0.375em; height: 0.375em; top: 0.937em; left: 1.375em; }
+    .theme-switch__spot:nth-last-of-type(3) { width: 0.25em; height: 0.25em; top: 0.312em; left: 0.812em; }
+    .theme-switch__clouds { width: 1.25em; height: 1.25em; background-color: var(--clouds-color);
+      border-radius: var(--container-radius); position: absolute; bottom: -0.625em; left: 0.312em;
+      box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color);
+      transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25); }
+    .theme-switch__stars-container { position: absolute; color: var(--stars-color); top: -100%;
+      left: 0.312em; width: 2.75em; height: auto; transition: var(--transition); }
+    .theme-switch svg { width: 1.15em !important; height: 1.15em !important; }
+    .theme-switch__checkbox:checked + .theme-switch__container { background-color: var(--container-night-bg); }
+    .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container {
+      left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter)); }
+    .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container:hover {
+      left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter) - 0.187em); }
+    .theme-switch__circle-container:hover { left: calc(var(--circle-container-offset) + 0.187em); }
+    .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__moon { transform: translate(0); }
+    .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__clouds { bottom: -4.062em; }
+    .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__stars-container { top: 50%; transform: translateY(-50%); }
+
+    /* ==== CHẾ ĐỘ NGÀY (công tắc gạt sang mặt trời) ====
+       Chỉ đổi GIAO DIỆN trang (panel, nút, chữ) — KHÔNG đụng
+       #stage-backdrop, vì nền sân khấu được cấu hình từ Admin */
+    .day-mode .glass-panel { background: rgba(245, 247, 251, 0.93); border-color: rgba(16, 22, 32, 0.12); }
+    .day-mode .glass-card { background: rgba(16, 22, 32, 0.05); border-color: rgba(16, 22, 32, 0.12); }
+    .day-mode .glass-card:hover { background: rgba(16, 22, 32, 0.09); border-color: rgba(16, 22, 32, 0.2); }
+    .day-mode .glass-panel .text-white { color: #10141c !important; }
+    .day-mode .glass-panel .text-gray-300,
+    .day-mode .glass-panel .text-gray-400,
+    .day-mode .glass-panel .text-gray-500 { color: #4b5261 !important; }
+    .day-mode .glass-panel .text-gray-400:hover,
+    .day-mode .glass-panel a:hover { color: #10141c !important; }
+    .day-mode header { border-color: rgba(16, 22, 32, 0.1); }
+    .day-mode header .text-white { color: #e7eaf1 !important; }
+    .day-mode .day-dark-text { color: #10141c !important; }
+    .day-mode .look-card.mode-png h3 { color: #12161f !important; text-shadow: 0 1px 10px rgba(255,255,255,.9); }
+    .day-mode .look-card h3, .day-mode .look-card span { text-shadow: 0 1px 8px rgba(0,0,0,.55); }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #181920;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #333644;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #4f5368;
+    }
+
+    /* Subtle Glassmorphism */
+    .glass-panel {
+      background: rgba(23, 25, 33, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Checkbox Pulse Animation */
+    .btn-pulse {
+      animation: pulse-ring 2s infinite;
+    }
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+    }
+
+    /* NỀN SÂN KHẤU (Thay đổi bằng nút trong thẻ) */
+    #stage-backdrop {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background: linear-gradient(180deg, #12141c 0%, #0a0b0e 100%);
+      transition: background 0.6s ease;
+    }
+    #carousel-stage { touch-action: pan-y; }
+
+    /* Nút "Thay đổi hình nền" – chỉ hiện trên thẻ đang chọn */
+    .bg-btn {
+      transition: background .2s ease, color .2s ease, border-color .2s ease;
+    }
+
+    /* MENU DANH MỤC — nút hamburger (uiverse soft-octopus-29) bên trái + bảng xổ xuống */
+    .toggle {
+      position: relative; width: 30px; height: 30px; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 7px; transition-duration: .5s; flex: 0 0 auto;
+    }
+    .bars { width: 100%; height: 3px; background-color: rgb(176, 92, 255); border-radius: 4px; }
+    #bar2 { transition-duration: .8s; }
+    #bar1, #bar3 { width: 70%; }
+    #cat-checkbox:checked + .toggle .bars { position: absolute; transition-duration: .5s; }
+    #cat-checkbox:checked + .toggle #bar2 { transform: scaleX(0); transition-duration: .5s; }
+    #cat-checkbox:checked + .toggle #bar1 { width: 100%; transform: rotate(45deg); transition-duration: .5s; }
+    #cat-checkbox:checked + .toggle #bar3 { width: 100%; transform: rotate(-45deg); transition-duration: .5s; }
+    #cat-checkbox:checked + .toggle { transition-duration: .5s; transform: rotate(180deg); }
+    /* nhãn phân loại đang chọn, cạnh nút hamburger */
+    #cat-current { max-width: 70vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* BẢNG DANH MỤC xổ xuống dưới thanh */
+    .cat-drop-panel {
+      display: none; position: absolute; top: 100%; left: 10px; z-index: 60;
+      min-width: 290px; max-height: min(62vh, 480px); overflow-y: auto;
+      flex-direction: column; gap: 2px;
+      padding: 10px; border-radius: 14px;
+      background: rgba(22, 24, 31, .97); backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 20px 40px -14px rgba(0,0,0,.7);
+    }
+    .cat-drop-panel.open { display: flex; }
+    .cat-group-label {
+      font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+      color: #6b7280; padding: 8px 10px 4px;
+    }
+    .cat-item-btn {
+      text-align: left; font-size: 12.5px; font-weight: 700; padding: 9px 12px;
+      border: 0; border-radius: 9px; background: transparent; color: #d1d5db;
+      cursor: pointer; white-space: nowrap;
+      transition: background .15s ease, color .15s ease;
+    }
+    .cat-item-btn:hover { background: rgba(255,255,255,.08); color: #fff; }
+    .cat-item-btn.on { background: rgba(239, 68, 68, .18); color: #fff; }
+
+    /* thẻ PHỤ (không chọn): chỉ hiện hình — ẩn chữ thông tin; thẻ chính giữ nguyên */
+    .look-card [data-info] { opacity: 1; transition: opacity .25s ease; }
+    .look-card:not(.active) [data-info] { opacity: 0; }
+
+    /* THÔNG SỐ thu gọn — bấm mới hiện */
+    .spec-fold summary {
+      cursor: pointer; list-style: none; outline: none;
+      display: flex; align-items: center; justify-content: space-between;
+      font-weight: 700; font-size: 11px; color: #fff;
+      user-select: none;
+    }
+    .spec-fold summary::-webkit-details-marker { display: none; }
+    .spec-fold summary::after { content: '▾'; color: #9ca3af; transition: transform .2s ease; }
+    .spec-fold[open] summary::after { transform: rotate(180deg); }
+
+    /* NHẠC NỀN: player đĩa xoay (theo uiverse pretty-panther-5) — nhỏ gọn ở góc trái */
+    .uiverse-player { display: flex; flex-direction: column; align-items: center; user-select: none; }
+    .uiverse-disc { position: relative; z-index: 0; height: 44px; margin-bottom: -7px; transition: height .2s ease; cursor: pointer; }
+    .uiverse-player:hover .uiverse-disc, .uiverse-player.open .uiverse-disc { height: 0; overflow: hidden; }
+    .uiverse-vinyl {
+      display: block; border: 3px solid #a1a1aa; border-radius: 9999px;
+      box-shadow: 0 3px 5px -1px rgba(0,0,0,.45);
+      animation: uiverse-spin 3s linear infinite; background: #000;
+    }
+    .uiverse-disc .uiverse-vinyl { width: 86px; height: 86px; }
+    .uiverse-dot {
+      position: absolute; z-index: 10; width: 19px; height: 19px;
+      background: #fff; border: 3px solid #a1a1aa; border-radius: 9999px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.35); top: 27px; left: 27px;
+    }
+    .uiverse-card {
+      z-index: 30; display: flex; flex-direction: column;
+      width: 118px; height: 58px; transition: all .3s ease;
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 3px 6px -1px rgba(0,0,0,.4), 0 2px 3px -2px rgba(0,0,0,.3);
+      overflow: hidden; cursor: default;
+    }
+    .uiverse-player:hover .uiverse-card, .uiverse-player.open .uiverse-card { width: 240px; height: 132px; }
+    .uiverse-top { display: flex; flex-direction: row; width: 100%; height: 0; overflow: hidden; transition: height .3s ease; }
+    .uiverse-player:hover .uiverse-top, .uiverse-player.open .uiverse-top { height: 60px; }
+    .uiverse-mini {
+      position: relative; display: flex; align-items: center; justify-content: center;
+      flex: 0 0 auto; width: 70px; height: 70px; margin-top: -18px; margin-left: -12px;
+      opacity: 0; transition: opacity .1s ease;
+    }
+    .uiverse-player:hover .uiverse-mini, .uiverse-player.open .uiverse-mini { opacity: 1; }
+    .uiverse-mini .uiverse-vinyl { width: 66px; height: 66px; border-width: 3px; }
+    .uiverse-dot2 {
+      position: absolute; z-index: 10; width: 15px; height: 15px;
+      background: #fff; border: 3px solid #a1a1aa; border-radius: 9999px;
+      top: 26px; left: 26px;
+    }
+    .uiverse-names {
+      display: flex; flex-direction: column; justify-content: center; width: 100%;
+      padding-left: 9px; margin-left: -70px; overflow: hidden;
+      white-space: nowrap; transition: margin-left .3s ease;
+    }
+    .uiverse-player:hover .uiverse-names, .uiverse-player.open .uiverse-names { margin-left: -9px; }
+    .uiverse-title { margin: 0; font-size: 14px; font-weight: 700; color: #18181b; line-height: 1.25; }
+    .uiverse-sub { margin: 0; font-size: 10px; color: #52525b; }
+    .uiverse-bar {
+      display: flex; flex-direction: row; align-items: center;
+      margin: 8px 8px 0; background: #e0e7ff; border-radius: 6px; min-height: 14px;
+      transition: margin-top .3s ease;
+    }
+    .uiverse-player:hover .uiverse-bar, .uiverse-player.open .uiverse-bar { margin-top: 0; }
+    .uiverse-time { display: none; font-size: 10px; color: #52525b; }
+    .uiverse-time.cur { padding-left: 8px; }
+    .uiverse-time.dur { padding-right: 8px; }
+    .uiverse-player:hover .uiverse-time, .uiverse-player.open .uiverse-time { display: inline-block; }
+    #bgm-seek {
+      flex-grow: 1; width: 70px; height: 3px; margin: auto 6px;
+      -webkit-appearance: none; appearance: none; background: #d1d5db; border-radius: 9999px; cursor: pointer;
+    }
+    #bgm-seek::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 10px; height: 10px;
+      background: #fff; border: 2px solid #a1a1aa; border-radius: 9999px;
+      cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.4);
+    }
+    .uiverse-controls { display: flex; flex-direction: row; align-items: center; justify-content: center; flex-grow: 1; margin: 0 8px; }
+    .uiverse-controls button {
+      display: flex; align-items: center; justify-content: center;
+      width: 34px; height: 100%; flex: 0 0 auto;
+      background: none; border: 0; cursor: pointer; color: #18181b; padding: 0;
+    }
+    .uiverse-controls button:hover { color: #000; }
+    .uiverse-controls button.uiverse-tiny { width: 0; overflow: hidden; transition: width .25s ease; }
+    .uiverse-controls button.uiverse-tiny svg { width: 15px; height: 15px; }
+    .uiverse-player:hover button.uiverse-tiny, .uiverse-player.open button.uiverse-tiny { width: 34px; }
+    .uiverse-controls button.on svg { stroke: #6d28d9; }
+    .bgm-play-icon { display: flex; }
+    .bgm-pause-icon { display: none; }
+    #bgm-wrap.playing .bgm-play-icon { display: none !important; }
+    #bgm-wrap.playing .bgm-pause-icon { display: flex !important; }
+    @keyframes uiverse-spin { to { transform: rotate(360deg); } }
+
+    /* HIỆU ỨNG LẬT THẺ 3D (kiểu uiverse): chạm/bấm thẻ → quay 180° */
+    .flip-inner { position: relative; width: 100%; flex: 1 1 auto; min-height: 0; }
+    /* thẻ dạng cột: ảnh chiếm phần trên, chữ nằm DƯỚI ảnh (không đè lên hình) */
+    .look-card { display: flex; flex-direction: column; overflow: hidden; }
+    /* chân thẻ KHÔNG khung nền — chỉ chữ rõ */
+    .card-foot { flex: 0 0 auto; }
+
+    /* NHÃN MẶT: góc trái phía trên, nằm TRONG thẻ (trên ảnh) */
+    .face-tag {
+      position: absolute; top: 10px; left: 10px; z-index: 6;
+      font-size: 9px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase;
+      color: #f3f4f6; background: rgba(10, 12, 18, .55);
+      padding: 4px 9px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.16);
+      backdrop-filter: blur(4px);
+      pointer-events: none;
+    }
+    .look-card.mode-png .face-tag { background: rgba(10, 12, 18, .4); }
+    .look-card { perspective: 1200px; }   /* chiều sâu cho lật */
+    .look-card.can-flip .flip-inner {
+      transform-style: preserve-3d;
+      transition: transform .72s cubic-bezier(.45,.2,.2,1);
+    }
+    .look-card.can-flip.is-flipped .flip-inner { transform: rotateY(180deg); }
+    .flip-face {
+      position: absolute !important; inset: 0;      /* !important: không bị class Tailwind (relative...) ghi đè */
+      backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    }
+    .flip-face.flip-back { transform: rotateY(180deg); }
+
+    /* Popup chọn nền (mở LÊN TRÊN nút — tránh bị cắt bởi overflow-hidden ở dưới) */
+    #bg-pop {
+      position: absolute; bottom: calc(100% + 10px); left: 50%; z-index: 40;
+      transform: translateX(-50%) scale(0.97); transform-origin: bottom center;
+      display: none; flex-wrap: wrap; justify-content: center; align-content: flex-end;
+      gap: 10px; padding: 14px; border-radius: 16px;
+      background: rgba(22, 24, 31, 0.96); backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 24px 48px -18px rgba(0,0,0,0.7);
+      width: min(92vw, 520px);
+      max-height: 78vh; overflow-y: auto;
+      opacity: 0; transition: opacity .22s ease, transform .22s ease;
+    }
+    #bg-pop.open { display: flex; opacity: 1; transform: translateX(-50%) scale(1); }
+    /* chip nền dọcidan: ảnh lớn phía trên + nhãn bên dưới (giống view admin) */
+    .bg-chip {
+      position: relative; width: 148px;
+      display: flex; flex-direction: column; gap: 8px;
+      padding: 9px; border-radius: 14px;
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
+      cursor: pointer; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .bg-chip:hover { transform: translateY(-3px); box-shadow: 0 10px 20px -10px rgba(0,0,0,.65); }
+    .bg-chip .img {
+      width: 100%; height: 78px; border-radius: 10px;
+      background-position: center; background-size: cover; background-repeat: no-repeat;
+    }
+    .bg-chip .nm {
+      font-size: 10px; font-weight: 600; color: #e5e7eb; letter-spacing: .02em;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 8px; padding: 6px 8px; text-align: center;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .bg-chip.chip-on { border-color: #fbbf24; box-shadow: 0 0 0 1px #fbbf24, 0 10px 22px -12px rgba(0,0,0,.7); }
+    .bg-title { width: 100%; text-align: center; font-size: 10px; letter-spacing: .18em;
+      text-transform: uppercase; color: rgba(255,255,255,.45); margin-bottom: 2px; font-weight: 600; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-white selection:text-black">
+
+  <!-- NHẠC NỀN: nút bật/tắt nổi góc trái — cấu hình trong trang ADMIN -->
+  <audio id="store-bgm" loop preload="auto"></audio>
+  <div id="bgm-wrap" class="fixed left-3 bottom-3 z-[60]" style="display:none">
+    <div id="bgm-player" class="uiverse-player" title="Nhạc nền">
+      <div class="uiverse-disc" id="bgm-disc">
+        <svg width="124" height="124" viewBox="0 0 128 128" class="uiverse-vinyl">
+          <rect width="128" height="128" fill="black"></rect>
+          <circle cx="20" cy="20" r="2" fill="white"></circle>
+          <circle cx="40" cy="30" r="2" fill="white"></circle>
+          <circle cx="60" cy="10" r="2" fill="white"></circle>
+          <circle cx="80" cy="40" r="2" fill="white"></circle>
+          <circle cx="100" cy="20" r="2" fill="white"></circle>
+          <circle cx="120" cy="50" r="2" fill="white"></circle>
+          <circle cx="90" cy="30" r="10" fill="white" fill-opacity="0.5"></circle>
+          <circle cx="90" cy="30" r="8" fill="white"></circle>
+          <path d="M0 128 Q32 64 64 128 T128 128" fill="purple" stroke="black" stroke-width="1"></path>
+          <path d="M0 128 Q32 48 64 128 T128 128" fill="mediumpurple" stroke="black" stroke-width="1"></path>
+          <path d="M0 128 Q32 32 64 128 T128 128" fill="rebeccapurple" stroke="black" stroke-width="1"></path>
+          <path d="M0 128 Q16 64 32 128 T64 128" fill="purple" stroke="black" stroke-width="1"></path>
+          <path d="M64 128 Q80 64 96 128 T128 128" fill="mediumpurple" stroke="black" stroke-width="1"></path>
+        </svg>
+        <div class="uiverse-dot"></div>
+      </div>
+      <div class="uiverse-card">
+        <div class="uiverse-top">
+          <div class="uiverse-mini">
+            <svg width="96" height="96" viewBox="0 0 128 128" class="uiverse-vinyl">
+              <rect width="128" height="128" fill="black"></rect>
+              <circle cx="20" cy="20" r="2" fill="white"></circle>
+              <circle cx="40" cy="30" r="2" fill="white"></circle>
+              <circle cx="60" cy="10" r="2" fill="white"></circle>
+              <circle cx="80" cy="40" r="2" fill="white"></circle>
+              <circle cx="100" cy="20" r="2" fill="white"></circle>
+              <circle cx="120" cy="50" r="2" fill="white"></circle>
+              <circle cx="90" cy="30" r="10" fill="white" fill-opacity="0.5"></circle>
+              <circle cx="90" cy="30" r="8" fill="white"></circle>
+              <path d="M0 128 Q32 64 64 128 T128 128" fill="purple" stroke="black" stroke-width="1"></path>
+              <path d="M0 128 Q32 48 64 128 T128 128" fill="mediumpurple" stroke="black" stroke-width="1"></path>
+              <path d="M0 128 Q32 32 64 128 T128 128" fill="rebeccapurple" stroke="black" stroke-width="1"></path>
+              <path d="M0 128 Q16 64 32 128 T64 128" fill="purple" stroke="black" stroke-width="1"></path>
+              <path d="M64 128 Q80 64 96 128 T128 128" fill="mediumpurple" stroke="black" stroke-width="1"></path>
+            </svg>
+            <div class="uiverse-dot2"></div>
+          </div>
+          <div class="uiverse-names">
+            <p class="uiverse-title" id="bgm-name">Nhạc nền LiOA</p>
+            <p class="uiverse-sub" id="bgm-sub">Cửa hàng Chọn mẫu</p>
+          </div>
+        </div>
+        <div class="uiverse-bar">
+          <span class="uiverse-time cur" id="bgm-cur">0:00</span>
+          <input type="range" id="bgm-seek" min="0" max="100" value="0" step="0.5" />
+          <span class="uiverse-time dur" id="bgm-dur">0:00</span>
+        </div>
+        <div class="uiverse-controls">
+          <button type="button" id="bgm-restart" class="uiverse-tiny" title="Phát lại từ đầu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+          </button>
+          <button type="button" id="bgm-toggle" title="Phát / tạm dừng">
+            <svg xmlns="http://www.w3.org/2000/svg" class="bgm-play-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="bgm-pause-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+          </button>
+          <button type="button" id="bgm-loop" class="uiverse-tiny" title="Lặp lại liên tục">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TOP NAVIGATION BAR ================= -->
+  <header class="w-full h-16 border-b border-white/10 px-6 lg:px-12 flex items-center justify-between glass-panel sticky top-0 z-50">
+    <!-- Brand Logo -->
+    <div class="flex items-center gap-3">
+      <span class="font-bold tracking-widest text-lg uppercase text-white">TOHO ELECTRIC<span class="text-gray-400 font-normal"> VN</span></span>
+    </div>
+
+    <!-- CATEGORY NAV — menu ngành hàng (dựng động từ dữ liệu) -->
+
+    <!-- Cart Counter & Actions -->
+    <div class="flex items-center gap-4">
+      <!-- Công tắc NGÀY/ĐÊM (theo dỏi strong-squid-82) -->
+      <label class="theme-switch" title="Đổi nền nhẹ / nền tối">
+        <input type="checkbox" id="night-switch" class="theme-switch__checkbox">
+        <div class="theme-switch__container">
+          <div class="theme-switch__clouds"></div>
+          <div class="theme-switch__stars-container">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2.2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
+          </div>
+          <div class="theme-switch__circle-container">
+            <div class="theme-switch__sun-moon-container">
+              <div class="theme-switch__moon">
+                <div class="theme-switch__spot"></div>
+                <div class="theme-switch__spot"></div>
+                <div class="theme-switch__spot"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </label>
+      <!-- NÚT QUẢN TRỊ ĐÃ ẨN THEO YÊU CẦU (vẫn vào được admin.html qua đường dẫn trực tiếp) -->
+      <!-- <a href="admin.html" title="Trang quản trị sản phẩm" class="p-2 rounded-full glass-card hover:scale-105 transition opacity-50 hover:opacity-100">
+        <i data-lucide="settings-2" class="w-5 h-5 text-white"></i>
+      </a> -->
+      <button id="cart-trigger-btn" onclick="toggleCartModal(true)" class="relative flex items-center justify-center p-2 rounded-full glass-card hover:scale-105 transition">
+        <i data-lucide="shopping-bag" class="w-5 h-5 text-white"></i>
+        <span id="cart-badge-count" class="absolute -top-1 -right-1 bg-white text-black text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center scale-0 transition-transform duration-300">
+          0
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= CATEGORY BAR — nút menu bên trái, xổ bảng danh mục ================= -->
+  <div id="cat-bar" class="sticky top-16 z-40 w-full glass-panel border-b border-white/10">
+    <div class="px-3 py-1 flex items-center gap-3">
+      <input type="checkbox" id="cat-checkbox" style="display:none">
+      <label for="cat-checkbox" class="toggle" id="cat-toggle" title="Danh mục sản phẩm">
+        <div class="bars" id="bar1"></div>
+        <div class="bars" id="bar2"></div>
+        <div class="bars" id="bar3"></div>
+      </label>
+      <span id="cat-current" class="text-[12.5px] font-semibold text-gray-200" style="display:none"></span>
+    </div>
+    <nav id="cat-nav" class="cat-drop-panel"></nav>
+  </div>
+
+  <!-- ================= MAIN SPLIT CONTENT AREA ================= -->
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden relative">
+
+    <!-- BÊN TRÁI: INTERACTIVE LOOKBOOK SLIDER (7 COLUMNS) -->
+    <section class="lg:col-span-7 xl:col-span-8 p-6 lg:p-12 flex flex-col justify-between items-center relative min-h-[550px] lg:min-h-auto overflow-hidden bg-gradient-to-b from-[#12141c] to-[#0a0b0e] select-none">
+      
+      <!-- NỀN SÂN KHẤU (đổi được) -->
+      <div id="stage-backdrop"></div>
+      
+      <!-- Top Title Bar inside Canvas -->
+      <div class="w-full flex justify-between items-start z-10 pointer-events-none">
+        <div>
+          <span class="text-xs uppercase tracking-widest text-gray-400 font-semibold block mb-1 day-dark-text">Trải nghiệm phối đồ tương tác</span>
+          <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white tracking-tight day-dark-text">Chọn mẫu<span class="text-amber-400">.</span></h1>
+        </div>
+        
+        <!-- Active Look Counter -->
+        <div class="text-right">
+          <span id="active-look-num" class="text-3xl lg:text-4xl font-bold font-mono text-white day-dark-text">01</span>
+          <span id="total-looks-num" class="text-sm text-gray-500 font-mono"> / 04</span>
+        </div>
+      </div>
+
+      <!-- 3D CAROUSEL STAGE WITH MOUSE DRAG LISTENERS -->
+      <div id="carousel-stage" class="w-full h-[420px] md:h-[520px] lg:h-[580px] my-auto flex items-center justify-center relative z-10 carousel-stage cursor-grab active:cursor-grabbing">
+        
+        <!-- Lookbook Cards rendered via JS -->
+        <div id="carousel-cards-container" class="relative w-full max-w-[400px] md:max-w-[500px] h-full flex items-center justify-center pointer-events-none">
+          <!-- Cards populated by JavaScript -->
+        </div>
+
+      </div>
+
+      <!-- NÚT THAY ĐỔI HÌNH NỀN — NGOÀI THẺ, đặt ngay dưới thẻ SP -->
+      <div class="relative flex justify-center my-2 z-20">
+        <button type="button" onclick="toggleBgPop()" class="bg-btn inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/10 hover:bg-white hover:border-white border border-white/25 text-[10px] font-bold tracking-widest uppercase text-white hover:text-black">
+          <i data-lucide="image" class="w-3.5 h-3.5"></i> Thay đổi hình nền
+        </button>
+        <!-- POPUP CHỌN HÌNH NỀN (mở dưới nút) -->
+        <div id="bg-pop">
+          <div class="bg-title">Chọn hình nền</div>
+          <!-- chips rendered by JS -->
+        </div>
+      </div>
+
+      <!-- BOTTOM NAVIGATION CONTROLS & PAGINATION -->
+      <div class="w-full max-w-lg flex items-center justify-between z-20 gap-4 mt-4">
+        <!-- Prev Button -->
+        <button onclick="changeSlide(-1)" class="p-3.5 rounded-full glass-card hover:bg-white hover:text-black transition-all transform active:scale-95 group" aria-label="Phối đồ trước">
+          <i data-lucide="arrow-left" class="w-5 h-5 text-gray-300 group-hover:text-black"></i>
+        </button>
+
+        <!-- Dynamic Dots Indicator -->
+        <div id="carousel-dots" class="flex items-center gap-2">
+          <!-- Dots rendered by JS -->
+        </div>
+
+        <!-- Next Button -->
+        <button onclick="changeSlide(1)" class="p-3.5 rounded-full glass-card hover:bg-white hover:text-black transition-all transform active:scale-95 group" aria-label="Phối đồ sau">
+          <i data-lucide="arrow-right" class="w-5 h-5 text-gray-300 group-hover:text-black"></i>
+        </button>
+      </div>
+
+      <!-- POPUP CHỌN HÌNH NỀN đã dời vào cột phải (dưới tên sản phẩm) -->
+
+    </section>
+
+
+    <!-- BÊN PHẢI: DYNAMIC "IN THIS LOOK" PANEL (5 COLUMNS) -->
+    <section class="lg:col-span-5 xl:col-span-4 border-l border-white/10 glass-panel p-6 lg:p-8 flex flex-col justify-between overflow-y-auto">
+      
+      <div>
+        <!-- Panel Header -->
+        <div class="flex items-center justify-between border-b border-white/10 pb-5 mb-6">
+          <div>
+            <span id="outfit-category-tag" class="text-[11px] font-bold uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-full">
+              Urban Streetwear
+            </span>
+            <h2 id="outfit-title" class="text-xl font-bold text-white mt-2">The Metro Oversized Look</h2>
+          </div>
+          <span id="item-count-badge" class="text-xs font-semibold bg-white/10 text-gray-300 px-3 py-1 rounded-full border border-white/10">
+            3 Pieces
+          </span>
+        </div>
+
+        <!-- Section Label -->
+        <div id="panel-section-label" class="flex items-center justify-between text-xs text-gray-400 font-medium mb-4">
+          <span>MÓN ĐỒ TRONG PHỐI ĐỘ</span>
+          <span>CHỌN SIZE & TÙY CHỌN</span>
+        </div>
+
+        <!-- Items Breakdown List -->
+        <div id="outfit-items-list" class="space-y-4">
+          <!-- Dynamic item cards will be generated here -->
+        </div>
+      </div>
+
+      <!-- BUNDLE SUMMARY & ADD TO BAG ACTION FOOTER -->
+      <div class="pt-6 mt-6 border-t border-white/10">
+        
+        <!-- Bundle Discounts Incentive -->
+        <div class="flex items-center justify-between mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
+          <div class="flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+            <span>Mua trọn bộ <strong>TIẾT KIỆM 10%</strong> tổng giá</span>
+          </div>
+          <span id="discount-saved-amount" class="font-bold text-amber-400">-$42.00</span>
+        </div>
+
+        <!-- Subtotal / Price Summary -->
+        <div class="space-y-1 mb-5">
+          <div class="flex justify-between text-xs text-gray-400">
+            <span>Tổng gốc:</span>
+            <span id="original-total-price" class="line-through">$420.00</span>
+          </div>
+          <div class="flex justify-between items-baseline">
+            <span class="text-sm font-semibold text-gray-200">Tổng trọn bộ:</span>
+            <span id="final-bundle-price" class="text-2xl font-extrabold text-white">$378.00</span>
+          </div>
+        </div>
+
+        <!-- Main Add Full Look Button -->
+        <button id="add-bundle-btn" onclick="addCurrentLookToBag()" class="w-full py-4 px-6 bg-white text-black font-bold text-sm rounded-xl shadow-lg hover:bg-gray-200 active:scale-[0.99] transition-all flex items-center justify-center gap-3 group btn-pulse">
+          <i data-lucide="shopping-bag" class="w-5 h-5 text-black group-hover:scale-110 transition-transform"></i>
+          <span>THÊM TRỌN BỘ VÀO GIỎ</span>
+        </button>
+
+        <p class="text-center text-[11px] text-gray-500 mt-3 flex items-center justify-center gap-2">
+          <i data-lucide="truck" class="w-3.5 h-3.5"></i>
+          Miễn phí giao hàng nhanh & đổi trả thoải mái trong 30 ngày
+        </p>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ================= SHOPPING BAG MODAL ================= -->
+  <div id="cart-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex justify-end opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="w-full max-w-md bg-[#12141c] h-full border-l border-white/10 p-6 flex flex-col justify-between translate-x-full transition-transform duration-300 shadow-2xl" id="cart-modal-panel">
+      
+      <!-- Cart Header -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="shopping-bag" class="w-6 h-6 text-white"></i>
+          <h3 class="text-lg font-bold text-white">Giỏ hàng của bạn</h3>
+        </div>
+        <button onclick="toggleCartModal(false)" class="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Cart Items Container -->
+      <div id="cart-items-container" class="flex-1 overflow-y-auto my-4 space-y-3 pr-1">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Cart Summary Footer -->
+      <div class="border-t border-white/10 pt-4 space-y-4">
+        <div class="flex justify-between items-center text-sm">
+          <span class="text-gray-400">Tổng tiền:</span>
+          <span id="cart-total-amount" class="text-xl font-bold text-white">$0.00</span>
+        </div>
+        <button onclick="thanhToanQuaWebChinh()" class="w-full py-3.5 bg-amber-400 text-black font-bold rounded-xl hover:bg-amber-300 transition">
+          TIẾN HÀNH THANH TOÁN
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ================= NOTIFICATION TOAST ================= -->
+  <div id="toast-notification" class="fixed bottom-6 left-1/2 -translate-x-1/2 glass-panel border border-amber-400/30 text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 z-50 translate-y-20 opacity-0 transition-all duration-300">
+    <div class="w-6 h-6 rounded-full bg-amber-400 text-black flex items-center justify-center font-bold text-xs">✓</div>
+    <span id="toast-msg" class="text-xs md:text-sm font-medium">Đã thêm trọn bộ vào giỏ hàng!</span>
+  </div>
+
+
+  <!-- ================= JAVASCRIPT APP LOGIC ================= -->
+  <script>
+    // ------------------------------------------------------------------
+    // DATA MODEL: OUTFIT LOOKS COLLECTION
+    // ------------------------------------------------------------------
+    const LOOKBOOK_DATA = [
+      {
+        id: "look-01",
+        number: "01",
+        category: "Urban Streetwear",
+        title: "The Oversized Layered Look",
+        modelImage: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
+        items: [
+          {
+            id: "item-101",
+            name: "Heavyweight Studio Hoodie",
+            category: "Outerwear",
+            price: 140.00,
+            image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=300&q=80",
+            sizes: ["S", "M", "L", "XL"],
+            selectedSize: "L",
+            selected: true
+          },
+          {
+            id: "item-102",
+            name: "Relaxed Wide Denim Pants",
+            category: "Bottoms",
+            price: 120.00,
+            image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=300&q=80",
+            sizes: ["30", "32", "34", "36"],
+            selectedSize: "32",
+            selected: true
+          },
+          {
+            id: "item-103",
+            name: "Retro Platform Chunky Sneakers",
+            category: "Footwear",
+            price: 160.00,
+            image: "https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=300&q=80",
+            sizes: ["US 8", "US 9", "US 10", "US 11"],
+            selectedSize: "US 10",
+            selected: true
+          }
+        ]
+      },
+      {
+        id: "look-02",
+        number: "02",
+        category: "Minimalist Tailored",
+        title: "Monochrome Wool Trench & Trousers",
+        modelImage: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80",
+        items: [
+          {
+            id: "item-201",
+            name: "Minimal Double-Breasted Trench Coat",
+            category: "Coat",
+            price: 280.00,
+            image: "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=300&q=80",
+            sizes: ["46", "48", "50", "52"],
+            selectedSize: "48",
+            selected: true
+          },
+          {
+            id: "item-202",
+            name: "Pleated Tapered Dress Trousers",
+            category: "Pants",
+            price: 110.00,
+            image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=300&q=80",
+            sizes: ["30", "32", "34"],
+            selectedSize: "32",
+            selected: true
+          },
+          {
+            id: "item-203",
+            name: "Italian Calfskin Derby Shoes",
+            category: "Footwear",
+            price: 210.00,
+            image: "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=300&q=80",
+            sizes: ["41", "42", "43", "44"],
+            selectedSize: "42",
+            selected: true
+          }
+        ]
+      },
+      {
+        id: "look-03",
+        number: "03",
+        category: "Casual Luxury",
+        title: "Cashmere Knit & Cargo Ensemble",
+        modelImage: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=80",
+        items: [
+          {
+            id: "item-301",
+            name: "Ribbed Merino Wool Crewneck Sweater",
+            category: "Knitwear",
+            price: 165.00,
+            image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=300&q=80",
+            sizes: ["S", "M", "L", "XL"],
+            selectedSize: "M",
+            selected: true
+          },
+          {
+            id: "item-302",
+            name: "Tactical Utility Cargo Trousers",
+            category: "Bottoms",
+            price: 135.00,
+            image: "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?auto=format&fit=crop&w=300&q=80",
+            sizes: ["S", "M", "L"],
+            selectedSize: "M",
+            selected: true
+          },
+          {
+            id: "item-303",
+            name: "Minimalist Leather High-Top Sneakers",
+            category: "Footwear",
+            price: 195.00,
+            image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=300&q=80",
+            sizes: ["US 9", "US 10", "US 11"],
+            selectedSize: "US 10",
+            selected: true
+          }
+        ]
+      },
+      {
+        id: "look-04",
+        number: "04",
+        category: "Modern Activewear",
+        title: "Tech-Fleece Athleisure Set",
+        modelImage: "https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=800&q=80",
+        items: [
+          {
+            id: "item-401",
+            name: "Thermal Molded Zip Jacket",
+            category: "Jacket",
+            price: 155.00,
+            image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=300&q=80",
+            sizes: ["S", "M", "L", "XL"],
+            selectedSize: "L",
+            selected: true
+          },
+          {
+            id: "item-402",
+            name: "Tapered Performance Joggers",
+            category: "Pants",
+            price: 95.00,
+            image: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=300&q=80",
+            sizes: ["S", "M", "L"],
+            selectedSize: "M",
+            selected: true
+          }
+        ]
+      }
+    ];
+
+    // ---- Nạp dữ liệu do trang ADMIN quản trị (localStorage / file thư mục) ----
+    function loadAdminData() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('trylook-data') || 'null');
+        if (saved && Array.isArray(saved.looks) && saved.looks.length) {
+          const clean = saved.looks
+            .filter(l => l && l.title && Array.isArray(l.items))
+            .map(l => ({
+              id: l.id || ('look-' + Math.random().toString(36).slice(2)),
+              number: l.number,
+              category: l.category || '',
+              title: l.title,
+              modelImage: l.modelImage || '',
+              modelImageBack: l.modelImageBack || '',
+              mode: l.mode === 'png' ? 'png' : 'cover',
+              badge: l.badge || '',
+              subCategory: l.subCategory || '',
+              ma: l.ma || '',
+              items: l.items.map(it => ({
+                id: it.id || ('item-' + Math.random().toString(36).slice(2)),
+                name: it.name || 'Item',
+                category: it.category || '',
+                price: +it.price || 0,
+                oldPrice: +it.oldPrice || 0,
+                role: it.role === 'addon' ? 'addon' : 'main',
+                fromSheet: !!it.fromSheet,
+                image: it.image || '',
+                sizes: Array.isArray(it.sizes) && it.sizes.length ? it.sizes : ['M'],
+                selectedSize: it.selectedSize || (it.sizes && it.sizes[0]) || 'M',
+                selected: it.selected !== false,
+                ma: it.ma || '',   // cột A — mã riêng của biến thể (đổi theo pill cột M)
+                sku: it.sku || '',
+                fullName: it.fullName || '',
+                sub: it.sub || '',
+                specs: it.specs || '',
+                stock: it.stock || '',
+                badge: it.badge || ''
+              }))
+            }));
+          if (clean.length) {
+            clean.forEach((l, i) => { if (!l.number) l.number = String(i + 1).padStart(2, '0'); });
+            LOOKBOOK_DATA.splice(0, LOOKBOOK_DATA.length, ...clean);
+          }
+        }
+      } catch (e) {}
+    }
+    loadAdminData();
+
+    // ------------------------------------------------------------------
+    // ĐỒNG BỘ GIỮA CÁC TRÌNH DUYỆT: bộ nhớ trình duyệt là RIÊNG TỪNG trình duyệt,
+    // nhưng file trong "thư mục lưu dữ liệu" (cùng chỗ với file web) là DÙNG CHUNG.
+    // Trình duyệt mới mở web → tự nạp trylook-data.json / trylook-bgs.json /
+    // cau-hinh.json từ thư mục nếu bộ nhớ đang trống hoặc file thư mục MỚI HƠN.
+    // (Hoạt động khi mở web qua host/máy chủ; mở bằng file:// thì vẫn dùng bộ nhớ.)
+    // ------------------------------------------------------------------
+    async function fetchFolderJson(file) {
+      try {
+        const r = await fetch(file, { cache: 'no-store' });
+        if (!r.ok) return null;
+        return await r.json();
+      } catch (e) { return null; }
+    }
+    async function applyFolderData() {
+      let adopted = false;
+      // DỮ LIỆU SẢN PHẨM: file thư mục mới hơn bộ nhớ → dùng file + ghi lại vào bộ nhớ
+      const folder = await fetchFolderJson('trylook-data.json');
+      if (folder && Array.isArray(folder.looks) && folder.looks.length) {
+        let saved = null;
+        try { saved = JSON.parse(localStorage.getItem('trylook-data') || 'null'); } catch (e) { saved = null; }
+        const folderTime = Date.parse(folder.savedAt || '') || 0;
+        const lsTime = Date.parse((saved && saved.savedAt) || '') || 0;
+        // KHÔNG nhận file thư mục khi nó ÍT sản phẩm hơn bộ nhớ đang có (tránh mất dữ liệu
+        // do admin trên trình duyệt khác lưu đè khi bộ nhớ của nó rỗng)
+        const folderPoorer = folder.looks.length < ((saved && Array.isArray(saved.looks)) ? saved.looks.length : 0);
+        if (!saved || !Array.isArray(saved.looks) || !saved.looks.length || (folderTime > lsTime && !folderPoorer)) {
+          try { localStorage.setItem('trylook-data', JSON.stringify(folder)); } catch (e) {}
+          loadAdminData();
+          adopted = true;
+        }
+      }
+      // NỀN MẪU + NỀN ĐANG DÙNG + NHẠC: chỉ nạp khi bộ nhớ đang trống
+      if (!localStorage.getItem('trylook-bgs')) {
+        const bgs = await fetchFolderJson('trylook-bgs.json');
+        if (Array.isArray(bgs) && bgs.length) {
+          try { localStorage.setItem('trylook-bgs', JSON.stringify(bgs)); } catch (e) {}
+        }
+      }
+      // NỀN MẪU + NỀN ĐANG DÙNG + NHẠC + MENU ẨN + NGÀY/ĐÊM: nạp từ thư mục khi bộ nhớ trống
+      // → mở web ở TRÌNH DUYỆT KHÁC vẫn nhận đúng giao diện như đã cài
+      if (!localStorage.getItem('trylook-bg') || !localStorage.getItem('trylook-music') ||
+          !localStorage.getItem('trylook-menu') || !localStorage.getItem('trylook-day')) {
+        const cfg = await fetchFolderJson('cau-hinh.json');
+        if (cfg) {
+          if (!localStorage.getItem('trylook-bg') && cfg.nen) {
+            try { localStorage.setItem('trylook-bg', cfg.nen); } catch (e) {}
+          }
+          if (!localStorage.getItem('trylook-music') && cfg.nhac && cfg.nhac.url) {
+            try { localStorage.setItem('trylook-music', JSON.stringify(cfg.nhac)); } catch (e) {}
+          }
+          if (!localStorage.getItem('trylook-menu') && Array.isArray(cfg.menuAn)) {
+            try { localStorage.setItem('trylook-menu', JSON.stringify(cfg.menuAn)); } catch (e) {}
+          }
+          if (!localStorage.getItem('trylook-day') && typeof cfg.cheDoNang === 'boolean') {
+            try { localStorage.setItem('trylook-day', cfg.cheDoNang ? '1' : '0'); } catch (e) {}
+          }
+        }
+      }
+      return adopted;
+    }
+
+    // APP STATE
+    let currentLookIndex = 0;
+    let shoppingBag = [];
+    let ALL_LOOKS = [];          // danh sách đầy đủ chưa lọc (menu ngành hàng)
+    let currentCategory = '';    // '' = Tất cả
+    let currentSub = '';         // phân loại cột D đang chọn ('' = cả danh mục)
+    const fmtVND = (n) => Math.round(n).toLocaleString('vi-VN') + 'đ';
+
+    // DRAG / SWIPE STATE VARIABLES
+    let isDragging = false;
+    let startX = 0;
+    let dragOffset = 0;
+    let stageWidth = 1;
+    let moved = false;          // cử động đủ lớn để tính là "kéo"
+    let suppressClick = false;  // chỉ chặn click khi vừa đổi thẻ
+    let velSamples = [];        // mẫu (t, x) để tính vận tốc trên cửa sổ ~120ms
+
+    // ------------------------------------------------------------------
+    // INITIALIZATION & EVENT LISTENERS
+    // ------------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', async () => {
+      // nạp dữ liệu chung từ thư mục (đồng bộ giữa các trình duyệt) TRƯỚC khi vẽ
+      try { await applyFolderData(); } catch (e) {}
+      lucide.createIcons();
+      initDragEvents();
+      ALL_LOOKS = LOOKBOOK_DATA.slice();
+      renderCategoryNav();
+      buildLookbook();
+      positionCards();
+      renderRightPanel();
+      buildBgPop();
+      auditPngLooks();
+      // PHỤC HỒI GIỎ TẠM nếu khách bấm xem chi tiết rồi quay lại trang chọn mẫu
+      try {
+        const savedBag = JSON.parse(sessionStorage.getItem('trylook-bag') || '[]');
+        if (Array.isArray(savedBag) && savedBag.length) { shoppingBag = savedBag; updateCartBadge(); }
+      } catch (e) {}
+      try { applyStageBg(localStorage.getItem('trylook-bg') || 'noir'); } catch (e) {}
+      initDayNightSwitch();
+      initMusic();
+      // LINK PHÂN LOẠI: abc.com/Công Suất Nhỏ 1100W (5A) → hiện đúng sản phẩm của link
+      const seg = readCategoryFromUrl();
+      if (seg) {
+        const exists = ALL_LOOKS.some(l => subSplit(l.subCategory).toLowerCase() === seg.toLowerCase());
+        if (exists) setSubCategory(seg);
+      }
+    });
+
+    // ------------------------------------------------------------------
+    // MENU PHÂN LOẠI — hiển thị đúng THEO SUBCATEGORY (cột D) trên sheets,
+    // thứ tự theo thứ tự xuất hiện của cột D trên bảng
+    // ------------------------------------------------------------------
+    function normCat(s) { return String(s || '').replace(/\s+/g, ' ').trim(); }
+    function subSplit(s) { return normCat(String(s || '').split('/')[0]); }
+
+    function renderCategoryNav() {
+      const panel = document.getElementById('cat-nav');
+      if (!panel) return;
+      // gom các phân loại cột D (phần trước "/"), giữ thứ tự sheet
+      const hidden = loadHiddenMenu();   // danh mục bị ẨN trong admin (mục "Menu cửa hàng")
+      const isOff = (s) => hidden.some(x => String(x || '').toLowerCase() === s.toLowerCase());
+      const subs = [];
+      ALL_LOOKS.forEach(l => {
+        const sb = subSplit(l.subCategory);
+        if (sb && !subs.some(x => x.toLowerCase() === sb.toLowerCase())) subs.push(sb);
+      });
+      const group = subs.filter(sb => /^c\u00f4ng su\u1ea5t/i.test(sb)).filter(sb => !isOff(sb));
+      const rest = subs.filter(sb => !/^c\u00f4ng su\u1ea5t/i.test(sb)).filter(sb => !isOff(sb));
+      const curSub = (currentSub || '').toLowerCase();
+      const btn = (sb) =>
+        `<button type="button" class="cat-item-btn ${sb.toLowerCase() === curSub ? 'on' : ''}" data-sub="${escHTML(sb)}">${escHTML(sb)}</button>`;
+      let html = '';
+      if (group.length) html += '<div class="cat-group-label">C\u00f4ng su\u1ea5t</div>' + group.map(btn).join('');
+      if (rest.length)  html += '<div class="cat-group-label">Danh m\u1ee5c kh\u00e1c</div>' + rest.map(btn).join('');
+      panel.innerHTML = html;
+      panel.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+        // bấm lại mục đang chọn → quay về TẤT CẢ
+        setSubCategory(b.classList.contains('on') ? '' : (b.dataset.sub || ''));
+        closeCatMenu();
+      }));
+      // nối nút hamburger (làm 1 lần)
+      const cb = document.getElementById('cat-checkbox');
+      const tg = document.getElementById('cat-toggle');
+      if (tg && !tg.dataset.wired) {
+        tg.dataset.wired = '1';
+        cb.addEventListener('change', () => panel.classList.toggle('open', cb.checked));
+        document.addEventListener('click', (e) => {
+          const inBar = e.target && e.target.closest && e.target.closest('#cat-bar');
+          if (!inBar) closeCatMenu();
+        });
+      }
+      updateCatCurrent();
+    }
+    function closeCatMenu() {
+      const cb = document.getElementById('cat-checkbox');
+      const panel = document.getElementById('cat-nav');
+      if (cb) cb.checked = false;
+      if (panel) panel.classList.remove('open');
+    }
+    // nhãn phân loại đang chọn, cạnh nút menu
+    function updateCatCurrent() {
+      const el = document.getElementById('cat-current');
+      if (!el) return;
+      el.textContent = currentSub || '';
+      el.style.display = currentSub ? '' : 'none';
+    }
+
+    // ------------------------------------------------------------------
+    // MENU ẨN/HIỆN — quản lý trong ADMIN, mục "Menu cửa hàng"
+    // ------------------------------------------------------------------
+    function loadHiddenMenu() {
+      try { const a = JSON.parse(localStorage.getItem('trylook-menu') || '[]'); return Array.isArray(a) ? a : []; }
+      catch (e) { return []; }
+    }
+
+    function setSubCategory(sub) {
+      sub = (sub || '').trim();
+      if (sub === (currentSub || '')) return;
+      const src = sub
+        ? ALL_LOOKS.filter(l => subSplit(l.subCategory).toLowerCase() === sub.toLowerCase())
+        : ALL_LOOKS;
+      if (!src.length) { toastCatEmpty(); return; }
+      currentSub = sub;
+      currentLookIndex = 0;
+      LOOKBOOK_DATA.splice(0, LOOKBOOK_DATA.length, ...src);
+      renderCategoryNav();
+      buildLookbook();
+      positionCards();
+      updateAppView();
+      if (!urlNavPending) pushCategoryToUrl(sub);   // Link phân loại: abc.com/<phân-loại>
+    }
+
+    // ------------------------------------------------------------------
+    // LINK PHÂN LOẠI: abc.com/Công Suất Nhỏ 1100W (5A)
+    // Điền đúng link (tên phân loại cột D) → web hiện các sản phẩm trong link đó.
+    // Hỗ trợ cả dạng đuôi #/tên-phân-loại (dùng được với mọi host tĩnh).
+    // ------------------------------------------------------------------
+    let urlNavPending = false;   // true khi đổi phân loại DO back/forward của trình duyệt
+    // đổi phân loại → slug chuẩn: KHÔNG DẤU, chữ thường, gạch ngang (VD: cong-suat-nho-1100w-5a)
+    function slugify(s) {
+      return String(s || '')
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')   // bỏ dấu tiếng Việt
+        .replace(/đ/g, 'd')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+    // đọc phần phân loại từ URL (slug) → trả về tên phân loại thật trong dữ liệu
+    // ưu tiên #slug (fallback mọi host), không có mới đọc từ đường dẫn
+    function readCategoryFromUrl() {
+      try {
+        let seg = '';
+        if (location.hash && location.hash.length > 2) {
+          seg = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
+        } else {
+          const parts = location.pathname.split('/').filter(Boolean);
+          const last = parts.length ? parts[parts.length - 1] : '';
+          if (last && !/\.html?$/i.test(last)) seg = decodeURIComponent(last);
+        }
+        const slug = slugify(seg);
+        if (!slug) return '';
+        let found = '';
+        ALL_LOOKS.some(l => {
+          const sb = subSplit(l.subCategory);
+          if (sb && slugify(sb) === slug) { found = sb; return true; }
+          return false;
+        });
+        return found;   // '' nếu link không đúng tên phân loại nào
+      } catch (e) { return ''; }
+    }
+    function pushCategoryToUrl(sub) {
+      try {
+        const base = location.pathname.replace(/\/[^/]*$/, '/');   // giữ thư mục gốc của web
+        history.pushState(null, '', base + (sub ? slugify(sub) : ''));
+      } catch (e) {
+        try { location.hash = sub ? '/' + slugify(sub) : '/'; } catch (e2) {}
+      }
+    }
+    function onUrlNavChange() {
+      urlNavPending = true;
+      const seg = readCategoryFromUrl();
+      if (seg !== (currentSub || '')) {
+        const exists = ALL_LOOKS.some(l => subSplit(l.subCategory).toLowerCase() === seg.toLowerCase());
+        if (exists || !seg) setSubCategory(seg);
+      }
+      urlNavPending = false;
+    }
+    window.addEventListener('popstate', onUrlNavChange);
+    window.addEventListener('hashchange', onUrlNavChange);   // một số trình duyệt chỉ bắn hashchange khi đổi #
+    function toastCatEmpty() {
+      const wrap = document.createElement('div');
+      wrap.className = 'fixed top-20 left-1/2 -translate-x-1/2 bg-white text-black text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl z-[70]';
+      wrap.textContent = 'Chưa có sản phẩm trong phân loại này';
+      document.body.appendChild(wrap);
+      setTimeout(() => wrap.remove(), 1600);
+    }
+
+
+
+    // CÔNG TẮC NGÀY/ĐÊM: gạt phải = trời sáng (nền nhạt, chữ đậm), gạt trái = về nền đã chọn
+    function initDayNightSwitch() {
+      const sw = document.getElementById('night-switch');
+      if (!sw) return;
+      const apply = () => {
+        document.body.classList.toggle('day-mode', sw.checked);
+        try { localStorage.setItem('trylook-day', sw.checked ? '1' : '0'); } catch (e) {}
+      };
+      try { sw.checked = (localStorage.getItem('trylook-day') || '0') === '1'; } catch (e) {}
+      apply();
+      sw.addEventListener('change', apply);
+      sw.addEventListener('click', (e) => e.stopPropagation());  // không đụng kéo-thả
+    }
+
+    // Cảnh báo nếu ảnh ở mode "PNG trong suốt" thực ra KHÔNG có nền trong suốt
+    function auditPngLooks() {
+      LOOKBOOK_DATA.forEach((look) => {
+        if (look.mode !== 'png' || !look.modelImage || !look.modelImage.startsWith('data:image')) return;
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const s = 48;
+            const cv = document.createElement('canvas');
+            cv.width = s; cv.height = s;
+            const x = cv.getContext('2d');
+            x.drawImage(img, 0, 0, s, s);
+            const d = x.getImageData(0, 0, s, s).data;
+            let opaque = 0;
+            for (let p = 3; p < d.length; p += 4) if (d[p] > 24) opaque++;
+            if (opaque > s * s * 0.97) {
+              showToast('Ảnh outfit ' + look.number + ' vẫn còn nền đặc — vào Admin bấm "Xóa nền → trong suốt" nhé!');
+            }
+          } catch (e) {}
+        };
+        img.src = look.modelImage;
+      });
+    }
+
+    // ------------------------------------------------------------------
+    // MOUSE & TOUCH SWIPE ENGINE WITH DYNAMIC BLUR & PROGRESSIVE POSITIONING
+    // ------------------------------------------------------------------
+    function initDragEvents() {
+      const stage = document.getElementById('carousel-stage');
+      const getX = (e) => (e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX);
+
+      const onDragStart = (e) => {
+        isDragging = true; moved = false; suppressClick = false;
+        startX = getX(e);
+        dragOffset = 0;
+        velSamples = [];
+        stageWidth = stage.offsetWidth || 1;
+        stage.classList.add('cursor-grabbing');
+      };
+
+      const onDragMove = (e) => {
+        if (!isDragging) return;
+        const x = getX(e);
+        dragOffset = x - startX;
+        if (Math.abs(dragOffset) > 6) moved = true;
+
+        // lưu mẫu vị trí để tính vận tốc trên cửa sổ ~120ms (ổn định, không nhảy)
+        const t = performance.now();
+        velSamples.push({ t, x });
+        while (velSamples.length > 2 && t - velSamples[0].t > 120) velSamples.shift();
+
+        // mousemove của Chrome đã gộp theo khung hình → vẽ trực tiếp là đủ mượt
+        updateCardPositionsOnDrag();
+      };
+
+      const onDragEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        stage.classList.remove('cursor-grabbing');
+
+        // Quy đổi đúng như lúc kéo: 1 thẻ = 0.4 × chiều rộng sân khấu
+        const stepPx = stageWidth * 0.4;
+
+        // vận tốc trên cửa sổ ~120ms: (x_cuối − x_đầu) / thời gian
+        let velocity = 0;
+        if (velSamples.length > 1) {
+          const a = velSamples[0], b = velSamples[velSamples.length - 1];
+          const dtPositive = b.t - a.t;
+          if (dtPositive >= 30) velocity = (b.x - a.x) / dtPositive * 1000;  // px/s
+        }
+        // chiếu theo quán tính: vị trí dự kiến sau ~120ms
+        const projected = dragOffset + velocity * 0.12;
+        const threshold = stageWidth * 0.12;   // hất nhẹ vẫn đổi thẻ
+        const n = LOOKBOOK_DATA.length;
+
+        // Kéo đè qua mấy thẻ thì đi đúng bấy nhiêu thẻ (không còn giới hạn ±1)
+        let steps = -Math.round(projected / stepPx);
+        if (steps === 0 && Math.abs(projected) > threshold) {
+          steps = projected < 0 ? 1 : -1;
+        }
+        steps = Math.max(-(n - 1), Math.min(n - 1, steps));
+
+        const slid = steps !== 0;
+        if (slid) currentLookIndex = ((currentLookIndex + steps) % n + n) % n;
+
+        // chỉ chặn click khi ĐÃ đổi thẻ — lúc đứng im, click thẻ trái/phải luôn hoạt động
+        suppressClick = slid;
+        dragOffset = 0;
+
+        // KHÔNG dựng lại thẻ: xoá style inline → CSS transition tự trượt về vị trí
+        updateAppView();
+      };
+
+      // Mouse events
+      stage.addEventListener('mousedown', (e) => { e.preventDefault(); onDragStart(e); });
+      window.addEventListener('mousemove', onDragMove);
+      window.addEventListener('mouseup', onDragEnd);
+      window.addEventListener('blur', () => { if (isDragging) onDragEnd(); });
+
+      // Touch events
+      stage.addEventListener('touchstart', onDragStart, { passive: true });
+      window.addEventListener('touchmove', onDragMove, { passive: true });
+      window.addEventListener('touchend', onDragEnd);
+    }
+
+    // Dynamic blur & scale calculation during live mouse dragging
+    function updateCardPositionsOnDrag() {
+      const cards = document.querySelectorAll('.look-card');
+      const normalizedDrag = dragOffset / (stageWidth * 0.4); // Drag progression (-1 to 1)
+
+      cards.forEach((card) => {
+        const cardIndex = parseInt(card.dataset.index, 10);
+        let diff = cardIndex - currentLookIndex;
+        
+        // Handle wrap-around diff (support mọi số lượng look)
+        const n = LOOKBOOK_DATA.length;
+        if (diff < -n/2) diff += n;
+        if (diff > n/2) diff -= n;
+
+        // Effective position offset (+ theo chiều kéo: thẻ chạy cùng tay, không bị ngược)
+        const totalPos = diff + normalizedDrag;
+        const absPos = Math.abs(totalPos);
+
+        // Calculate dynamic properties
+        const scale = Math.max(0.65, 1 - absPos * 0.2);
+        const opacity = Math.max(0.2, 1 - absPos * 0.5);
+        const blur = absPos * 6; // Dynamic progressive blur in px
+        const translateX = totalPos * 65; // percentage
+        const rotateY = -totalPos * 18; // degrees
+        const zIndex = Math.round(30 - absPos * 10);
+
+        card.style.transition = 'none'; // Disable transition for instant drag tracking
+        card.style.transform = `translateX(${translateX}%) scale(${scale}) rotateY(${rotateY}deg) translateZ(${(1 - absPos) * 50}px)`;
+        card.style.opacity = opacity;
+        card.style.filter = `blur(${blur}px) grayscale(${absPos * 30}%)`;
+        card.style.zIndex = zIndex;
+      });
+    }
+
+    // ------------------------------------------------------------------
+    // CAROUSEL: dựng thẻ 1 LẦN duy nhất (tránh load lại ảnh, chống giật)
+    // và chỉ đổi class vị trí khi chuyển look
+    // ------------------------------------------------------------------
+    function buildLookbook() {
+      const container = document.getElementById('carousel-cards-container');
+      const dotsContainer = document.getElementById('carousel-dots');
+      container.innerHTML = '';
+      dotsContainer.innerHTML = '';
+
+      LOOKBOOK_DATA.forEach((look, index) => {
+        // Card Element
+        const cardEl = document.createElement('div');
+        cardEl.dataset.index = index;
+        const isPng = look.mode === 'png';
+        const hasBack = !!(look.modelImageBack && look.modelImage);
+        cardEl.className = `look-card ${isPng ? 'mode-png' : ''} ${!look.modelImage ? 'no-img' : ''} ${hasBack ? 'can-flip' : ''} absolute w-full h-full rounded-2xl glass-card shadow-2xl border border-white/10 pointer-events-auto cursor-pointer`.trim();
+
+        cardEl.onclick = (e) => {
+          if (suppressClick) { suppressClick = false; return; }  // thì vừa kéo xong
+          if (index !== currentLookIndex) {
+            currentLookIndex = index;
+            updateAppView();
+          } else {
+            toggleFlip(index);   // bấm thẻ đang chọn → lật
+          }
+        };
+
+        const phBlock = look.modelImage ? '' : `
+            <div class="flex items-center justify-center w-full h-full bg-gradient-to-br from-[#1b2030] to-[#0d1018] pointer-events-none">
+              <div class="text-center px-6">
+                <div class="text-[10px] font-bold uppercase tracking-[0.3em] text-amber-400/80">LiOA</div>
+              </div>
+            </div>`;
+
+        // CHÂN THẺ (dưới ảnh): phân loại cột D (đổi theo mục khách chọn) + mã sản phẩm + nút xem chi tiết trên web chính
+        const footSub = subSplit(look.subCategory) || look.category;
+        const footHTML = `
+            <div data-info class="card-foot shrink-0 px-4 pt-2 pb-3 text-white">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-amber-400 block">${footSub}</span>
+              <h3 class="text-[15px] font-bold leading-tight mt-0.5 line-clamp-2">${look.ma || ''}</h3>
+              ${look.ma ? `
+              <button type="button" class="mt-2 inline-flex items-center gap-1.5 pointer-events-auto bg-amber-400 hover:bg-amber-300 text-black text-[10px] font-black tracking-wide px-3 py-1.5 rounded-full shadow-lg transition" onclick="event.stopPropagation(); xemChiTietTrenWeb('${encodeURIComponent(look.ma)}')">
+                <i data-lucide="external-link" class="w-3 h-3"></i> XEM CHI TIẾT
+              </button>` : ''}
+            </div>`;
+
+        cardEl.innerHTML = `
+          <div class="flip-inner" data-inner>
+            <div class="flip-face flip-front rounded-2xl overflow-hidden pointer-events-none" data-face="front">
+              ${phBlock || `<img alt="${look.title}" draggable="false" class="w-full h-full object-cover object-center">`}
+              <div class="vignette absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10 pointer-events-none"></div>
+            </div>
+            ${hasBack ? `
+            <div class="flip-face flip-back rounded-2xl overflow-hidden pointer-events-none" data-face="back">
+              <img alt="Mặt sau ${look.title}" draggable="false" class="w-full h-full object-cover object-center">
+              <div class="vignette absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10 pointer-events-none"></div>
+            </div>` : ''}
+          </div>
+          <span data-info class="face-tag">Mặt trước</span>
+          ${footHTML}
+        `;
+        container.appendChild(cardEl);
+
+        cardEl.dataset.showing = 'front';
+
+        // Pagination Dot
+        const dot = document.createElement('button');
+        dot.className = `w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentLookIndex ? 'w-8 bg-white' : 'bg-white/30 hover:bg-white/60'}`;
+        dot.onclick = () => {
+          currentLookIndex = index;
+          updateAppView();
+        };
+        dotsContainer.appendChild(dot);
+      });
+
+      document.getElementById('total-looks-num').innerText = ` / ${String(LOOKBOOK_DATA.length).padStart(2, '0')}`;
+      // nhiều SP thì ẩn hàng dot (counter số vẫn hiển thị)
+      const dots = document.getElementById('carousel-dots');
+      if (dots) dots.style.display = LOOKBOOK_DATA.length > 15 ? 'none' : 'flex';
+      updateImgWindow();   // chỉ nạp ảnh các thẻ quanh thẻ đầu tiên
+    }
+
+    // LẬT THẺ 3D: quay 180° sang mặt sau (bấm thẻ đang chọn)
+    function toggleFlip(index) {
+      const cardEl = document.querySelector(`.look-card[data-index="${index}"]`);
+      const look = LOOKBOOK_DATA[index];
+      if (!cardEl || !look || !look.modelImageBack || !look.modelImage) return;
+      const flipped = cardEl.classList.toggle('is-flipped');
+      cardEl.dataset.showing = flipped ? 'back' : 'front';
+      const tag = cardEl.querySelector('.face-tag');   // nhãn đứng im, không xoay theo ảnh
+      if (tag) tag.textContent = flipped ? 'Mặt sau' : 'Mặt trước';
+      // ảnh mặt sau chỉ nạp khi cần (tiết kiệm bộ nhớ)
+      const backImg = cardEl.querySelector('[data-face="back"] img');
+      if (backImg && !backImg.hasAttribute('src')) backImg.setAttribute('src', look.modelImageBack);
+    }
+
+    // Chỉ cập nhật class vị trí (kết hợp CSS transition => trượt mượt)
+    function positionCards() {
+      const n = LOOKBOOK_DATA.length;
+      document.querySelectorAll('.look-card').forEach(card => {
+        // xoá style inline còn lại từ lúc kéo → trả quyền cho CSS transition
+        card.style.transition = '';
+        card.style.transform = '';
+        card.style.opacity = '';
+        card.style.filter = '';
+        card.style.zIndex = '';
+
+        const index = parseInt(card.dataset.index, 10);
+        let diff = index - currentLookIndex;
+        if (diff < -n/2) diff += n;
+        if (diff > n/2) diff -= n;
+
+        let cls = 'far-right';
+        if (diff === 0) cls = 'active';
+        else if (diff === 1) cls = 'next-1';
+        else if (diff === -1) cls = 'prev-1';
+        else if (diff < 0) cls = 'far-left';
+        card.classList.remove('active', 'next-1', 'prev-1', 'far-left', 'far-right');
+        card.classList.add(cls);
+      });
+
+      // dots
+      document.querySelectorAll('#carousel-dots button').forEach((d, i) => {
+        d.className = `w-2.5 h-2.5 rounded-full transition-all duration-300 ${i === currentLookIndex ? 'w-8 bg-white' : 'bg-white/30 hover:bg-white/60'}`;
+      });
+      document.getElementById('active-look-num').innerText = LOOKBOOK_DATA[currentLookIndex].number;
+    }
+
+    function changeSlide(direction) {
+      currentLookIndex = (currentLookIndex + direction + LOOKBOOK_DATA.length) % LOOKBOOK_DATA.length;
+      updateAppView();
+    }
+
+    function updateAppView() {
+      positionCards();
+      renderRightPanel();
+      // rời thẻ → trả thẻ về mặt trước (tránh treo mặt sau khi lướt qua)
+      document.querySelectorAll('.look-card.is-flipped:not(.active)').forEach(c => {
+        c.classList.remove('is-flipped');
+        c.dataset.showing = 'front';
+        const tg = c.querySelector('.face-tag');
+        if (tg) tg.textContent = 'Mặt trước';
+        const bi = c.querySelector('[data-face="back"] img');
+        if (bi) bi.removeAttribute('src');
+      });
+      updateImgWindow();   // chỉ giữ ảnh của các thẻ gần thẻ đang xem → đỡ nghẽn
+    }
+
+    // ------------------------------------------------------------------
+    // QUẢN LÝ BỘ NHỚ ẢNH: chỉ tải ảnh cho cửa sổ ±2 thẻ quanh thẻ active,
+    // các thẻ xa bỏ src (giải phóng bộ nhớ) — web chạy nổi khi có 200+ SP
+    // ------------------------------------------------------------------
+    const IMG_WINDOW = 2;
+    function updateImgWindow() {
+      document.querySelectorAll('.look-card').forEach(cardEl => {
+        const idx = +cardEl.dataset.index;
+        const look = LOOKBOOK_DATA[idx];
+        if (!look) return;
+        const fImg = cardEl.querySelector('[data-face="front"] img');
+        const bImg = cardEl.querySelector('[data-face="back"] img');
+        const hasImg = fImg || bImg;
+        if (!hasImg && !look.modelImage) return;
+        const near = Math.abs(idx - currentLookIndex) <= IMG_WINDOW || (idx + LOOKBOOK_DATA.length - currentLookIndex) % LOOKBOOK_DATA.length <= IMG_WINDOW || (currentLookIndex + LOOKBOOK_DATA.length - idx) % LOOKBOOK_DATA.length <= IMG_WINDOW;
+        if (near) {
+          if (fImg && look.modelImage && fImg.getAttribute('src') !== look.modelImage) {
+            fImg.setAttribute('src', look.modelImage);
+          }
+          // ảnh mặt sau chỉ giữ nếu thẻ đang bị lật
+          if (bImg) {
+            const wantBack = cardEl.classList.contains('is-flipped');
+            if (wantBack && look.modelImageBack && bImg.getAttribute('src') !== look.modelImageBack) bImg.setAttribute('src', look.modelImageBack);
+            else if (!wantBack && bImg.hasAttribute('src')) bImg.removeAttribute('src');
+          }
+        } else if (hasImg) {
+          // thẻ xa: nhả ảnh ra khỏi bộ nhớ
+          if (fImg) fImg.removeAttribute('src');
+          if (bImg) bImg.removeAttribute('src');
+        }
+      });
+    }
+
+    // ------------------------------------------------------------------
+    // RIGHT PANEL (IN THIS LOOK) RENDER & INTERACTION
+    // ------------------------------------------------------------------
+    // thoát HTML an toàn cho chuỗi từ sheet/admin
+    function escHTML(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function renderRightPanel() {
+      const activeLook = LOOKBOOK_DATA[currentLookIndex];
+
+      // Update Header Text
+      document.getElementById('outfit-category-tag').innerText = activeLook.category;
+      document.getElementById('outfit-title').innerText = activeLook.title;
+
+      const itemsListContainer = document.getElementById('outfit-items-list');
+      itemsListContainer.innerHTML = '';
+
+      let activeItemsCount = 0;
+
+      // chia món theo vai trò từ admin: sản phẩm chính → sau đó mua kèm
+      const withIdx = activeLook.items.map((it, i) => ({ it, i }));
+      const mains = [], addons = [];
+      withIdx.forEach((entry, k) => {
+        const r = entry.it.role === 'addon' ? 'addon' : (k === 0 ? 'main' : (entry.it.role === 'main' ? 'main' : 'addon'));
+        (r === 'addon' ? addons : mains).push(entry);
+      });
+
+      // ============ CHẾ ĐỘ TRANG SẢN PHẨM (= web tham khảo TOHO, phân loại là cột M) ============
+      const isProductMode = mains.length > 0 && mains.every(e => e.it.fromSheet);
+      const labelEl = document.getElementById('panel-section-label');
+      if (labelEl) labelEl.style.display = isProductMode ? 'none' : 'flex';
+      if (isProductMode) {
+        const sel = mains.find(e => e.it.selected) || mains[0];
+        const item = sel.it;
+        activeItemsCount++;
+
+        const sub = item.sub || '';
+        const crumb = ((activeLook.category || '') + (sub ? ' / ' + sub : '')).toUpperCase();
+        const sku = item.ma || item.sku || (activeLook.id || '').replace(/^lp-/, '');
+        const pct = (item.oldPrice > item.price && item.price > 0)
+          ? Math.round((1 - item.price / item.oldPrice) * 100) : 0;
+        const outOfStock = /h\u1ebft|h\u1ea9\u0309t/i.test(item.stock || '');
+
+        const pills = mains.map(e => `
+          <button onclick="selectMainVariant(${e.i})"
+                  class="px-3 py-1.5 text-[11px] font-semibold rounded-full border transition ${e.it.selected
+                    ? 'bg-red-600 border-red-500 text-white shadow-lg shadow-red-950/40'
+                    : 'bg-white/5 border-white/15 text-gray-300 hover:bg-white/15'}">${escHTML(e.it.name)}</button>`).join('');
+
+        const block = document.createElement('div');
+        block.className = 'glass-card rounded-2xl p-4 border border-white/10 mb-4';
+        block.innerHTML = `
+          <div class="text-[10px] font-bold uppercase tracking-widest text-amber-400 mb-2">${escHTML(crumb)}</div>
+          <div class="flex items-center gap-2 flex-wrap mb-3 text-[10px]">
+            <span class="text-gray-500">Mã sản phẩm:</span>
+            <span class="font-semibold text-red-400 bg-red-500/10 border border-red-500/30 rounded px-1.5 py-0.5">${escHTML(sku)}</span>
+            ${item.badge ? `<span class="font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded px-1.5 py-0.5">${escHTML(item.badge)}</span>` : ''}
+            <span class="text-gray-500">Tình trạng: <b class="${outOfStock ? 'text-red-400' : 'text-emerald-400'}">${escHTML(item.stock || 'Có hàng')}</b></span>
+          </div>
+          <div class="flex items-baseline gap-2.5 flex-wrap">
+            <span class="text-3xl font-extrabold text-red-500">${fmtVND(item.price)}</span>
+            ${item.oldPrice ? `<s class="text-sm text-gray-500">${fmtVND(item.oldPrice)}</s>` : ''}
+            ${pct > 0 ? `<span class="text-[10px] font-bold text-red-400 bg-red-500/10 rounded-full px-2.5 py-1 border border-red-500/25">Tiết kiệm ${pct}%</span>` : ''}
+          </div>
+          <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-4 mb-2">Phân loại / Kích thước:</div>
+          <div class="flex flex-wrap gap-1.5">${pills}</div>
+          ${item.fullName && item.fullName !== activeLook.title ? `<div class="text-[11px] text-gray-500 mt-2.5 leading-snug">${escHTML(item.fullName)}</div>` : ''}
+          ${item.specs ? `<details class="spec-fold mt-3 pt-3 border-t border-white/10"><summary>Thông số</summary><div class="mt-2 text-[11px] text-gray-300 leading-relaxed" style="white-space:pre-line">${escHTML(item.specs)}</div></details>` : ''}
+        `;
+        itemsListContainer.appendChild(block);
+      }
+
+      const renderOne = (entry, isAddon) => {
+        const item = entry.it;
+        const itemIdx = entry.i;
+        if (item.selected) activeItemsCount++;
+
+        const itemCard = document.createElement('div');
+        itemCard.className = `glass-card p-3.5 rounded-xl border transition-all duration-300 ${item.selected ? 'border-white/20 bg-white/[0.05]' : 'border-white/5 opacity-50'}`;
+
+        // Sizes Options HTML
+        const sizesHTML = item.sizes.map(size => `
+          <button onclick="selectItemSize(${itemIdx}, '${size}')" 
+                  class="px-2.5 py-1 text-[11px] font-semibold rounded-md transition ${item.selectedSize === size ? 'bg-white text-black font-bold' : 'bg-white/10 text-gray-300 hover:bg-white/20'}">
+            ${size}
+          </button>
+        `).join('');
+
+        itemCard.innerHTML = `
+          <div class="flex items-center justify-between gap-3">
+            <!-- Item Thumbnail & Info -->
+            <div class="flex items-center gap-3">
+              <div class="w-14 h-14 rounded-lg overflow-hidden bg-black/40 border border-white/10 shrink-0">
+                <img src="${item.image}" alt="${escHTML(item.name)}" class="w-full h-full object-cover">
+              </div>
+              <div>
+                <span class="text-[10px] text-gray-400 font-semibold uppercase">${escHTML(item.category)}</span>
+                <h4 class="text-xs md:text-sm font-bold text-white line-clamp-1">${escHTML(item.name)}</h4>
+                <span class="text-xs font-semibold text-amber-400">${fmtVND(item.price)}${item.oldPrice ? ` <s class="text-[10px] text-gray-500 font-normal ml-1">${fmtVND(item.oldPrice)}</s>` : ''}</span>
+              </div>
+            </div>
+
+            <!-- Toggle Included Button -->
+            <button onclick="toggleItemSelection(${itemIdx})" class="p-2 rounded-lg ${item.selected ? 'bg-amber-400/20 text-amber-400 border border-amber-400/40' : 'bg-white/5 text-gray-400'} hover:scale-105 transition" title="Thêm/Bỏ món này">
+              <i data-lucide="${item.selected ? 'check' : 'plus'}" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Size Selector Bar (Show if selected & has sizes) -->
+          ${item.selected && item.sizes.length ? `
+            <div class="mt-3 pt-2 border-t border-white/5 flex items-center justify-between">
+              <span class="text-[10px] text-gray-400">Size:</span>
+              <div class="flex items-center gap-1.5">
+                ${sizesHTML}
+              </div>
+            </div>
+          ` : ''}
+        `;
+
+        itemsListContainer.appendChild(itemCard);
+      };
+
+      if (isProductMode) {
+        // chế độ trang SP: biến thể đã là pill phân loại, danh sách chỉ còn MUA KÈM
+        if (addons.length) {
+          const sep = document.createElement('div');
+          sep.className = 'flex items-center gap-2 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-gray-400';
+          sep.innerHTML = `<span class="flex-1 border-t border-dashed border-white/10"></span> Sản phẩm mua kèm <span class="flex-1 border-t border-dashed border-white/10"></span>`;
+          itemsListContainer.appendChild(sep);
+          addons.forEach(entry => renderOne(entry, true));
+        }
+      } else {
+        mains.forEach(entry => renderOne(entry, false));
+        if (addons.length) {
+          const sep = document.createElement('div');
+          sep.className = 'flex items-center gap-2 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-gray-400';
+          sep.innerHTML = `<span class="flex-1 border-t border-dashed border-white/10"></span> Sản phẩm mua kèm <span class="flex-1 border-t border-dashed border-white/10"></span>`;
+          itemsListContainer.appendChild(sep);
+          addons.forEach(entry => renderOne(entry, true));
+        }
+      }
+
+      document.getElementById('item-count-badge').innerText = `${activeItemsCount} món đã chọn`;
+
+      calculatePricing();
+      lucide.createIcons();
+    }
+
+    // Chọn biến thể (pill phân loại) — các món chính độc quyền nhau, chỉ 1 được chọn
+    function selectMainVariant(itemIdx) {
+      const look = LOOKBOOK_DATA[currentLookIndex];
+      look.items.forEach((it, i) => { if (i !== itemIdx && it.role !== 'addon') it.selected = false; });
+      const it = look.items[itemIdx];
+      it.selected = true;
+      if (it.sizes && it.sizes.length) it.selectedSize = it.sizes[0];
+      // MÃ SẢN PHẨM (cột A) đổi theo biến thể đang chọn — cả trên panel lẫn chân thẻ ảnh
+      if (it.ma) {
+        look.ma = it.ma;
+        const card = document.querySelector('.look-card.active');
+        const h3 = card && card.querySelector('.card-foot h3');
+        if (h3) h3.textContent = look.ma;
+      }
+      renderRightPanel();
+    }
+
+    // Toggle Item in Current Look
+    function toggleItemSelection(itemIdx) {
+      const activeLook = LOOKBOOK_DATA[currentLookIndex];
+      activeLook.items[itemIdx].selected = !activeLook.items[itemIdx].selected;
+      renderRightPanel();
+    }
+
+    // Select Size for Item
+    function selectItemSize(itemIdx, size) {
+      const activeLook = LOOKBOOK_DATA[currentLookIndex];
+      activeLook.items[itemIdx].selectedSize = size;
+      renderRightPanel();
+    }
+
+    // ------------------------------------------------------------------
+    // PRICING CALCULATIONS
+    // ------------------------------------------------------------------
+    function calculatePricing() {
+      const activeLook = LOOKBOOK_DATA[currentLookIndex];
+      const selectedItems = activeLook.items.filter(i => i.selected);
+
+      const rawTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
+      const discountRate = selectedItems.length > 1 ? 0.10 : 0; // 10% Bundle discount
+      const discountAmount = rawTotal * discountRate;
+      const finalTotal = rawTotal - discountAmount;
+
+      document.getElementById('original-total-price').innerText = fmtVND(rawTotal);
+      document.getElementById('discount-saved-amount').innerText = '-' + fmtVND(discountAmount);
+      document.getElementById('final-bundle-price').innerText = fmtVND(finalTotal);
+
+      const addBtn = document.getElementById('add-bundle-btn');
+      if (selectedItems.length === 0) {
+        addBtn.disabled = true;
+        addBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        addBtn.disabled = false;
+        addBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // SHOPPING BAG & MODAL LOGIC
+    // ------------------------------------------------------------------
+    function addCurrentLookToBag() {
+      const activeLook = LOOKBOOK_DATA[currentLookIndex];
+      const selectedItems = activeLook.items.filter(i => i.selected);
+
+      if (selectedItems.length === 0) return;
+
+      selectedItems.forEach(item => {
+        shoppingBag.push({
+          ...item,
+          outfitTitle: activeLook.title,
+          cartId: `${item.id}-${item.selectedSize}-${Date.now()}`
+        });
+      });
+
+      updateCartBadge();
+      renderCartItems();
+      saveBag();
+      showToast(`Đã thêm ${selectedItems.length} món từ "${activeLook.title}" vào giỏ!`);
+    }
+
+    function updateCartBadge() {
+      const badge = document.getElementById('cart-badge-count');
+      badge.innerText = shoppingBag.length;
+      if (shoppingBag.length > 0) {
+        badge.classList.remove('scale-0');
+        badge.classList.add('scale-100');
+      } else {
+        badge.classList.remove('scale-100');
+        badge.classList.add('scale-0');
+      }
+    }
+
+    function renderCartItems() {
+      const container = document.getElementById('cart-items-container');
+      container.innerHTML = '';
+
+      if (shoppingBag.length === 0) {
+        container.innerHTML = `
+          <div class="h-64 flex flex-col items-center justify-center text-gray-500">
+            <i data-lucide="shopping-bag" class="w-12 h-12 mb-3 stroke-[1]"></i>
+            <p class="text-sm">Giỏ hàng của bạn đang trống.</p>
+          </div>
+        `;
+        document.getElementById('cart-total-amount').innerText = fmtVND(0);
+        return;
+      }
+
+      let total = 0;
+      shoppingBag.forEach((item, idx) => {
+        total += item.price;
+
+        const el = document.createElement('div');
+        el.className = 'glass-card p-3 rounded-xl flex items-center justify-between gap-3 border border-white/5';
+        el.innerHTML = `
+          <div class="flex items-center gap-3">
+            <img src="${item.image}" class="w-12 h-12 rounded-lg object-cover">
+            <div>
+              <h5 class="text-xs font-bold text-white line-clamp-1">${item.name}</h5>
+              <span class="text-[10px] text-gray-400">Size: ${item.selectedSize}</span>
+              <span class="block text-xs font-semibold text-amber-400">${fmtVND(item.price)}</span>
+            </div>
+          </div>
+          <button onclick="removeFromCart(${idx})" class="p-1.5 text-gray-500 hover:text-red-400 transition">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        `;
+        container.appendChild(el);
+      });
+
+      document.getElementById('cart-total-amount').innerText = fmtVND(total);
+      lucide.createIcons();
+    }
+
+    function removeFromCart(index) {
+      shoppingBag.splice(index, 1);
+      updateCartBadge();
+      renderCartItems();
+      saveBag();
+    }
+
+    // LƯU GIỎ TẠM trong tab (khách qua lại web chính không mất hàng đã chọn)
+    function saveBag() {
+      try { sessionStorage.setItem('trylook-bag', JSON.stringify(shoppingBag)); } catch (e) {}
+    }
+
+    // XEM CHI TIẾT SẢN PHẨM TRÊN WEB CHÍNH (mở tab mới, giữ nguyên trang chọn mẫu)
+    function xemChiTietTrenWeb(maEncoded) {
+      try {
+        const ma = decodeURIComponent(maEncoded || '');
+        if (!ma) return;
+        window.open('../san-pham/' + encodeURIComponent(ma), '_blank');
+      } catch (e) {}
+    }
+
+    // THANH TOÁN: gởi giỏ hàng về web chính TOHO → mở bảng XÁC NHẬN ĐƠN HÀNG & THANH TOÁN
+    function thanhToanQuaWebChinh() {
+      if (!shoppingBag.length) { showToast('Giỏ hàng của bạn đang trống!'); return; }
+      const items = shoppingBag.map(it => ({
+        id: it.ma || it.id,
+        code: it.ma || '',
+        name: ((it.fullName || it.outfitTitle || it.name || '') + (it.selectedSize ? ' — ' + it.selectedSize : '')).trim(),
+        price: it.price || 0,
+        image: it.image || '',
+        quantity: 1
+      }));
+      try { sessionStorage.setItem('tohoCartHandoff', JSON.stringify(items)); } catch (e) {}
+      window.location.href = '../index.html?checkout=1';
+    }
+
+    function toggleCartModal(show) {
+      const modal = document.getElementById('cart-modal');
+      const panel = document.getElementById('cart-modal-panel');
+
+      if (show) {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        panel.classList.remove('translate-x-full');
+      } else {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        panel.classList.add('translate-x-full');
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast-notification');
+      document.getElementById('toast-msg').innerText = message;
+      
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    // ------------------------------------------------------------------
+    // THAY ĐỔI HÌNH NỀN (nút trong thẻ đang chọn)
+    // ------------------------------------------------------------------
+    const DEFAULT_BG_PRESETS = [
+      { k:'noir',   n:'Noir original',  css:'linear-gradient(180deg,#12141c 0%,#0a0b0e 100%)' },
+      { k:'pump',   n:'Hồng sunset',    css:'linear-gradient(160deg,#2a1019 0%,#7c2d4e 55%,#b45331 130%)' },
+      { k:'sage',   n:'Rêu trầm',       css:'linear-gradient(160deg,#101b14 0%,#24402e 60%,#37553f 125%)' },
+      { k:'velvet', n:'Đỏ đô nhung',    css:'linear-gradient(160deg,#1b0f14 0%,#52212e 60%,#7f2d3b 125%)' },
+      { k:'coffee', n:'Cà phê',         css:'linear-gradient(160deg,#18120c 0%,#4a3220 60%,#785430 125%)' },
+      { k:'ocean',  n:'Biển đêm',       css:'linear-gradient(160deg,#0b1220 0%,#16304d 60%,#1d5e6e 125%)' },
+      { k:'violet', n:'Sương tím',      css:'linear-gradient(160deg,#150e21 0%,#372157 60%,#57328a 125%)' },
+      { k:'stripe', n:'Kẻ mờ',          css:'repeating-linear-gradient(115deg,#101218 0 26px,#171b24 26px 52px)' },
+    ];
+
+    // Danh sách nền được quản lý từ trang ADMIN (localStorage 'trylook-bgs')
+    // nạp LẠI khi admin sửa → tab cửa hàng đang mở cũng cập nhật (storage event)
+    let BG_PRESETS = (function () {
+      try {
+        const list = JSON.parse(localStorage.getItem('trylook-bgs') || 'null');
+        if (Array.isArray(list) && list.length) {
+          return list
+            .filter(p => p && p.css)
+            .map((p, i) => ({ k: p.k || ('bg-' + i), n: p.n || ('Nền ' + (i + 1)), css: p.css }));
+        }
+      } catch (e) {}
+      return DEFAULT_BG_PRESETS;
+    })();
+
+    function loadBgPresets() {
+      try {
+        const list = JSON.parse(localStorage.getItem('trylook-bgs') || 'null');
+        if (Array.isArray(list) && list.length) {
+          BG_PRESETS = list
+            .filter(p => p && p.css)
+            .map((p, i) => ({ k: p.k || ('bg-' + i), n: p.n || ('Nền ' + (i + 1)), css: p.css }));
+        }
+      } catch (e) {}
+    }
+
+    function buildBgPop() {
+      const pop = document.getElementById('bg-pop');
+      // dựng lại chip mỗi lần mở → luôn đọc dữ liệu nền MỚI NHẤT từ admin
+      pop.querySelectorAll('.bg-chip').forEach(c => c.remove());
+      // dựng bằng JS style (không đưa p.css qua thuộc tính HTML — tránh vỡ dấu " của url())
+      pop.insertAdjacentHTML('beforeend', BG_PRESETS.map(p => `
+        <button type="button" class="bg-chip" data-k="${p.k}" title="${p.n}">
+          <span class="img"></span>
+          <span class="nm">${p.n}</span>
+        </button>`).join(''));
+
+      pop.querySelectorAll('.bg-chip').forEach(chip => {
+        const p = BG_PRESETS.find(x => String(x.k) === String(chip.dataset.k));
+        if (p) chip.querySelector('.img').style.background = p.css;
+        chip.addEventListener('click', (e) => {
+          e.stopPropagation();
+          applyStageBg(chip.dataset.k);
+          toggleBgPop(false);
+        });
+      });
+    }
+
+    function applyStageBg(key) {
+      const preset = BG_PRESETS.find(p => p.k === key) || BG_PRESETS[0];
+      const stage = document.getElementById('stage-backdrop');
+      if (stage) stage.style.background = preset.css;
+      try { localStorage.setItem('trylook-bg', preset.k); } catch (e) {}
+      document.querySelectorAll('#bg-pop .bg-chip').forEach(c =>
+        c.classList.toggle('chip-on', c.dataset.k === preset.k));
+    }
+
+    function toggleBgPop(force) {
+      const pop = document.getElementById('bg-pop');
+      if (!pop) return;
+      const open = force !== undefined ? force : !pop.classList.contains('open');
+      if (open) {
+        loadBgPresets();          // đọc nền mới nhất từ admin
+        buildBgPop();             // dựng lại chip theo danh sách mới
+      }
+      pop.classList.toggle('open', open);
+    }
+
+    // bấm ra ngoài biển popup để đóng
+    document.addEventListener('click', (e) => {
+      const pop = document.getElementById('bg-pop');
+      if (!pop || !pop.classList.contains('open')) return;
+      if (!pop.contains(e.target) && !e.target.closest('.bg-btn')) toggleBgPop(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') toggleBgPop(false);
+    });
+
+    // ------------------------------------------------------------------
+    // NHẠC NỀN: cấu hình trong trang ADMIN (localStorage 'trylook-music')
+    // ------------------------------------------------------------------
+    const MUSIC_KEY = 'trylook-music';
+    let bgmPlaying = false;
+    let bgmAutoPending = false;
+
+    // NHẠC MẶC ĐỊNH: FILE NHẠC ĐẶT TRONG CÙNG THƯ MỤC web (không cần mạng, phát chắc chắn)
+    const LOCAL_MUSIC_DEFAULT = encodeURIComponent('AMV - 李羲承进行曲(命苦是种天赋) Lý Tây Thành (Cuộc sống khó khăn là một món quà) #xuantinhmedia.mp3');
+
+    // link Drive cũ dạng uc?export=download → đổi sang dạng chuẩn phát trực tiếp
+    function driveNormalize(u) {
+      const s = String(u || '');
+      const m = /[?&]id=([^&/#?]+)/.exec(s);
+      if (m && s.indexOf('drive.google.com') >= 0) {
+        return 'https://drive.usercontent.google.com/download?id=' + m[1] + '&export=download&confirm=t';
+      }
+      return u;
+    }
+
+    function getMusicCfg() {
+      const cfg = { url: LOCAL_MUSIC_DEFAULT, volume: 60, autoplay: false };
+      try {
+        const c = JSON.parse(localStorage.getItem(MUSIC_KEY) || 'null');
+        if (c && typeof c === 'object' && 'url' in c) {
+          const u = String(driveNormalize(c.url) || '').trim();
+          // trống hoặc là link Drive mặc định CŨ → coi như chưa cấu hình, dùng file nhạc trong thư mục
+          const oldDefault = !u || (u.indexOf('drive.google.com') >= 0 && u.indexOf('1gBs_XtHOSgmVwXkJZdOuAlZ93hbruHiR') >= 0);
+          if (!oldDefault) cfg.url = u;
+          if (c.volume != null) cfg.volume = c.volume;
+          if (c.autoplay != null) cfg.autoplay = c.autoplay;
+        }
+      } catch (e) {}
+      return cfg;
+    }
+    function playBGM() {
+      const au = document.getElementById('store-bgm');
+      const wrap = document.getElementById('bgm-wrap');
+      if (!au || !au.src) return;
+      au.play().then(() => {
+        bgmPlaying = true;
+        if (wrap) wrap.classList.add('playing');
+      }).catch(() => {});
+    }
+    function stopBGM() {
+      const au = document.getElementById('store-bgm');
+      const wrap = document.getElementById('bgm-wrap');
+      if (au) au.pause();
+      bgmPlaying = false;
+      bgmAutoPending = false;
+      if (wrap) wrap.classList.remove('playing');
+    }
+    function initMusic() {
+      const cfg = getMusicCfg();
+      const au = document.getElementById('store-bgm');
+      const wrap = document.getElementById('bgm-wrap');
+      if (!au || !wrap) return;
+      stopBGM();
+      // player nhạc LUÔN hiện trên web
+      wrap.style.display = '';
+      au.src = cfg.url;
+      au.volume = Math.min(1, Math.max(0, (cfg.volume == null ? 60 : (+cfg.volume || 0)) / 100));
+      const pl = document.getElementById('bgm-player');
+      if (pl && !pl.dataset.wired) {
+        pl.dataset.wired = '1';
+        // bấm đĩa → xổ/thu player (dành cho màn cảm ứng, desktop thì rê chuột)
+        const disc = document.getElementById('bgm-disc');
+        if (disc) disc.addEventListener('click', (e) => {
+          e.stopPropagation();
+          pl.classList.toggle('open');
+        });
+        document.addEventListener('click', (e) => {
+          if (pl.classList.contains('open') && !pl.contains(e.target)) pl.classList.remove('open');
+        });
+        // phát / tạm dừng
+        const tbtn = document.getElementById('bgm-toggle');
+        if (tbtn) tbtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!au.src) {
+            const tip = document.createElement('div');
+            tip.className = 'fixed bottom-16 left-4 bg-white text-black text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl z-[70]';
+            tip.textContent = 'Chưa có nhạc — cài trong trang ADMIN, mục "Nhạc nền"';
+            document.body.appendChild(tip);
+            setTimeout(() => tip.remove(), 1800);
+            return;
+          }
+          bgmPlaying ? stopBGM() : playBGM();
+        });
+        // phát lại từ đầu
+        const rbtn = document.getElementById('bgm-restart');
+        if (rbtn) rbtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (au.src) { au.currentTime = 0; if (!bgmPlaying) playBGM(); }
+        });
+        // lặp lại liên tục
+        const lbtn = document.getElementById('bgm-loop');
+        if (lbtn) lbtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          au.loop = !au.loop;
+          lbtn.classList.toggle('on', au.loop);
+        });
+        // thanh kéo tiến độ
+        const seek = document.getElementById('bgm-seek');
+        const cur = document.getElementById('bgm-cur');
+        const dur = document.getElementById('bgm-dur');
+        const fmt = (s) => { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+        if (seek) seek.addEventListener('input', () => {
+          if (au.duration && isFinite(au.duration)) au.currentTime = (+seek.value / 100) * au.duration;
+        });
+        au.addEventListener('timeupdate', () => {
+          if (au.duration && isFinite(au.duration)) {
+            if (seek) seek.value = (au.currentTime / au.duration) * 100;
+            if (cur) cur.textContent = fmt(au.currentTime);
+            if (dur && dur.textContent === '0:00') dur.textContent = fmt(au.duration);
+          }
+        });
+        au.addEventListener('loadedmetadata', () => { if (dur) dur.textContent = fmt(au.duration); });
+        au.addEventListener('durationchange', () => { if (dur) dur.textContent = fmt(au.duration); });
+      }
+      // "tự phát": chờ cử động đầu tiên của người xem (trình duyệt chặn autoplay)
+      bgmAutoPending = !!cfg.autoplay;
+      const kick = () => {
+        if (bgmAutoPending && !bgmPlaying) playBGM();
+        bgmAutoPending = false;
+        document.removeEventListener('pointerdown', kick);
+      };
+      document.addEventListener('pointerdown', kick);
+    }
+
+    // trang ADMIN sửa nền / nhạc / dữ liệu → cửa hàng cập nhật ngay (không cần tải lại)
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'trylook-bgs') {
+        loadBgPresets();
+        buildBgPop();   // dựng lại chip luôn (kể cả khi popup ẩn — mở là thấy mới)
+        try { applyStageBg(localStorage.getItem('trylook-bg') || 'noir'); } catch (err) {}
+      }
+      if (e.key === 'trylook-bg') {
+        // admin bấm "Dùng nền này" → cửa hàng đổi nền ngay
+        try { applyStageBg(e.newValue || 'noir'); } catch (err) {}
+      }
+      if (e.key === 'trylook-music') initMusic();
+      if (e.key === 'trylook-menu') renderCategoryNav();   // admin ẩn/hiện danh mục → menu web cập nhật ngay
+      if (e.key === 'trylook-data') location.reload();
+    });
+
+    // localStorage bị chặn (mở bằng file://, ẩn danh...) → cảnh báo đỏ cho người dùng
+    (function () {
+      let canLS = true;
+      try {
+        localStorage.setItem('trylook-ls-test', '1');
+        localStorage.removeItem('trylook-ls-test');
+      } catch (e) { canLS = false; }
+      if (!canLS) {
+        const show = () => {
+          const bar = document.createElement('div');
+          bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:200;background:#7f1d1d;color:#fecaca;padding:10px 16px;font-size:12px;font-weight:700;text-align:center;line-height:1.5';
+          bar.innerHTML = '⚠ Trang bị chặn bộ nhớ (localStorage) — mở qua <b>http://localhost:8737/try_the_look_interactive_lookbook.html</b> và mở ADMIN qua <b>http://localhost:8737/admin.html</b> (cùng 1 cách mở) để nhận dữ liệu.';
+          document.body.prepend(bar);
+        };
+        document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', show) : show();
+      }
+    })();
+  </script>
+</body>
+</html>

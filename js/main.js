@@ -320,6 +320,36 @@ async function initData() {
     await loadPolicies();          // bài viết / chính sách từ data/policies.js (local, admin quản lý)
 
     applyStartupRouting();
+    nhanGioHangTuChonMau();
+}
+
+// NHẬN GIỎ HÀNG GỬI TỪ TRANG "CHỌN MẪU" → mở thẳng bảng XÁC NHẬN ĐƠN HÀNG & THANH TOÁN
+function nhanGioHangTuChonMau() {
+    try {
+        if (!new URLSearchParams(location.search).get('checkout')) return;
+        history.replaceState(null, '', location.pathname);   // bỏ ?checkout=1 (refresh không mở lại)
+        const items = JSON.parse(sessionStorage.getItem('tohoCartHandoff') || '[]');
+        sessionStorage.removeItem('tohoCartHandoff');
+        if (!Array.isArray(items) || !items.length) return;
+
+        items.forEach(it => {
+            if (!it || !it.id) return;
+            const ex = cart.find(x => x.id === it.id);
+            if (ex) ex.quantity += (it.quantity || 1);
+            else cart.push({
+                id: it.id,
+                code: it.code || it.id,
+                name: it.name || it.id,
+                price: it.price || 0,
+                image: it.image || IMG_PLACEHOLDER,
+                quantity: it.quantity || 1
+            });
+        });
+
+        updateCartUI();
+        showToast('Đã nhận giỏ hàng từ trang chọn mẫu!', 'ok');
+        setTimeout(() => { try { openCheckoutModal(); } catch (e) {} }, 400);
+    } catch (e) { /* bỏ qua */ }
 }
 
 // Nạp bài viết / chính sách: HOÀN TOÀN từ source cục bộ (admin đăng) — không lấy từ Sheet nữa
@@ -2039,9 +2069,37 @@ function calculateTotalPower() {
         </div>
     `;
 }
+// NÚT "CHỌN MẪU": tổng công suất → mở đúng mức dòng ổ cắm trên trang CHỌN MẪU (5A/10A/15A/20A/25A/30A)
 function addPcBuildToCart() {
-    showToast("Đã tính toán xong công suất!");
+    let totalWatts = 0;
+    Object.keys(selectedDevices).forEach(id => {
+        const dev = deviceList.find(d => d.id === id);
+        if (dev) totalWatts += dev.power * selectedDevices[id];
+    });
+
+    if (totalWatts <= 0) {
+        showToast("Vui lòng chọn ít nhất 1 thiết bị để tính công suất!", "info");
+        return;
+    }
+
     closePcBuilderModal();
+
+    // Ngưỡng "trở xuống": chọn mức dòng CHỖNG được công suất tính được
+    const MUC_DONG = [
+        [1100, 'cong-suat-nho-1100w-5a'],
+        [2200, 'cong-suat-tieu-chuan-2200w-10a'],
+        [3300, 'cong-suat-lon-3300w-15a'],
+        [4400, 'cong-suat-lon-4400w-20a'],
+        [5500, 'cong-suat-lon-5500w-25a'],
+        [6600, 'cong-suat-lon-6600w-30a']
+    ];
+    let slug = 'cong-suat-lon-6600w-30a';
+    for (const muc of MUC_DONG) {
+        if (totalWatts <= muc[0]) { slug = muc[1]; break; }
+    }
+
+    showToast(`Tổng ${totalWatts.toLocaleString('vi-VN')} W — mở mẫu phù hợp, đang chuyển trang...`);
+    setTimeout(() => { window.location.href = 'chon mau/CHON MAU.html#/' + slug; }, 600);
 }
 // --- LIGHTBOX ARTISTIC CONTROLLER ---
 let lightboxImages = [];

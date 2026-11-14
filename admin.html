@@ -58,6 +58,7 @@
       <button class="nav-item" data-tab="warranty" onclick="switchTab('warranty')"><i class="fa-solid fa-shield-halved"></i>Bảo Hành <span id="warrantyNavBadge" class="hidden ml-auto bg-white text-tohoRed text-[10px] font-black px-1.5 py-0.5 rounded-full">0</span></button>
       <button class="nav-item" data-tab="flash" onclick="switchTab('flash')"><i class="fa-solid fa-bolt"></i>Flash Sale</button>
       <button class="nav-item" data-tab="posts" onclick="switchTab('posts')"><i class="fa-solid fa-newspaper"></i>Bài Viết</button>
+      <button class="nav-item" data-tab="chonmau" onclick="switchTab('chonmau')"><i class="fa-solid fa-images"></i>Chọn Mẫu</button>
       <button class="nav-item" data-tab="sync" onclick="switchTab('sync')"><i class="fa-solid fa-cloud-arrow-down"></i>Đồng Bộ &amp; Xuất</button>
       <button class="nav-item" data-tab="system" onclick="switchTab('system')"><i class="fa-solid fa-gear"></i>Hệ Thống</button>
     </nav>
@@ -324,6 +325,13 @@
           <p class="text-[10px] uppercase font-bold text-slate-400 mb-2">Log tiến trình</p>
           <pre id="syncLog" class="text-xs bg-navy-900 text-green-400 rounded-xl p-4 overflow-auto max-h-64 whitespace-pre-wrap">Sẵn sàng…</pre>
         </div>
+      </section>
+      <!-- ============ CHỌN MẪU (trang chon mau/CHON MAU.html) ============ -->
+      <section id="tab-chonmau" class="hidden">
+        <div class="bg-white rounded-2xl shadow border border-slate-200 overflow-hidden">
+          <iframe id="chonMauFrame" src="about:blank" class="w-full block" style="height: calc(100vh - 150px); border: 0;" title="Quản lý chọn mẫu"></iframe>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-2">Sửa thẻ ảnh, phân loại công suất (5A → 30A), nền, nhạc, menu… dữ liệu lưu ngay trên máy và đồng bộ sang trang chọn mẫu.</p>
       </section>
       <!-- ============ HỆ THỐNG ============ -->
       <section id="tab-system" class="hidden space-y-4 max-w-3xl">

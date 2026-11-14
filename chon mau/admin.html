@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang quản trị — Try the Look (Studio2026)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0d0e12; color: #f3f4f6; }
+    .glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(10px); }
+
+    /* mục gập (accordion) để trang gọn */
+    details.fold { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; margin-top: 14px; overflow: clip; }
+    details.fold > summary { cursor: pointer; padding: 12px 18px; display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 13px; letter-spacing: .02em; list-style: none; user-select: none; }
+    details.fold > summary::-webkit-details-marker { display: none; }
+    details.fold > summary:hover { background: rgba(255,255,255,0.04); }
+    details.fold > summary .chev { margin-left: auto; color: #9ca3af; transition: transform .2s; }
+    details.fold[open] > summary .chev { transform: rotate(180deg); }
+    details.fold > .fold-body { padding: 2px 18px 16px; }
+    details.fold:not([open]) > .fold-body { display: none !important; }   /* gập hẳn cả khi con có display riêng */
+    /* danh sách sản phẩm gọn: thẻ chữ nhật mỏng thay card to */
+    #looks-grid { display: flex; flex-direction: column; gap: 8px; }
+    #looks-grid .look-row { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; }
+    #looks-grid .look-row:hover { border-color: rgba(255,255,255,0.16); }
+    .field {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px; padding: 8px 12px; font-size: 13px; color: #fff; outline: none;
+      transition: border-color .2s, background .2s;
+    }
+    .field:focus { border-color: #fbbf24; background: rgba(255,255,255,0.08); }
+    .field::placeholder { color: #6b7280; }
+    .label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #9ca3af; font-weight: 700; margin-bottom: 4px; display:block; }
+    .btn { border-radius: 10px; font-size: 12px; font-weight: 700; padding: 8px 14px; transition: all .2s; display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
+    .btn-amber { background: #fbbf24; color: #000; }
+    .btn-amber:hover { background: #fcd34d; }
+    .btn-ghost { background: rgba(255,255,255,0.06); color: #d1d5db; border: 1px solid rgba(255,255,255,0.1); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .btn-danger { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    .btn-danger:hover { background: rgba(239,68,68,0.25); color: #fff; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+    .fade-in { animation: fadeIn .25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    /* CHẾ ĐỘ NHÚNG VÀO ADMIN CHÍNH (?embed=1): ẩn header riêng của trang này */
+    html.embed-admin header { display: none !important; }
+    html.embed-admin main { padding-top: 12px; }
+  </style>
+  <script>
+    // Mở trong admin chính (?embed=1) → tự ẩn header riêng cho gọn
+    if (location.search.indexOf('embed=1') !== -1) {
+      document.documentElement.classList.add('embed-admin');
+    }
+  </script>
+</head>
+<body class="min-h-screen">
+
+  <!-- ============ HEADER ============ -->
+  <header class="h-16 border-b border-white/10 px-6 flex items-center justify-between sticky top-0 bg-[#0d0e12]/90 backdrop-blur z-40">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-extrabold text-sm">S</div>
+      <span class="font-bold tracking-widest uppercase">STUDIO<span class="text-gray-400 font-normal">2026</span></span>
+      <span class="text-[10px] font-bold tracking-widest uppercase text-amber-400 bg-amber-400/10 px-2 py-1 rounded-full">Admin</span>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <button onclick="exportJSON()" class="btn btn-ghost"><i data-lucide="download" class="w-4 h-4"></i> Xuất JSON</button>
+      <button onclick="document.getElementById('import-file').click()" class="btn btn-ghost"><i data-lucide="upload" class="w-4 h-4"></i> Nhập JSON</button>
+      <button onclick="resetDefault()" class="btn btn-danger"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Mặc định</button>
+      <a href="CHON MAU.html" target="_blank" class="btn btn-amber"><i data-lucide="external-link" class="w-4 h-4"></i> Xem cửa hàng</a>
+      <input type="file" id="import-file" accept=".json,application/json" class="hidden">
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto p-6 pb-24">
+
+    <!-- ============ THỐNG KÊ (hàng gọn) ============ -->
+    <div class="glass rounded-2xl px-5 py-3.5 mb-5 grid grid-cols-4 gap-3 text-center">
+      <div>
+        <div class="text-[9px] tracking-widest uppercase text-gray-400 font-bold mb-0.5">Sản phẩm</div>
+        <div id="stat-looks" class="text-xl font-extrabold text-amber-400">0</div>
+      </div>
+      <div>
+        <div class="text-[9px] tracking-widest uppercase text-gray-400 font-bold mb-0.5">Món hàng</div>
+        <div id="stat-items" class="text-xl font-extrabold">0</div>
+      </div>
+      <div>
+        <div class="text-[9px] tracking-widest uppercase text-gray-400 font-bold mb-0.5">TB giá trị</div>
+        <div id="stat-avg" class="text-xl font-extrabold">0đ</div>
+      </div>
+      <div>
+        <div class="text-[9px] tracking-widest uppercase text-gray-400 font-bold mb-0.5">Dung lượng</div>
+        <div id="stat-size" class="text-xl font-extrabold">0 KB</div>
+      </div>
+    </div>
+
+    <!-- ============ DANH SÁCH OUTFIT (gập/mở như các tab khác) ============ -->
+    <details class="fold" open>
+      <summary>
+        <i data-lucide="shirt" class="w-4 h-4 text-amber-400"></i> Quản lý sản phẩm
+        <span id="look-count" class="text-[10px] font-bold text-gray-500 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full"></span>
+        <i data-lucide="chevron-down" class="chev w-4 h-4"></i>
+      </summary>
+      <div class="fold-body">
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+          <div class="flex gap-2 flex-wrap items-center">
+            <div class="relative">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-gray-500 absolute left-2.5 top-1/2 -translate-y-1/2"></i>
+              <input id="look-search" class="field !py-1.5 !pl-8 !text-[11px] !w-56" placeholder="Tìm tên / loại / SKU...">
+            </div>
+            <button onclick="openEditor(-1)" class="btn btn-amber"><i data-lucide="plus" class="w-4 h-4"></i> Thêm</button>
+          </div>
+        </div>
+
+        <div id="looks-grid"></div>
+
+        <div id="look-pager" class="flex items-center justify-center gap-3 mt-4 text-xs text-gray-400"></div>
+
+        <p class="text-xs text-gray-500 mt-6 flex items-start gap-2">
+          <i data-lucide="info" class="w-4 h-4 mt-0.5 shrink-0"></i>
+          Dữ liệu lưu vào trình duyệt. Dùng "Xuất JSON" để sao lưu, "Nhập JSON" để khôi phục.
+        </p>
+      </div>
+    </details>
+
+    <!-- ============ ĐỒNG BỘ GOOGLE SHEET (gập) ============ -->
+    <details class="fold">
+      <summary>
+        <i data-lucide="table-2" class="w-4 h-4 text-emerald-400"></i> Đồng bộ sản phẩm từ Google Sheet
+        <span id="sheet-status" class="text-[10px] text-emerald-400/90 font-semibold truncate max-w-[240px]"></span>
+        <i data-lucide="chevron-down" class="chev w-4 h-4"></i>
+      </summary>
+      <div class="fold-body">
+        <input id="sheet-url" class="field !text-[11px] mb-2" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vQWm2p0bF1cb1jjEdiol9BUZzVnH53XEvwpj9DW9QfOmgmbgj9VIX-QqoXXA6QCP-YvPQQQDGOaVrEW/pub">
+        <div class="flex gap-2 flex-wrap items-center">
+          <button onclick="syncSheet()" class="btn btn-amber"><i data-lucide="refresh-cw" class="w-4 h-4"></i> Đồng bộ → sản phẩm</button>
+        </div>
+        <p class="text-[10px] text-gray-500 mt-2.5 leading-snug">
+          Gom theo <b>cột mã (SKU)</b>: mã giống nhau = <b>1 sản phẩm</b>, biến thể nằm chung thẻ.
+          Ảnh Drive tự đổi thumbnail; <b>ảnh 1 = mặt trước</b>, <b>ảnh 2 = mặt sau</b> lật được.
+          Món <b>SP mua kèm</b> bạn tự chọn từ kho trong phần sửa sản phẩm (không tự thêm).
+        </p>
+      </div>
+    </details>
+
+    <!-- ============ THƯ MỤC LƯU TRỮ (gập) ============ -->
+    <details class="fold">
+      <summary>
+        <i data-lucide="folder-open" class="w-4 h-4 text-sky-400"></i> Thư mục lưu dữ liệu (tự lưu trực tiếp)
+        <span id="fs-status" class="text-[10px] text-sky-400/90 font-semibold truncate max-w-[260px]"></span>
+        <i data-lucide="chevron-down" class="chev w-4 h-4"></i>
+      </summary>
+      <div class="fold-body">
+        <div class="flex gap-2 flex-wrap items-center">
+          <button onclick="pickFolder()" class="btn btn-ghost"><i data-lucide="folder-open" class="w-4 h-4"></i> Chọn thư mục</button>
+          <button onclick="fsSave(true)" class="btn btn-ghost"><i data-lucide="save" class="w-4 h-4"></i> Lưu ngay</button>
+          <button onclick="migrateHeavyImages()" class="btn btn-amber"><i data-lucide="broom" class="w-4 h-4"></i> Dọn ảnh nặng → file</button>
+        </div>
+        <p class="text-[10px] text-gray-500 mt-2.5 leading-snug">
+          Xuất <b>trylook-data.json</b>, <b>trylook-bgs.json</b>, <b>cau-hinh.json</b> + <b>file ảnh/nhạc tải từ máy</b> tự động vào thư mục đã chọn mỗi khi có thay đổi. Cần <b>Chrome / Edge mới</b>; mở lại trang có thể phải cấp quyền lại — chọn lại cùng thư mục.<br>
+          <b>Khuyến nghị: chọn chính thư mục chứa 2 file web (thư mục DA4)</b> — ảnh úp lên sẽ thành file ngay tại đó, web đọc được đường dẫn <code>tên-file.jpg</code>.
+        </p>
+      </div>
+    </details>
+
+    <!-- ============ QUẢN LÝ NỀN MẪU (gập) ============ -->
+    <details class="fold">
+      <summary>
+        <i data-lucide="images" class="w-4 h-4 text-amber-400"></i> Nền mẫu trên cửa hàng
+        <span id="bg-status" class="text-[10px] text-emerald-400/80 font-semibold"></span>
+        <i data-lucide="chevron-down" class="chev w-4 h-4"></i>
+      </summary>
+      <div class="fold-body">
+        <div class="flex gap-2 flex-wrap items-center mb-3">
+          <button onclick="addBgBlank()" class="btn btn-ghost"><i data-lucide="plus" class="w-4 h-4"></i> Thêm nền mới</button>
+          <button onclick="resetBgs()" class="btn btn-danger"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Mặc định</button>
+        </div>
+        <div id="bg-list" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- render by JS -->
+        </div>
+        <p class="text-[10px] text-gray-500 mt-3 leading-snug">
+          Nền hỗ trợ gradient/màu CSS và <b>ảnh URL</b> (hoặc tải từ máy — tự nén). Có ảnh thì CSS tự gọn dạng <code>url(...) center/cover</code>.
+        </p>
+      </div>
+    </details>
+
+    <!-- ============ NHẠC NỀN CHO CỬA HÀNG (gập) ============ -->
+    <details class="fold">
+      <summary>
+        <i data-lucide="music" class="w-4 h-4 text-rose-400"></i> Nhạc nền cho cửa hàng
+        <span id="music-status" class="text-[10px] text-emerald-400/80 font-semibold"></span>
+        <i data-lucide="chevron-down" class="chev w-4 h-4"></i>
+      </summary>
+      <div class="fold-body">
+        <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Link nhạc (mp3 / ogg / wav) hoặc tải từ máy</label>
+        <input id="music-url" class="field !text-[11px] my-1.5" placeholder="https://.../nhac-nen.mp3" oninput="setMusicURL(this.value)" onchange="persistMusic()">
+        <div class="flex gap-2 flex-wrap items-center my-1.5">
+          <label class="btn btn-ghost cursor-pointer mb-0"><i data-lucide="upload" class="w-4 h-4"></i> Tải nhạc từ máy<input id="music-file" type="file" accept="audio/*" class="hidden" onchange="uploadMusic(this)"></label>
+          <button onclick="previewMusic()" class="btn btn-ghost mb-0"><i data-lucide="play" class="w-4 h-4"></i> Nghe thử</button>
+        </div>
+        <div class="flex gap-3 items-center flex-wrap mt-3 text-[11px] text-gray-300">
+          <span class="font-semibold text-gray-400 uppercase text-[10px]">Âm lượng</span>
+          <input id="music-vol" type="range" min="0" max="100" class="w-40 accent-emerald-500" oninput="setMusicVol(this.value)">
+          <span id="music-vol-label" class="w-9 text-right text-gray-400">60%</span>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none"><input id="music-auto" type="checkbox" class="accent-emerald-500" onchange="setMusicAuto(this.checked)"> Tự phát khi mở web</label>
+        </div>
+        <p class="text-[10px] text-gray-500 mt-2.5 leading-snug">
+          Lưu tự động. Cửa hàng sẽ có nút <b>♪ bật/tắt nhạc</b> ở góc trái. <b>Chấp nhận link Google Drive</b>: dán link chia sẻ thường, web tự đổi thành link phát trực tiếp — file trên Drive phải bật <b>“ai có link đều xem được”</b>. File tải từ máy chỉ nhận <b>≤ 2MB</b>.
+        </p>
+      </div>
+    </details>
+
+    <!-- ============ MENU CỬA HÀNG (gập) ============ -->
+    <details class="fold">
+      <summary>
+        <i data-lucide="list-tree" class="w-4 h-4 text-sky-400"></i> Menu cửa hàng
+        <span id="menu-status" class="text-[10px] text-sky-400/90 font-semibold"></span>
+        <i data-lucide="chevron-down" class="chev w-4 h-4"></i>
+      </summary>
+      <div class="fold-body">
+        <div id="menu-manager" class="grid sm:grid-cols-2 gap-1.5"></div>
+        <p class="text-[10px] text-gray-500 mt-2.5 leading-snug">
+          Bỏ tick = <b>ẩn danh mục khỏi menu trên web</b> (sản phẩm vẫn còn trong "Tất cả"). Menu lấy phân loại <b>cột D</b> trên sheet.
+        </p>
+      </div>
+    </details>
+  </main>
+
+  <!-- ============ MODAL SỬA / THÊM OUTFIT ============ -->
+  <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeEditor()"></div>
+    <div class="relative glass rounded-3xl w-full max-w-3xl max-h-[92vh] overflow-y-auto bg-[#12141c] p-6 fade-in">
+      <div class="flex items-center justify-between mb-6">
+        <h3 id="modal-title" class="text-xl font-bold">Sửa outfit</h3>
+        <button onclick="closeEditor()" class="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <!-- thông tin outfit -->
+      <div class="grid md:grid-cols-[160px_1fr] gap-5 mb-6">
+        <div>
+          <img id="ed-model-preview" src="" onerror="this.style.opacity=.25" class="w-[160px] h-[210px] object-cover rounded-xl border border-white/10 bg-black/40">
+          <label class="btn btn-ghost w-full justify-center mt-2 !text-[11px] cursor-pointer">
+            <i data-lucide="image-plus" class="w-4 h-4"></i> Ảnh mặt trước
+            <input type="file" id="ed-model-upload" accept="image/*" class="hidden">
+          </label>
+        </div>
+        <div class="space-y-4">
+          <div class="grid md:grid-cols-2 gap-3">
+            <div>
+              <label class="label">Mã sản phẩm</label>
+              <input id="ed-ma" class="field" placeholder="VD: LP-1100 (từ cột A trên sheet)">
+            </div>
+            <div>
+              <label class="label">Tên sản phẩm</label>
+              <input id="ed-title" class="field" placeholder="VD: Ổ cắm điện LiOA ... (cột B trên sheet)">
+            </div>
+          </div>
+          <div>
+            <label class="label">Danh mục</label>
+            <input id="ed-category" class="field" placeholder="VD: Ổ CẮM ĐIỆN">
+          </div>
+          <div>
+            <label class="label">Phân loại (cột D — dùng cho menu cửa hàng)</label>
+            <input id="ed-sub" class="field" placeholder="VD: Công Suất Nhỏ 1100W (5A)">
+          </div>
+          <div>
+            <label class="label">Mặt trước (URL — hoặc bấm "Ảnh mặt trước" để tải từ máy)</label>
+            <input id="ed-model" class="field" oninput="syncModelPreview()" placeholder="https://images.unsplash.com/...">
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="flex-1">
+              <label class="label">Mặt sau (URL — tùy chọn, bấm thẻ đang chọn để lật)</label>
+              <input id="ed-model-back" class="field !py-1.5 !text-[11px]" oninput="syncModelBackPreview()" placeholder="URL ảnh mặt sau (tùy chọn)">
+            </div>
+            <img id="ed-back-preview" src="" onerror="this.style.opacity=.25" class="w-12 h-16 object-cover rounded-lg border border-white/10 bg-black/40 opacity-30 mt-6 shrink-0">
+          </div>
+          <label class="btn btn-ghost w-full justify-center !py-1.5 !text-[10px] cursor-pointer">
+            Tải ảnh mặt sau từ máy
+            <input type="file" id="ed-model-back-upload" accept="image/*" class="hidden">
+          </label>
+        </div>
+      </div>
+
+      <!-- sản phẩm trong outfit -->
+      <div class="flex items-center justify-between border-t border-white/10 pt-4 mb-3">
+        <h4 class="text-sm font-bold tracking-widest uppercase text-gray-300">Sản phẩm trong outfit</h4>
+        <button onclick="addItemRow()" class="btn btn-ghost !text-[11px]"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Thêm sản phẩm</button>
+      </div>
+      <div id="items-editor" class="space-y-4"></div>
+
+      <div class="flex justify-end gap-3 mt-8">
+        <button onclick="closeEditor()" class="btn btn-ghost">Hủy</button>
+        <button onclick="saveLook()" class="btn btn-amber"><i data-lucide="save" class="w-4 h-4"></i> Lưu outfit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TOAST ============ -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-24 opacity-0 transition-all duration-300 z-[60] px-5 py-3 rounded-xl bg-white text-black font-bold text-sm shadow-2xl flex items-center gap-2">
+    <i data-lucide="check-circle-2" class="w-4 h-4"></i><span id="toast-msg"></span>
+  </div>
+
+  <script>
+    // ================= DỮ LIỆU MẶC ĐỊNH (giống trang cửa hàng) =================
+    const DEFAULT_LOOKS = [
+      { id:"look-01", number:"01", category:"Urban Streetwear", title:"The Oversized Layered Look",
+        modelImage:"https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
+        items:[
+          { id:"item-101", name:"Heavyweight Studio Hoodie", category:"Outerwear", price:140.00, image:"https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=300&q=80", sizes:["S","M","L","XL"], selectedSize:"L", selected:true },
+          { id:"item-102", name:"Relaxed Wide Denim Pants", category:"Bottoms", price:120.00, image:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=300&q=80", sizes:["30","32","34","36"], selectedSize:"32", selected:true },
+          { id:"item-103", name:"Retro Platform Chunky Sneakers", category:"Footwear", price:160.00, image:"https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=300&q=80", sizes:["US 8","US 9","US 10","US 11"], selectedSize:"US 10", selected:true }
+        ]},
+      { id:"look-02", number:"02", category:"Minimalist Tailored", title:"Monochrome Wool Trench & Trousers",
+        modelImage:"https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80",
+        items:[
+          { id:"item-201", name:"Minimal Double-Breasted Trench Coat", category:"Coat", price:280.00, image:"https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=300&q=80", sizes:["46","48","50","52"], selectedSize:"48", selected:true },
+          { id:"item-202", name:"Pleated Tapered Dress Trousers", category:"Pants", price:110.00, image:"https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=300&q=80", sizes:["30","32","34"], selectedSize:"32", selected:true },
+          { id:"item-203", name:"Italian Calfskin Derby Shoes", category:"Footwear", price:210.00, image:"https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=300&q=80", sizes:["41","42","43","44"], selectedSize:"42", selected:true }
+        ]},
+      { id:"look-03", number:"03", category:"Casual Luxury", title:"Cashmere Knit & Cargo Ensemble",
+        modelImage:"https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=80",
+        items:[
+          { id:"item-301", name:"Ribbed Merino Wool Crewneck Sweater", category:"Knitwear", price:165.00, image:"https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=300&q=80", sizes:["S","M","L","XL"], selectedSize:"M", selected:true },
+          { id:"item-302", name:"Tactical Utility Cargo Trousers", category:"Bottoms", price:135.00, image:"https://images.unsplash.com/photo-1517445312882-bc9910d016b7?auto=format&fit=crop&w=300&q=80", sizes:["S","M","L"], selectedSize:"M", selected:true },
+          { id:"item-303", name:"Minimalist Leather High-Top Sneakers", category:"Footwear", price:195.00, image:"https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=300&q=80", sizes:["US 9","US 10","US 11"], selectedSize:"US 10", selected:true }
+        ]},
+      { id:"look-04", number:"04", category:"Modern Activewear", title:"Tech-Fleece Athleisure Set",
+        modelImage:"https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=800&q=80",
+        items:[
+          { id:"item-401", name:"Thermal Molded Zip Jacket", category:"Jacket", price:155.00, image:"https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=300&q=80", sizes:["S","M","L","XL"], selectedSize:"L", selected:true },
+          { id:"item-402", name:"Tapered Performance Joggers", category:"Pants", price:95.00, image:"https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=300&q=80", sizes:["S","M","L"], selectedSize:"M", selected:true }
+        ]}
+    ];
+
+    const LS_KEY = 'trylook-data';
+    let looks = loadLooks();
+    let editIndex = -1;      // -1 = thêm mới
+    let draftItems = [];     // bản nháp sản phẩm trong modal
+
+    // ================= LOAD / SAVE =================
+    function loadLooks() {
+      try {
+        const d = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+        if (d && Array.isArray(d.looks) && d.looks.length) return d.looks;
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(DEFAULT_LOOKS));
+    }
+
+    function persist(silent) {
+      renumber();
+      try {
+        localStorage.setItem(LS_KEY, JSON.stringify({ version: 1, savedAt: new Date().toISOString(), looks }));
+        if (!silent) toast('Đã lưu vào trình duyệt ✅');
+        render();
+      } catch (e) {
+        toast('Lưu thất bại — bộ nhớ đầy (~5MB). Bấm "Dọn ảnh nặng → file" trong phần Thư mục lưu dữ liệu, hoặc dùng ảnh URL.', true);
+      }
+      scheduleFsSave();   // tự lưu bản sao vào thư mục người dùng đã chọn
+    }
+
+    function renumber() {
+      looks.forEach((l, i) => { l.number = String(i + 1).padStart(2, '0'); });
+    }
+
+    // ================= RENDER =================
+    const PAGE_SIZE = 24;
+    let adminPage = 1, adminQuery = '';
+    function filteredIdx() {
+      const q = adminQuery.trim().toLowerCase();
+      const idxs = [];
+      looks.forEach((l, i) => {
+        if (!q) { idxs.push(i); return; }
+        const hay = (l.title + ' ' + l.category + ' ' + l.id + ' ' + (l.items || []).map(x => (x.name || '') + ' ' + (x.category || '')).join(' ')).toLowerCase();
+        if (hay.indexOf(q) >= 0) idxs.push(i);
+      });
+      return idxs;
+    }
+
+    function render() {
+      const grid = document.getElementById('looks-grid');
+      const pager = document.getElementById('look-pager');
+      grid.innerHTML = '';
+      pager.innerHTML = '';
+
+      const idxs = filteredIdx();
+      const maxPage = Math.max(1, Math.ceil(idxs.length / PAGE_SIZE));
+      if (adminPage > maxPage) adminPage = maxPage;
+      const page = idxs.slice((adminPage - 1) * PAGE_SIZE, adminPage * PAGE_SIZE);
+      const countEl = document.getElementById('look-count');
+      if (countEl) countEl.innerText = adminQuery ? `${idxs.length} kết quả · ${looks.length} SP` : `${looks.length} SP`;
+
+      page.forEach((i, k) => {
+        const look = looks[i];
+        const total = look.items.reduce((s, it) => s + (+it.price || 0), 0);
+        const card = document.createElement('div');
+        card.className = 'look-row flex items-center gap-3 p-2.5 fade-in';
+        card.innerHTML = `
+          <img src="${look.modelImage}" onerror="this.removeAttribute('src');this.style.opacity=.15" class="w-12 h-16 object-cover rounded-lg border border-white/10 bg-black/40 shrink-0">
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2 text-[9px] font-bold tracking-widest uppercase">
+              <span class="text-gray-500">${look.number}</span>
+              <span class="text-amber-400 truncate">${esc(look.category)}</span>
+            </div>
+            <h3 class="font-bold text-[12px] mt-0.5 truncate text-white">${esc(look.title)}</h3>
+            <div class="text-[10px] text-gray-400 mt-0.5 truncate">${look.items.length} món · Tổng ${Math.round(total).toLocaleString('vi-VN')}đ · ${esc(look.items.map(it => it.name).join(', '))}</div>
+          </div>
+          <div class="flex gap-1 shrink-0">
+            <button onclick="openEditor(${i})" class="btn btn-ghost !py-1 !px-2 !text-[10px]"><i data-lucide="pencil" class="w-3 h-3"></i></button>
+            <button onclick="moveLook(${i},-1)" class="btn btn-ghost !py-1 !px-1.5" title="Lên trên"><i data-lucide="arrow-up" class="w-3 h-3"></i></button>
+            <button onclick="moveLook(${i},1)" class="btn btn-ghost !py-1 !px-1.5" title="Xuống dưới"><i data-lucide="arrow-down" class="w-3 h-3"></i></button>
+            <button onclick="removeLook(${i})" class="btn btn-danger !py-1 !px-2"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+          </div>`;
+        grid.appendChild(card);
+      });
+
+      if (maxPage > 1) {
+        pager.innerHTML = `
+          <button onclick="goPage(${adminPage - 1})" class="btn btn-ghost !py-1 !px-2 ${adminPage <= 1 ? 'opacity-30 pointer-events-none' : ''}"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>
+          <span>Trang ${adminPage}/${maxPage}</span>
+          <button onclick="goPage(${adminPage + 1})" class="btn btn-ghost !py-1 !px-2 ${adminPage >= maxPage ? 'opacity-30 pointer-events-none' : ''}"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>`;
+      }
+      lucide.createIcons();
+      updateStats();
+    }
+
+    function goPage(p) {
+      const maxPage = Math.max(1, Math.ceil(filteredIdx().length / PAGE_SIZE));
+      adminPage = Math.min(maxPage, Math.max(1, p));
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateStats() {
+      document.getElementById('stat-looks').innerText = looks.length;
+      const items = looks.reduce((s, l) => s + l.items.length, 0);
+      document.getElementById('stat-items').innerText = items;
+      const avgs = looks.map(l => l.items.reduce((s, it) => s + (+it.price || 0), 0));
+      const avg = avgs.length ? avgs.reduce((a, b) => a + b, 0) / avgs.length : 0;
+      document.getElementById('stat-avg').innerText = Math.round(avg).toLocaleString('vi-VN') + 'đ';
+      let size = 0;
+      try { size = (localStorage.getItem(LS_KEY) || '').length; } catch (e) {}
+      document.getElementById('stat-size').innerText = (size / 1024).toFixed(1) + ' KB';
+    }
+
+    function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    // ============ KIỂM TRA MÔI TRƯỜNG LƯU TRỮ ============
+    // localStorage bị chặn (mở bằng file://, ẩn danh...) → mọi thao tác sẽ KHÔNG ĐƯỢC LƯU
+    (function () {
+      let canLS = true;
+      try {
+        localStorage.setItem('trylook-ls-test', '1');
+        localStorage.removeItem('trylook-ls-test');
+      } catch (e) { canLS = false; }
+      if (!canLS) {
+        const show = () => {
+          const bar = document.createElement('div');
+          bar.style.cssText = 'background:#7f1d1d;color:#fecaca;padding:10px 16px;font-size:12px;font-weight:700;border-radius:12px;margin-bottom:8px;line-height:1.5';
+          bar.innerHTML = '⚠ TRANG ĐANG BỊ CHẶN LƯU DỮ LIỆU (localStorage)! Mọi sửa đổi sẽ mất khi tải lại trang. Hãy mở admin qua <b>http://localhost:8737/admin.html</b> (thay vì nhấn đúp file), không dùng chế độ ẩn danh, không chặn cookie.';
+          document.body.prepend(bar);
+        };
+        document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', show) : show();
+      }
+    })();
+
+    // ================= MODAL =================
+    function openEditor(index) {
+      editIndex = index;
+      const isNew = index < 0;
+      const look = isNew
+        ? { id: '', number: '', category: '', title: '', modelImage: '', items: [] }
+        : JSON.parse(JSON.stringify(looks[index]));
+      draftItems = JSON.parse(JSON.stringify(look.items));
+
+      document.getElementById('modal-title').innerText = isNew ? 'Thêm outfit mới' : `Sửa: ${look.title}`;
+      document.getElementById('ed-ma').value = look.ma || '';
+      document.getElementById('ed-title').value = look.title;
+      document.getElementById('ed-category').value = look.category;
+      document.getElementById('ed-sub').value = look.subCategory || '';
+      document.getElementById('ed-model').value = look.modelImage;
+      document.getElementById('ed-model-preview').src = look.modelImage;
+      document.getElementById('ed-model-preview').style.opacity = 1;
+      document.getElementById('ed-model-back').value = look.modelImageBack || '';
+      const bp = document.getElementById('ed-back-preview');
+      bp.src = look.modelImageBack || '';
+      bp.style.opacity = look.modelImageBack ? 1 : .3;
+
+      renderItemsEditor();
+      lucide.createIcons();
+      showModal(true);
+    }
+
+    function closeEditor() { showModal(false); }
+    function showModal(open) {
+      const m = document.getElementById('modal');
+      m.classList.toggle('hidden', !open);
+      m.classList.toggle('flex', open);
+    }
+
+    function syncModelPreview() {
+      const img = document.getElementById('ed-model-preview');
+      const v = document.getElementById('ed-model').value.trim();
+      img.style.opacity = 1;
+      img.src = v;
+    }
+
+    function syncModelBackPreview() {
+      const img = document.getElementById('ed-back-preview');
+      const v = document.getElementById('ed-model-back').value.trim();
+      img.style.opacity = 1;
+      img.src = v;
+    }
+
+    // ===== editor sản phẩm =====
+    function renderItemsEditor() {
+      const box = document.getElementById('items-editor');
+      box.innerHTML = '';
+      // bộ chọn mua kèm từ kho sản phẩm đang có
+      box.insertAdjacentHTML('afterbegin', `
+        <div class="glass rounded-xl p-3 mb-3 flex gap-2 items-center flex-wrap">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-sky-400 shrink-0"><i data-lucide="package-plus" class="w-3.5 h-3.5 inline -mt-0.5"></i> Mua kèm từ kho</span>
+          <select id="ed-kho-select" class="field !py-1 !text-[10px] flex-1 min-w-[170px]"></select>
+          <button onclick="addFromKho()" class="btn btn-ghost !py-1 !px-2 !text-[10px]"><i data-lucide="plus" class="w-3 h-3"></i> Thêm</button>
+        </div>`);
+      draftItems.forEach((it, i) => {
+        const row = document.createElement('div');
+        row.className = 'glass rounded-xl p-4 fade-in';
+        row.innerHTML = `
+          <div class="grid md:grid-cols-[80px_1fr_150px_120px] gap-3 items-start">
+            <div>
+              <img src="${it.image}" onerror="this.style.opacity=.2" class="w-20 h-20 object-cover rounded-lg border border-white/10 bg-black/40">
+              <label class="btn btn-ghost w-full justify-center mt-1.5 !py-1 !text-[10px] cursor-pointer">
+                Tải ảnh
+                <input type="file" accept="image/*" class="hidden" onchange="uploadItemImg(event, ${i})">
+              </label>
+              <input type="text" class="field !py-1 !text-[10px] mt-1.5" placeholder="URL ảnh" value="${esc(it.image)}" onchange="draftItems[${i}].image=this.value;renderItemsEditor()">
+            </div>
+            <div class="space-y-2">
+              <input class="field" placeholder="Tên sản phẩm" value="${esc(it.name)}" oninput="draftItems[${i}].name=this.value">
+              <input class="field !py-1.5 !text-[11px]" placeholder="Loại (Jacket / Pants / Footwear...)" value="${esc(it.category)}" oninput="draftItems[${i}].category=this.value">
+            </div>
+            <div>
+              <input type="number" step="1" min="0" class="field" placeholder="Giá (VNĐ, VD: 43400)" value="${it.price}" oninput="draftItems[${i}].price=+this.value||0">
+              <input class="field !py-1.5 !text-[11px] mt-2" placeholder="Kích cỡ (cách nhau dấu phẩy)" value="${(it.sizes||[]).join(', ')}" oninput="draftItems[${i}].sizes=this.value.split(',').map(s=>s.trim()).filter(Boolean)">
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              <select class="field !py-1 !text-[10px] !w-[110px]" onchange="draftItems[${i}].role=this.value" title="Sản phẩm chính hiển thị trước — món 'Mua kèm' nằm sau mục Sản phẩm mua kèm">
+                <option value="main" ${(it.role || (i === 0 ? 'main' : 'addon')) === 'main' ? 'selected' : ''}>Sản phẩm chính</option>
+                <option value="addon" ${(it.role || (i === 0 ? 'main' : 'addon')) === 'addon' ? 'selected' : ''}>Mua kèm</option>
+              </select>
+              <label class="flex items-center gap-2 text-[11px] text-gray-300 cursor-pointer">
+                <input type="checkbox" ${it.selected ? 'checked' : ''} onchange="draftItems[${i}].selected=this.checked" class="accent-amber-400"> Chọn sẵn
+              </label>
+              <button onclick="removeItemRow(${i})" class="btn btn-danger !py-1 !px-2 !text-[10px]"><i data-lucide="trash-2" class="w-3 h-3"></i> Bỏ</button>
+            </div>
+          </div>`;
+        box.appendChild(row);
+      });
+      refreshKhoOptions();
+      lucide.createIcons();
+    }
+
+    // ===== chọn món mua kèm từ kho (tất cả sản phẩm đang có trên web) =====
+    function refreshKhoOptions() {
+      const sel = document.getElementById('ed-kho-select');
+      if (!sel) return;
+      const q = ((document.getElementById('ed-kho-search') || {}).value || '').trim().toLowerCase();
+      const opts = [];
+      looks.forEach((l, li) => (l.items || []).forEach((it, ii) => {
+        if (opts.length >= 500) return;
+        const hay = ((l.title || '') + ' ' + (it.name || '') + ' ' + (it.category || '') + ' ' + (l.id || '')).toLowerCase();
+        if (q && hay.indexOf(q) < 0) return;
+        opts.push(`<option value="${li}:${ii}">${esc((it.name || '(không tên)') + ' · ' + Math.round(+it.price || 0).toLocaleString('vi-VN') + 'đ · ' + (l.title || '').slice(0, 32))}</option>`);
+      }));
+      sel.innerHTML = opts.join('') || '<option value="">— không có kết quả —</option>';
+    }
+
+    function addFromKho() {
+      const sel = document.getElementById('ed-kho-select');
+      const v = sel ? sel.value : '';
+      if (!v || v.indexOf(':') < 0) { toast('Hãy chọn 1 sản phẩm trong kho trước', true); return; }
+      const ix = v.split(':').map(Number);
+      const look = looks[ix[0]]; const it = look && (look.items || [])[ix[1]];
+      if (!it) { toast('Sản phẩm không còn tồn tại — tải lại trang', true); return; }
+      draftItems.push({
+        id: 'it-addon-' + Date.now(),
+        name: it.name || '',
+        category: it.category || look.category || '',
+        price: +it.price || 0,
+        image: it.image || '',
+        sizes: (it.sizes && it.sizes.length) ? [...it.sizes] : ['M'],
+        selectedSize: it.selectedSize || (it.sizes && it.sizes[0]) || 'M',
+        selected: true,
+        role: 'addon'
+      });
+      renderItemsEditor();
+      toast('Đã thêm "' + (it.name || 'món') + '" vào mua kèm');
+    }
+
+    function addItemRow() {
+      draftItems.push({
+        id: 'item-' + Date.now(),
+        name: '', category: '', price: 0,
+        image: '', sizes: ['S', 'M', 'L'],
+        selectedSize: 'S', selected: true
+      });
+      renderItemsEditor();
+    }
+
+    function removeItemRow(i) {
+      draftItems.splice(i, 1);
+      renderItemsEditor();
+    }
+
+    // Tải ảnh từ máy → nén: PNG giữ nền trong suốt, JPEG nén thường
+    function compressImage(file, cb, max, quality) {
+      max = max || 800; quality = quality || 0.82;
+      // gói nén — tự nén lại nhỏ hơn cho tới khi dataURL gọn (~<420KB) đủ để lưu localStorage
+      const step = (src, m, q) => {
+        const img = new Image();
+        img.onload = () => {
+          const ratio = Math.min(1, m / Math.max(img.width, img.height));
+          const cv = document.createElement('canvas');
+          cv.width = Math.round(img.width * ratio);
+          cv.height = Math.round(img.height * ratio);
+          cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+          // xét PNG/JPEG theo ALPHA THỰC TẾ (ảnh chụp màn hình PNG có thể rất nặng)
+          try {
+            const probe = document.createElement('canvas');
+            probe.width = 32; probe.height = 32;
+            const pc = probe.getContext('2d');
+            pc.drawImage(cv, 0, 0, 32, 32);
+            const pd = pc.getImageData(0, 0, 32, 32).data;
+            let hasAlpha = false;
+            for (let i = 3; i < pd.length; i += 4) { if (pd[i] < 250) { hasAlpha = true; break; } }
+            let out = cv.toDataURL(hasAlpha ? 'image/png' : 'image/jpeg', q);
+            // quá nặng → thu nhỏ dần
+            if ((out.length || 0) > 420 * 1024 && m > 360) return step(src, m - 320, Math.max(0.62, q - 0.08));
+            cb(out);
+          } catch (err) {
+            cb(cv.toDataURL('image/png'));
+          }
+        };
+        img.src = src;
+      };
+      const reader = new FileReader();
+      reader.onload = e => step(e.target.result, max, quality);
+      reader.readAsDataURL(file);
+    }
+
+    // Lưu ảnh/nhạc dạng dataURL thành FILE trong thư mục đã chọn → trả về đường dẫn tương đối
+    // (bộ nhớ trình duyệt chỉ giữ tên file — không còn lỗi vượt giới hạn 5MB)
+    async function saveDataToFile(dataURL, baseName) {
+      if (!dirHandle) return null;
+      try {
+        if (await dirHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') return null;
+        const m = /^data:([a-z]+\/[a-z0-9.+-]+);/i.exec(dataURL || '');
+        if (!m) return null;
+        const ext = m[1].split('/')[1].replace('jpeg', 'jpg').replace('mpeg', 'mp3');
+        const name = baseName + '-' + Date.now() + '.' + ext;
+        const blob = await (await fetch(dataURL)).blob();
+        const fh = await dirHandle.getFileHandle(name, { create: true });
+        const w = await fh.createWritable();
+        await w.write(blob);
+        await w.close();
+        return name;
+      } catch (e) { return null; }
+    }
+
+    document.getElementById('ed-model-upload').addEventListener('change', (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      compressImage(f, async (url) => {
+        const path = await saveDataToFile(url, 'trylook-model');
+        document.getElementById('ed-model').value = path || url;
+        syncModelPreview();
+        toast(path ? 'Đã lưu ảnh model thành FILE trong thư mục ✓ (không tốn bộ nhớ)' : 'Đã nén & gắn ảnh model (lưu trong trình duyệt)');
+      });
+    });
+
+    document.getElementById('ed-model-back-upload').addEventListener('change', (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      compressImage(f, async (url) => {
+        const path = await saveDataToFile(url, 'trylook-model');
+        document.getElementById('ed-model-back').value = path || url;
+        syncModelBackPreview();
+        toast(path ? 'Đã lưu ảnh mặt sau thành FILE trong thư mục ✓' : 'Đã gắn ảnh mặt sau (lưu trong trình duyệt)');
+      });
+    });
+
+    function uploadItemImg(ev, i) {
+      const f = ev.target.files[0];
+      if (!f) return;
+      compressImage(f, async (url) => {
+        const path = await saveDataToFile(url, 'trylook-item');
+        draftItems[i].image = path || url;
+        renderItemsEditor();
+        toast(path ? 'Đã lưu ảnh sản phẩm thành FILE trong thư mục ✓' : 'Đã nén & gắn ảnh sản phẩm (lưu trong trình duyệt)');
+      });
+    }
+
+    // Tự nhận diện ảnh PNG trong suốt (không cần chọn "Kiểu hiển thị ảnh" nữa)
+    function detectImgMode(url) {
+      const v = String(url || '').trim();
+      return (/\.png(\?|#|$)/i.test(v) || v.indexOf('data:image/png') === 0) ? 'png' : 'cover';
+    }
+
+    // ================= LƯU / XÓA / XẾP =================
+    function saveLook() {
+      const title = document.getElementById('ed-title').value.trim();
+      if (!title) { toast('Nhập tên outfit đã!', true); return; }
+      if (draftItems.length === 0) { toast('Outfit phải có ít nhất 1 sản phẩm!', true); return; }
+
+      const look = {
+        id: editIndex >= 0 ? looks[editIndex].id : 'look-' + Date.now(),
+        number: '',
+        ma: document.getElementById('ed-ma').value.trim(),   // mã sản phẩm (cột A)
+        category: document.getElementById('ed-category').value.trim(),
+        subCategory: document.getElementById('ed-sub').value.trim(),
+        mode: detectImgMode(document.getElementById('ed-model').value),
+        title,
+        modelImage: document.getElementById('ed-model').value.trim(),
+        modelImageBack: document.getElementById('ed-model-back').value.trim(),
+        items: draftItems.map(it => ({ ...it, selectedSize: (it.sizes && it.sizes[0]) || 'M' }))
+      };
+
+      if (editIndex >= 0) looks[editIndex] = look;
+      else looks.push(look);
+      draftItems = [];
+
+      persist();   // render + toast
+      showModal(false);
+    }
+
+    function removeLook(i) {
+      if (looks.length <= 1) { toast('Phải còn tối thiểu 1 outfit để cửa hàng chạy!', true); return; }
+      if (!confirm(`Xóa outfit "${looks[i].title}"?`)) return;
+      looks.splice(i, 1);
+      persist();
+    }
+
+    function moveLook(i, dir) {
+      const j = i + dir;
+      if (j < 0 || j >= looks.length) return;
+      [looks[i], looks[j]] = [looks[j], looks[i]];
+      persist(true);   // không cần toast khi chỉ đảo thứ tự
+    }
+
+    // ================= XUẤT / NHẬP / RESET =================
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify({ version: 1, savedAt: new Date().toISOString(), looks }, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'trylook-data.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast('Đã xuất trylook-data.json');
+    }
+
+    document.getElementById('import-file').addEventListener('change', (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const d = JSON.parse(ev.target.result);
+          const arr = Array.isArray(d) ? d : d.looks;
+          if (!Array.isArray(arr) || !arr.length) throw new Error('no looks');
+          looks = arr.filter(l => l && l.title && Array.isArray(l.items));
+          if (!looks.length) throw new Error('empty');
+          persist();
+        } catch (err) {
+          toast('File JSON không đúng định dạng!', true);
+        }
+      };
+      reader.readAsText(f);
+      e.target.value = '';
+    });
+
+    function resetDefault() {
+      if (!confirm('Khôi phục 4 outfit mẫu ban đầu? Dữ liệu hiện tại sẽ bị thay thế.')) return;
+      looks = JSON.parse(JSON.stringify(DEFAULT_LOOKS));
+      persist();
+    }
+
+    // ================= TOAST =================
+    let toastTimer = null;
+    function toast(msg, isErr) {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').innerText = msg;
+      t.classList.remove('translate-y-24', 'opacity-0');
+      t.className = t.className.replace(isErr ? 'bg-white text-black' : 'bg-red-500 text-white', isErr ? 'bg-red-500 text-white' : 'bg-white text-black');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.add('translate-y-24', 'opacity-0'), 2600);
+    }
+
+    // ================= QUẢN LÝ NỀN MẪU =================
+    const DEFAULT_BGS = [
+      { k:'noir',   n:'Noir original',  css:'linear-gradient(180deg,#12141c 0%,#0a0b0e 100%)' },
+      { k:'pump',   n:'Hồng sunset',    css:'linear-gradient(160deg,#2a1019 0%,#7c2d4e 55%,#b45331 130%)' },
+      { k:'sage',   n:'Rêu trầm',       css:'linear-gradient(160deg,#101b14 0%,#24402e 60%,#37553f 125%)' },
+      { k:'velvet', n:'Đỏ đô nhung',    css:'linear-gradient(160deg,#1b0f14 0%,#52212e 60%,#7f2d3b 125%)' },
+      { k:'coffee', n:'Cà phê',         css:'linear-gradient(160deg,#18120c 0%,#4a3220 60%,#785430 125%)' },
+      { k:'ocean',  n:'Biển đêm',       css:'linear-gradient(160deg,#0b1220 0%,#16304d 60%,#1d5e6e 125%)' },
+      { k:'violet', n:'Sương tím',      css:'linear-gradient(160deg,#150e21 0%,#372157 60%,#57328a 125%)' },
+      { k:'stripe', n:'Kẻ mờ',          css:'repeating-linear-gradient(115deg,#101218 0 26px,#171b24 26px 52px)' },
+    ];
+
+    const BGS_KEY = 'trylook-bgs';
+    let bgs = loadBgs();
+
+    function loadBgs() {
+      try {
+        const list = JSON.parse(localStorage.getItem(BGS_KEY) || 'null');
+        if (Array.isArray(list) && list.length) {
+          return list.filter(p => p && p.css).map(p => ({ k: p.k, n: p.n || 'Nền', css: p.css, img: p.img || '' }));
+        }
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(DEFAULT_BGS));
+    }
+
+    // ghi localStorage (không vẽ lại — dùng khi đang gõ, giữ focus ô nhập)
+    function persistBgs() {
+      try {
+        localStorage.setItem(BGS_KEY, JSON.stringify(bgs));
+        const el = document.getElementById('bg-status');
+        if (el) el.textContent = 'Đã tự lưu ✓ ' + new Date().toLocaleTimeString().slice(0, 5);
+      } catch (e) {
+        toast('LỖI LƯU NỀN (bộ nhớ đầy): bấm "Dọn ảnh nặng → file" trong phần Thư mục, hoặc dùng Ảnh URL thay vì tải file', true);
+      }
+      scheduleFsSave();
+    }
+
+    function saveBgs(silent) {
+      persistBgs();
+      if (!silent) toast('Đã lưu danh sách nền ✅');
+      renderBgs();
+    }
+
+    // tự lưu khi đang gõ (tránh mất sửa khi quên bấm lưu)
+    let bgSaveTimer = null;
+    function saveBgsSoon() {
+      clearTimeout(bgSaveTimer);
+      bgSaveTimer = setTimeout(persistBgs, 450);
+    }
+
+    function renderBgs() {
+      const box = document.getElementById('bg-list');
+      let curK = 'noir';
+      try { curK = localStorage.getItem('trylook-bg') || 'noir'; } catch (e) {}
+      box.innerHTML = '';
+      bgs.forEach((bg, i) => {
+        const row = document.createElement('div');
+        row.className = 'glass rounded-2xl p-3 fade-in';
+        row.innerHTML = `
+          <div class="rounded-xl border border-white/10 mb-2 bg-[url('')]" data-sw style="height:64px"></div>
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[10px] font-bold uppercase tracking-wider ${bg.k === curK ? 'text-emerald-400' : 'text-gray-500'}">${bg.k === curK ? '★ Đang dùng trên cửa hàng' : 'Nền mẫu'}</span>
+            <button type="button" class="btn btn-ghost !py-1 !px-2 !text-[10px] bg-use" ${bg.k === curK ? 'disabled' : ''}><i data-lucide="check-circle" class="w-3 h-3"></i> ${bg.k === curK ? 'Đang chọn' : 'Dùng nền này'}</button>
+          </div>
+          <input class="field !py-1.5 !text-[11px] mb-1.5" placeholder="Tên nền" value="${esc(bg.n)}">
+          <div class="flex gap-1.5 mb-1.5">
+            <input class="field !py-1.5 !text-[10px] flex-1" placeholder="Ảnh nền (URL hoặc tải máy)" value="${esc(bg.img || '')}">
+            <label class="btn btn-ghost !py-1 !px-2 !text-[10px] cursor-pointer shrink-0" title="Tải ảnh từ máy">
+              <i data-lucide="upload" class="w-3 h-3"></i>
+              <input type="file" accept="image/*" class="hidden">
+            </label>
+          </div>
+          <textarea class="field !py-1.5 !text-[10px] font-mono" rows="2" placeholder="CSS background">${esc(bg.css)}</textarea>
+          <div class="flex justify-end mt-1.5">
+            <button type="button" class="btn btn-danger !py-1 !px-2 !text-[10px] bg-del" ${bgs.length <= 1 ? 'disabled' : ''}><i data-lucide="trash-2" class="w-3 h-3"></i> Bỏ</button>
+          </div>`;
+        // swatch nạp bằng JS — tránh dấu " trong url(...) làm vỡ thuộc tính style
+        row.querySelector('[data-sw]').style.background = bg.css;
+
+        row.querySelector('input').addEventListener('input', (e) => { bgs[i].n = e.target.value; saveBgsSoon(); });
+        row.querySelector('input').addEventListener('change', () => persistBgs());
+
+        const imgInput = row.querySelector('input[placeholder^="Ảnh nền"]');
+        imgInput.addEventListener('input', (e) => { setBgImg(i, e.target.value, row); saveBgsSoon(); });
+        imgInput.addEventListener('blur', () => persistBgs());
+        row.querySelector('input[type=file]').addEventListener('change', (e) => {
+          const f = e.target.files[0];
+          if (!f) return;
+          compressImage(f, async (u) => {
+            const path = await saveDataToFile(u, 'trylook-bg');
+            if (path) { setBgImg(i, path, row); persistBgs(); toast('Đã lưu ảnh nền thành FILE trong thư mục ✓ (không tốn bộ nhớ)'); }
+            else { setBgImg(i, u, row); persistBgs(); toast('Đã gắn ảnh nền (lưu trong trình duyệt — tối đa 1600px)'); }
+          }, 1600, 0.9);
+        });
+
+        row.querySelector('textarea').addEventListener('input', (e) => {
+          bgs[i].css = e.target.value;
+          row.querySelector('[data-sw]').style.background = e.target.value;
+          saveBgsSoon();
+        });
+        row.querySelector('textarea').addEventListener('change', () => persistBgs());
+        // chọn nền này cho cửa hàng (store nhận qua sự kiện storage → đổi ngay)
+        row.querySelector('.bg-use').addEventListener('click', () => {
+          try { localStorage.setItem('trylook-bg', bgs[i].k); } catch (e) {}
+          toast('Đã chọn "' + bgs[i].n + '" — cửa hàng tự đổi nền ✓');
+          renderBgs();
+        });
+        row.querySelector('.bg-del').addEventListener('click', () => { bgs.splice(i, 1); saveBgs(); });
+        box.appendChild(row);
+      });
+      lucide.createIcons();
+    }
+
+    // phòng hờ: đóng/ngẫu nhiên tab vẫn kịp lưu
+    window.addEventListener('beforeunload', persistBgs);
+
+    // gắn ảnh ngoài cho nền: css tự dòng thành url(...) center/cover
+    function setBgImg(i, url, row) {
+      bgs[i].img = (url || '').trim();
+      if (bgs[i].img) {
+        bgs[i].css = 'url("' + bgs[i].img + '") center/cover no-repeat';
+        if (row) {
+          row.querySelector('textarea').value = bgs[i].css;
+          row.querySelector('[data-sw]').style.background = bgs[i].css;
+        }
+      }
+    }
+
+    function addBgBlank() {
+      bgs.push({ k: 'bg-' + Date.now(), n: 'Nền mới', css: 'linear-gradient(160deg,#12151d 0%,#2a3140 100%)', img: '' });
+      saveBgs();
+    }
+
+    function resetBgs() {
+      if (!confirm('Khôi phục 8 nền mẫu gốc?')) return;
+      bgs = JSON.parse(JSON.stringify(DEFAULT_BGS)).map(b => ({ ...b, img: '' }));
+      saveBgs();
+    }
+
+    // ================= NHẠC NỀN CHO CỬA HÀNG =================
+    const MUSIC_KEY = 'trylook-music';
+    // NHẠC MẶC ĐỊNH: FILE NHẠC ĐẶT TRONG CÙNG THƯ MỤC web (không cần mạng, phát chắc chắn)
+    const DRIVE_MUSIC_DEFAULT = encodeURIComponent('AMV - 李羲承进行曲(命苦是种天赋) Lý Tây Thành (Cuộc sống khó khăn là một món quà) #xuantinhmedia.mp3');
+    let music = loadMusic();
+    let musicTimer = null;
+
+    function loadMusic() {
+      try {
+        const o = JSON.parse(localStorage.getItem(MUSIC_KEY) || 'null');
+        if (o && typeof o === 'object' && 'url' in o) return Object.assign({ volume: 60, autoplay: false }, o);
+      } catch (e) {}
+      return { url: DRIVE_MUSIC_DEFAULT, volume: 60, autoplay: false };
+    }
+    function persistMusic() {
+      try {
+        localStorage.setItem(MUSIC_KEY, JSON.stringify(music));
+        const el = document.getElementById('music-status');
+        if (el) el.textContent = 'Đã tự lưu ✓ ' + new Date().toLocaleTimeString().slice(0, 5);
+        scheduleFsSave();
+      } catch (e) {
+        toast('Lưu nhạc thất bại — file quá lớn (chỉ nhận ≤ 2MB khi tải từ máy)', true);
+      }
+    }
+    function persistMusicSoon() {
+      clearTimeout(musicTimer);
+      musicTimer = setTimeout(persistMusic, 400);
+      scheduleFsSave();   // nhạc cũng lưu vào thư mục (cau-hinh.json)
+    }
+    function renderMusicUI() {
+      const u = document.getElementById('music-url');
+      if (!u) return;
+      u.value = music.url || '';
+      const v = document.getElementById('music-vol');
+      v.value = music.volume;
+      document.getElementById('music-vol-label').textContent = music.volume + '%';
+      document.getElementById('music-auto').checked = !!music.autoplay;
+    }
+    // Link Google Drive → link phát nhạc trực tiếp (file phải bật "ai có link đều xem được")
+    function driveDirect(url) {
+      const u = String(url || '').trim();
+      let m = /drive\.google\.com\/file\/d\/([^/?#&]+)/.exec(u);
+      if (m) return 'https://drive.usercontent.google.com/download?id=' + m[1] + '&export=download&confirm=t';
+      m = /[?&]id=([^&/#?]+)/.exec(u);
+      if (m && u.indexOf('drive.google.com') >= 0) return 'https://drive.usercontent.google.com/download?id=' + m[1] + '&export=download&confirm=t';
+      return u;
+    }
+    function setMusicURL(val) {
+      const v = driveDirect(val);
+      music.url = v;
+      const inp = document.getElementById('music-url');
+      // link Drive dán vào → tự hiện bản link phát trực tiếp
+      if (inp && inp.value !== v && v.indexOf('drive.google.com') >= 0) inp.value = v;
+      persistMusicSoon();
+    }
+    function setMusicVol(v) {
+      music.volume = Math.min(100, Math.max(0, Math.round(+v || 0)));
+      const lb = document.getElementById('music-vol-label');
+      if (lb) lb.textContent = music.volume + '%';
+      persistMusicSoon();
+    }
+    function setMusicAuto(on) { music.autoplay = !!on; persistMusicSoon(); }
+    function uploadMusic(input) {
+      const f = input.files && input.files[0];
+      if (!f) return;
+      if (f.size > 2 * 1024 * 1024) {
+        toast('File nhạc quá lớn (' + Math.round(f.size / 1024) + 'KB) — chỉ nhận ≤ 2MB. Đề nghị dùng link URL.', true);
+        input.value = '';
+        return;
+      }
+      const rd = new FileReader();
+      rd.onload = async () => {
+        const path = await saveDataToFile(String(rd.result), 'trylook-nhac');
+        music.url = path || String(rd.result);
+        renderMusicUI();
+        persistMusic();
+        toast(path ? 'Đã lưu nhạc thành FILE trong thư mục ✓' : 'Đã gắn nhạc từ máy ✓');
+        input.value = '';
+      };
+      rd.readAsDataURL(f);
+    }
+    function previewMusic() {
+      let au = document.getElementById('bgm-preview');
+      if (au) { au.pause(); au.remove(); }
+      if (!music.url) { toast('Chưa có nhạc — nhập link hoặc tải file trước', true); return; }
+      au = new Audio(music.url);
+      au.id = 'bgm-preview';
+      au.volume = Math.min(1, Math.max(0, (music.volume || 0) / 100));
+      au.play().catch(() => toast('Không phát được — nếu là link Drive: mở file trên Drive → Chia sẻ → "Ai có link đều xem được"', true));
+    }
+    window.addEventListener('beforeunload', persistMusic);
+    renderMusicUI();
+
+    // ============ QUẢN LÝ MENU CỬA HÀNG (ẩn/hiện danh mục cột D) ============
+    const MENU_KEY = 'trylook-menu';
+    function loadHiddenMenu() {
+      try { const a = JSON.parse(localStorage.getItem(MENU_KEY) || '[]'); return Array.isArray(a) ? a : []; }
+      catch (e) { return []; }
+    }
+    function menuSplit(s) { return String(s || '').split('/')[0].replace(/\s+/g, ' ').trim(); }
+    function renderMenuManager() {
+      const box = document.getElementById('menu-manager');
+      if (!box) return;
+      const hidden = loadHiddenMenu();
+      const subs = [];
+      looks.forEach(l => {
+        const sb = menuSplit(l.subCategory);
+        if (sb && !subs.some(x => x.toLowerCase() === sb.toLowerCase())) subs.push(sb);
+      });
+      box.innerHTML = subs.map(sb => {
+        const off = hidden.some(x => x.toLowerCase() === sb.toLowerCase());
+        return `<label class="flex items-center gap-2 text-[11px] text-gray-300 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 cursor-pointer select-none">
+          <input type="checkbox" class="accent-sky-500" ${off ? '' : 'checked'}>
+          <span>${sb.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>
+        </label>`;
+      }).join('');
+      box.querySelectorAll('input[type=checkbox]').forEach((cb, i) =>
+        cb.addEventListener('change', () => toggleMenuCat(subs[i], cb.checked)));
+      const st = document.getElementById('menu-status');
+      if (st) st.textContent = subs.length ? (subs.length - hidden.length) + '/' + subs.length + ' đang hiện' : '';
+    }
+    function toggleMenuCat(sb, on) {
+      const hidden = loadHiddenMenu();
+      const idx = hidden.findIndex(x => x.toLowerCase() === String(sb).toLowerCase());
+      if (!on && idx < 0) hidden.push(sb);
+      if (on && idx >= 0) hidden.splice(idx, 1);
+      try { localStorage.setItem(MENU_KEY, JSON.stringify(hidden)); } catch (e) {}
+      clearTimeout(menuTimer);
+      menuTimer = setTimeout(() => scheduleFsSave(), 500);   // menu cũng lưu vào thư mục (cau-hinh.json)
+      renderMenuManager();
+    }
+    let menuTimer = null;
+    function renderMenuManagerSafe() { try { renderMenuManager(); } catch (e) {} }
+
+    // ============ DỌN ẢNH NẶNG: chuyển dataURL thành FILE trong thư mục ============
+    // (giải cứu khi bộ nhớ trình duyệt đầy — lỗi "Lưu thất bại — vượt giới hạn bộ nhớ")
+    async function migrateHeavyImages() {
+      if (!dirHandle) { toast('Hãy bấm "Chọn thư mục" trước!', true); return; }
+      if (await dirHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
+        toast('Chưa có quyền ghi thư mục — bấm lại "Chọn thư mục"', true); return;
+      }
+      const HEAVY = 100000;   // dataURL > 100KB coi là nặng
+      const isHeavy = (s) => typeof s === 'string' && s.indexOf('data:') === 0 && s.length > HEAVY;
+      let n = 0;
+      const conv = async (val, base) => {
+        if (!isHeavy(val)) return val;
+        const p = await saveDataToFile(val, base);
+        if (p) { n++; return p; }
+        return val;
+      };
+      // nền mẫu (ảnh + css url data)
+      for (const bg of bgs) {
+        if (isHeavy(bg.img)) {
+          const p = await saveDataToFile(bg.img, 'trylook-bg');
+          if (p) { bg.img = p; bg.css = 'url("' + p + '") center/cover no-repeat'; n++; }
+        }
+      }
+      // sản phẩm: ảnh model + mặt sau + từng món
+      for (const l of looks) {
+        l.modelImage = await conv(l.modelImage, 'trylook-model');
+        l.modelImageBack = await conv(l.modelImageBack, 'trylook-model');
+        for (const it of (l.items || [])) it.image = await conv(it.image, 'trylook-item');
+      }
+      // nhạc nền
+      if (isHeavy(music.url)) {
+        const p = await saveDataToFile(music.url, 'trylook-nhac');
+        if (p) { music.url = p; n++; renderMusicUI(); persistMusic(); }
+      }
+      persistBgs();
+      persist();
+      toast(n ? ('Đã chuyển ' + n + ' ảnh/nhạc nặng thành FILE trong thư mục ✓ — bộ nhớ còn trống') : 'Không có ảnh nặng nào cần dọn', n === 0);
+    }
+
+    // ================= ĐỒNG BỘ GOOGLE SHEET =================
+    const SHEET_DEFAULT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWm2p0bF1cb1jjEdiol9BUZzVnH53XEvwpj9DW9QfOmgmbgj9VIX-QqoXXA6QCP-YvPQQQDGOaVrEW/pub';
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [], cell = '', q = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i], n = text[i + 1];
+        if (q) {
+          if (c === '"' && n === '"') { cell += '"'; i++; }
+          else if (c === '"') q = false;
+          else cell += c;
+        } else if (c === '"') q = true;
+        else if (c === ',') { row.push(cell); cell = ''; }
+        else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+        else if (c !== '\r') cell += c;
+      }
+      if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+      return rows;
+    }
+
+    const driveThumb = (u) => {
+      const m = String(u).match(/drive\.google\.com\/file\/d\/([\w-]+)/);
+      return m ? 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w800' : String(u).trim();
+    };
+    const parseVND = (s) => {
+      const n = +String(s || '').replace(/[^\d]/g, '');
+      return isNaN(n) ? 0 : n;
+    };
+
+    async function syncSheet() {
+      const statusEl = document.getElementById('sheet-status');
+      const url = (document.getElementById('sheet-url').value.trim() || SHEET_DEFAULT_URL);
+      const csvUrl = url.includes('output=csv') ? url : (url.replace(/[?#].*$/, '').replace(/\/pubhtml$/, '/pub') + '?output=csv');
+      try {
+        statusEl.textContent = 'Đang tải sheet...';
+        const res = await fetch(csvUrl);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const csv = await res.text();
+        const grid = parseCSV(csv);
+        const header = (grid[0] || []).map(h => h.trim());
+        const col = (name) => header.findIndex(h => h.toLowerCase() === name.toLowerCase());
+        const cId = col('id'), cName = col('name'), cCat = col('category'), cSub = col('subCategory'),
+          cPrice = col('price'), cImg = col('image'), cSku = col('SKU'), cV1 = col('variant1'), cV2 = col('variant2'),
+          cWeb = col('GIÁ BÁN TRÊN WED'), cOld = col('oldPrice');
+        if (cId < 0 || cName < 0) throw new Error('Sheet thiếu cột id / name');
+
+        // nhóm: SKU giống nhau (cột L) → 1 thẻ. Dòng SKU trống gom theo TÊN liền nhau:
+        // tên trống = dòng tiếp nối của dòng trên; gặp tên mới = mở thẻ mới
+        const groups = new Map();
+        const normName = (s) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+        let openKey = null, openName = '';
+        (grid.slice(1)).forEach(r => {
+          const id = (r[cId] || '').trim();
+          const sku = (cSku >= 0 ? (r[cSku] || '').trim() : '');
+          if (!id && !sku) return;
+          const nm = normName(r[cName]);
+          let key;
+          if (sku) { key = 'S:' + sku; openKey = null; openName = ''; }
+          else if (nm) {
+            if (openKey && openName === nm) key = openKey;
+            else { openKey = 'N:' + nm; openName = nm; key = openKey; }
+          } else {
+            if (!openKey) { openKey = 'I:' + id; openName = ''; }  // dòng trống sau SKU: mở thẻ riêng rồi tiếp nối
+            key = openKey;
+          }
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key).push(r);
+        });
+
+        let added = 0, updated = 0, variants = 0, nextNum = looks.length;
+        groups.forEach((g, sku) => {
+          variants += g.length;
+          const first = g[0];
+          const get = (r, c, d) => (c >= 0 ? (r[c] || '').trim() : d);
+          const set = new Set();
+          // ảnh: gom thứ tự xuất hiện trong nhóm → [0]=mặt trước, [1]=mặt sau
+          g.forEach(r => String(r[cImg] || '').split(',').map(s => s.trim()).filter(Boolean)
+            .forEach(u => { const t = driveThumb(u); if (/drive\.google|http/.test(t) && !set.has(t)) set.add(t); }));
+          const imgs = [...set];
+          const front = imgs[0] || '';
+          const back = imgs[1] && imgs[1] !== imgs[0] ? imgs[1] : '';
+          // nhóm SKU thật (bỏ tiền tố S: / N: / I: của key)
+          const realSku = sku.startsWith('S:') ? sku.slice(2) : (sku.startsWith('I:') ? sku.slice(2) : '');
+          const cSpecs = col('specs'), cStock = col('stock'), cBadge = col('badge');
+          const vLabel = (r) => [get(r, cV1), get(r, cV2)].filter(Boolean).join(' / ');
+          // PHÂN LOẠI = cột M (variant1); trống mới lùi về tên dòng; trùng nhãn → thêm đuôi id
+          const idsInGroup = g.map(x => get(x, cId)).filter(Boolean).sort();
+          let commonPrefix = '';
+          if (idsInGroup.length >= 2) {
+            commonPrefix = idsInGroup[0];
+            for (const s of idsInGroup) { let i = 0; while (i < commonPrefix.length && commonPrefix[i] === s[i]) i++; commonPrefix = commonPrefix.slice(0, i); if (!commonPrefix) break; }
+          }
+          const rawLabels = g.map(r => vLabel(r) || get(r, cName) || get(r, cId) || '');
+          // trùng nhãn → gắn đuôi id khử tiền tố chung (VD 3SND3A15W → D3A15W)
+          const labelCnt = new Map();
+          rawLabels.forEach(lb => labelCnt.set(lb, (labelCnt.get(lb) || 0) + 1));
+          const label = (r, idx) => {
+            let lb = rawLabels[idx] || '';
+            if (labelCnt.get(lb) > 1) {
+              const idFull = get(r, cId) || '';
+              const tail = commonPrefix && idFull.indexOf(commonPrefix) === 0 ? idFull.slice(commonPrefix.length) : idFull;
+              lb = (lb ? lb + ' · ' : '') + (tail || idFull || ('VT' + (idx + 1)));
+            }
+            return lb;
+          };
+          const sheetItems = g.map((r, i) => ({
+            id: 'it-' + get(r, cId) || 'it-' + sku + '-' + (i + 1),
+            name: label(r, i),
+            category: get(r, cSub) || get(r, cCat) || 'Sản phẩm chính',
+            price: parseVND(get(r, cWeb) || get(r, cPrice)) || parseVND(get(r, cPrice)),
+            oldPrice: parseVND(get(r, cOld)),
+            image: front || driveThumb(get(r, cImg)) || '',
+            sizes: [label(r, i)],
+            selectedSize: label(r, i),
+            selected: i === 0,
+            role: 'main',   // biến thể cùng mã = 1 sản phẩm; "mua kèm" do admin tự thêm
+            fromSheet: true,
+            ma: get(r, cId) || '',   // cột A — mã riêng của từng biến thể (cột M)
+            sku: realSku || get(r, cId) || '',
+            fullName: get(r, cName) || '',
+            sub: get(r, cSub) || '',
+            specs: get(r, cSpecs) || '',
+            stock: get(r, cStock) || '',
+            badge: get(r, cBadge) || ''
+          }));
+          // giữ id cũ cho nhóm SKU (tiền tố S:) để món đã set tay không mất khi đồng bộ lại
+          const lookId = 'lp-' + String(sku).replace(/^S:/, '').replace(/[^A-Za-z0-9_-]/g, '_');
+          const oldIdx = looks.findIndex(l => l.id === lookId);
+          // giữ các món "mua kèm" đặt tay của admin (không đến từ sheet)
+          const userItems = oldIdx >= 0 ? (looks[oldIdx].items || []).filter(it => !it.fromSheet) : [];
+          const look = {
+            id: lookId,
+            number: '',
+            category: get(first, cCat) || 'LiOA',
+            subCategory: get(first, cSub) || '',   // cột D — cấp phân loại cho menu cửa hàng
+            ma: get(first, cId) || '',             // cột A — mã sản phẩm
+            mode: detectImgMode(front),   // tự nhận diện PNG trong suốt
+            title: get(first, cName) || realSku || get(first, cId) || 'Sản phẩm',
+            modelImage: front,
+            modelImageBack: back,
+            items: [...sheetItems, ...userItems]
+          };
+          if (oldIdx >= 0) { looks[oldIdx] = look; updated++; }
+          else { looks.push(look); added++; }
+        });
+
+        // đánh số lại
+        looks.forEach((l, i) => { if (l.fromSheet !== false) l.number = ''; });
+        persist();
+        lucide.createIcons();
+        statusEl.textContent = `Đồng bộ xong: ${groups.size} nhóm SKU / ${variants} biến thể (mới ${added}, cập nhật ${updated})`;
+        renderMenuManagerSafe();
+        toast(`Đã đồng bộ ${groups.size} sản phẩm (${variants} biến thể) từ Google Sheet`);
+      } catch (err) {
+        statusEl.textContent = 'Lỗi: ' + err.message;
+        toast('Đồng bộ sheet thất bại — ' + err.message, true);
+      }
+    }
+
+    // ================= THƯ MỤC LƯU TRỮ (File System Access API) =================
+    let dirHandle = null, fsSaveTimer = null;
+    const IDB_NAME = 'trylook-fs';
+    function idbOpen() {
+      return new Promise((res, rej) => {
+        const rq = indexedDB.open(IDB_NAME, 1);
+        rq.onupgradeneeded = () => rq.result.createObjectStore('kv');
+        rq.onsuccess = () => res(rq.result);
+        rq.onerror = () => rej(rq.error);
+      });
+    }
+    async function idbSet(k, v) { const db = await idbOpen(); return new Promise((res, rej) => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
+    async function idbGet(k) { const db = await idbOpen(); return new Promise((res, rej) => { const tx = db.transaction('kv', 'readonly'); const rq = tx.objectStore('kv').get(k); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); }); }
+
+    async function fsStatus(txt) { document.getElementById('fs-status').textContent = txt; }
+
+    async function pickFolder() {
+      if (!window.showDirectoryPicker) { fsStatus('Trình duyệt không hỗ trợ — dùng Chrome/Edge mới nhất'); return; }
+      try {
+        dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        await idbSet('dir', dirHandle);
+        await fsStatus('Đã chọn: ' + dirHandle.name + ' — tự lưu khi có thay đổi ✓');
+        await fsSave();
+      } catch (e) { /* người dùng hủy hộp thoại */ }
+    }
+
+    async function initFolder() {
+      if (!window.showDirectoryPicker) { var el = document.getElementById('fs-status'); if (el) el.textContent = 'Trình duyệt không hỗ trợ lưu thư mục (cần Chrome/Edge)'; return; }
+      try { dirHandle = await idbGet('dir'); } catch (e) { return; }
+      if (!dirHandle) { fsStatus('Chưa chọn thư mục'); return; }
+      const perm = await dirHandle.queryPermission({ mode: 'readwrite' });
+      if (perm === 'granted') {
+        fsStatus('Đã kết nối ' + dirHandle.name + ' — tự lưu ✓');
+        await restoreFromFolder();
+      }
+      else fsStatus('Thư mục cũ ' + dirHandle.name + ' — bấm "Chọn thư mục" để cấp quyền lại');
+    }
+
+    // CỨU DỮ LIỆU: bộ nhớ trình duyệt rỗng (bị xóa / mở nhầm nguồn khác) → nạp lại từ file thư mục đã chọn
+    async function restoreFromFolder() {
+      try {
+        if (!dirHandle) return;
+        if (await dirHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') return;
+        const readJson = async (name) => {
+          try {
+            const fh = await dirHandle.getFileHandle(name);
+            const f = await fh.getFile();
+            return JSON.parse(await f.text());
+          } catch (e) { return null; }
+        };
+        // nền mẫu bị mất → khôi phục từ trylook-bgs.json
+        if (!localStorage.getItem('trylook-bgs')) {
+          const arr = await readJson('trylook-bgs.json');
+          if (Array.isArray(arr) && arr.length) {
+            localStorage.setItem('trylook-bgs', JSON.stringify(arr));
+            bgs = loadBgs();
+            renderBgs();
+            fsStatus('Đã khôi phục ' + arr.length + ' nền từ "' + dirHandle.name + '" ✓');
+          }
+        }
+        // dữ liệu sản phẩm bị mất → khôi phục từ trylook-data.json
+        if (!localStorage.getItem(LS_KEY)) {
+          const o = await readJson('trylook-data.json');
+          if (o && Array.isArray(o.looks) && o.looks.length) {
+            localStorage.setItem(LS_KEY, JSON.stringify(o));
+            looks = o.looks;
+            renumber();
+            render();
+            fsStatus('Đã khôi phục ' + o.looks.length + ' sản phẩm từ "' + dirHandle.name + '" ✓');
+          }
+        }
+        // cấu hình nhạc bị mất → khôi phục từ cau-hinh.json
+        if (!localStorage.getItem('trylook-music')) {
+          const cfg = await readJson('cau-hinh.json');
+          if (cfg && cfg.nhac && cfg.nhac.url) {
+            try {
+              localStorage.setItem('trylook-music', JSON.stringify(cfg.nhac));
+              music = loadMusic();
+              renderMusicUI();
+              fsStatus('Đã khôi phục nhạc nền từ "' + dirHandle.name + '" ✓');
+            } catch (e) {}
+          }
+        }
+        // menu ẩn/hiện bị mất → khôi phục từ cau-hinh.json
+        if (!localStorage.getItem('trylook-menu')) {
+          const cfg2 = await readJson('cau-hinh.json');
+          if (cfg2 && Array.isArray(cfg2.menuAn)) {
+            try {
+              localStorage.setItem('trylook-menu', JSON.stringify(cfg2.menuAn));
+              renderMenuManagerSafe();
+              fsStatus('Đã khôi phục cài đặt menu từ "' + dirHandle.name + '" ✓');
+            } catch (e) {}
+          }
+        }
+      } catch (e) {}
+    }
+
+    function scheduleFsSave() {
+      if (!dirHandle) return;
+      clearTimeout(fsSaveTimer);
+      fsSaveTimer = setTimeout(() => fsSave(), 1200);
+    }
+
+    async function fsSave(manual) {
+      if (!dirHandle) { if (manual) fsStatus('Chưa chọn thư mục'); return; }
+      try {
+        if (await dirHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
+          if (manual) fsStatus('Chưa có quyền ghi — bấm lại "Chọn thư mục"');
+          return;
+        }
+        const put = async (name, data) => {
+          const fh = await dirHandle.getFileHandle(name, { create: true });
+          const w = await fh.createWritable();
+          await w.write(data); await w.close();
+        };
+        // CHỐT CHẶN MẤT DỮ LIỆU: nếu bộ nhớ đang chỉ còn mẫu demo (≤ 6 sp) mà file
+        // trong thư mục có NHIỀU sản phẩm hơn → KHÔNG ghi đè, khôi phục lại vào bộ nhớ
+        const curLooks = Array.isArray(looks) ? looks.length : 0;
+        let folderLooks = 0;
+        try {
+          const old = await readJson('trylook-data.json');
+          if (old && Array.isArray(old.looks)) folderLooks = old.looks.length;
+        } catch (e) {}
+        if (curLooks <= 6 && folderLooks > curLooks) {
+          try {
+            const good = await readJson('trylook-data.json');
+            if (good && Array.isArray(good.looks) && good.looks.length) {
+              try { localStorage.setItem('trylook-data', JSON.stringify(good)); } catch (e) {}
+              looks = good.looks;
+              render();
+              fsStatus('Bộ nhớ chỉ có mẫu demo — đã KHÔI PHỤC ' + good.looks.length + ' sản phẩm từ thư mục (không ghi đè)');
+            }
+          } catch (e) {}
+        } else {
+          // giữ lại bản cũ làm backup khi bản mới ít sản phẩm hơn hẳn
+          try {
+            if (folderLooks > curLooks) {
+              const prev = await readJson('trylook-data.json');
+              if (prev) await put('trylook-data-backup.json', JSON.stringify(prev));
+            }
+          } catch (e) {}
+          await put('trylook-data.json', JSON.stringify({ version: 1, savedAt: new Date().toISOString(), looks }, null, 2));
+        }
+        await put('trylook-bgs.json', JSON.stringify(bgs || []));
+        // cấu hình: nền đang dùng + NGÀY/ĐÊM + NHẠC NỀN — tất cả lưu vào thư mục
+        let nhac = null;
+        try { nhac = JSON.parse(localStorage.getItem('trylook-music') || 'null'); } catch (e) { nhac = null; }
+        await put('cau-hinh.json', JSON.stringify({
+          nen: localStorage.getItem('trylook-bg') || 'noir',
+          cheDoNang: (localStorage.getItem('trylook-day') || '0') === '1',
+          nhac: nhac,
+          menuAn: (JSON.parse(localStorage.getItem('trylook-menu') || '[]') || []),
+          savedAt: new Date().toISOString()
+        }, null, 2));
+        await fsStatus('Đã lưu thư mục "' + dirHandle.name + '" lúc ' + new Date().toLocaleTimeString().slice(0, 5) + ' ✓');
+      } catch (e) {
+        if (manual) toast('Lưu vào thư mục thất bại: ' + e.message, true);
+      }
+    }
+
+    // ================= INIT =================
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      render();
+      renderBgs();
+      renderMenuManagerSafe();
+      initFolder();
+
+      // ô tìm kiếm sản phẩm
+      const si = document.getElementById('look-search');
+      if (si) si.addEventListener('input', () => { adminQuery = si.value; adminPage = 1; render(); });
+
+      // nhớ link Google Sheet qua các lần mở lại
+      const su = document.getElementById('sheet-url');
+      if (su) {
+        try { const saved = localStorage.getItem('trylook-sheet-url'); if (saved) su.value = saved; } catch (e) {}
+        su.addEventListener('change', () => { try { localStorage.setItem('trylook-sheet-url', su.value); } catch (e) {} });
+      }
+    });
+  </script>
+</body>
+</html>

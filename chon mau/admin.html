@@ -6,6 +6,7 @@
   <title>Trang quản trị — Try the Look (Studio2026)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../js/admin-config.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -126,42 +127,21 @@
       </div>
     </details>
 
-    <!-- ============ ĐỒNG BỘ GOOGLE SHEET (gập) ============ -->
+    <!-- ============ ĐỒNG BỘ TỪ WEB CHÍNH (gập) ============ -->
     <details class="fold">
       <summary>
-        <i data-lucide="table-2" class="w-4 h-4 text-emerald-400"></i> Đồng bộ sản phẩm từ Google Sheet
+        <i data-lucide="refresh-cw" class="w-4 h-4 text-emerald-400"></i> Đồng bộ sản phẩm theo Web chính
         <span id="sheet-status" class="text-[10px] text-emerald-400/90 font-semibold truncate max-w-[240px]"></span>
         <i data-lucide="chevron-down" class="chev w-4 h-4"></i>
       </summary>
       <div class="fold-body">
-        <input id="sheet-url" class="field !text-[11px] mb-2" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vQWm2p0bF1cb1jjEdiol9BUZzVnH53XEvwpj9DW9QfOmgmbgj9VIX-QqoXXA6QCP-YvPQQQDGOaVrEW/pub">
         <div class="flex gap-2 flex-wrap items-center">
-          <button onclick="syncSheet()" class="btn btn-amber"><i data-lucide="refresh-cw" class="w-4 h-4"></i> Đồng bộ → sản phẩm</button>
+          <button onclick="syncTuWebChinh()" class="btn btn-amber"><i data-lucide="refresh-cw" class="w-4 h-4"></i> Đồng bộ ngay</button>
         </div>
         <p class="text-[10px] text-gray-500 mt-2.5 leading-snug">
-          Gom theo <b>cột mã (SKU)</b>: mã giống nhau = <b>1 sản phẩm</b>, biến thể nằm chung thẻ.
-          Ảnh Drive tự đổi thumbnail; <b>ảnh 1 = mặt trước</b>, <b>ảnh 2 = mặt sau</b> lật được.
-          Món <b>SP mua kèm</b> bạn tự chọn từ kho trong phần sửa sản phẩm (không tự thêm).
-        </p>
-      </div>
-    </details>
-
-    <!-- ============ THƯ MỤC LƯU TRỮ (gập) ============ -->
-    <details class="fold">
-      <summary>
-        <i data-lucide="folder-open" class="w-4 h-4 text-sky-400"></i> Thư mục lưu dữ liệu (tự lưu trực tiếp)
-        <span id="fs-status" class="text-[10px] text-sky-400/90 font-semibold truncate max-w-[260px]"></span>
-        <i data-lucide="chevron-down" class="chev w-4 h-4"></i>
-      </summary>
-      <div class="fold-body">
-        <div class="flex gap-2 flex-wrap items-center">
-          <button onclick="pickFolder()" class="btn btn-ghost"><i data-lucide="folder-open" class="w-4 h-4"></i> Chọn thư mục</button>
-          <button onclick="fsSave(true)" class="btn btn-ghost"><i data-lucide="save" class="w-4 h-4"></i> Lưu ngay</button>
-          <button onclick="migrateHeavyImages()" class="btn btn-amber"><i data-lucide="broom" class="w-4 h-4"></i> Dọn ảnh nặng → file</button>
-        </div>
-        <p class="text-[10px] text-gray-500 mt-2.5 leading-snug">
-          Xuất <b>trylook-data.json</b>, <b>trylook-bgs.json</b>, <b>cau-hinh.json</b> + <b>file ảnh/nhạc tải từ máy</b> tự động vào thư mục đã chọn mỗi khi có thay đổi. Cần <b>Chrome / Edge mới</b>; mở lại trang có thể phải cấp quyền lại — chọn lại cùng thư mục.<br>
-          <b>Khuyến nghị: chọn chính thư mục chứa 2 file web (thư mục DA4)</b> — ảnh úp lên sẽ thành file ngay tại đó, web đọc được đường dẫn <code>tên-file.jpg</code>.
+          Kéo toàn bộ sản phẩm từ <b>source web chính</b> (data/products.json — nơi admin cập nhật từ Google Sheet) vào trang chọn mẫu:
+          gom theo <b>mã chung (SKU)</b>, <b>ảnh 1 = mặt trước</b>, <b>ảnh 2 = mặt sau</b>, phân loại (5A → 30A, phích cắm, 1 pha…) giữ theo web.
+          Giá/tên hiển thị trên cửa hàng luôn tự bám theo web chính khi khách mở trang.
         </p>
       </div>
     </details>
@@ -182,7 +162,7 @@
           <!-- render by JS -->
         </div>
         <p class="text-[10px] text-gray-500 mt-3 leading-snug">
-          Nền hỗ trợ gradient/màu CSS và <b>ảnh URL</b> (hoặc tải từ máy — tự nén). Có ảnh thì CSS tự gọn dạng <code>url(...) center/cover</code>.
+          Mặc định là <b>11 nền từ kho ảnh</b> (bg 0 → bg 10). Có thể <b>đổi tên</b>, thay ảnh (URL hoặc tải từ máy — tự nén), thêm hoặc bớt nền. Có ảnh thì CSS tự gọn dạng <code>url(...) center/cover</code>.
         </p>
       </div>
     </details>
@@ -340,6 +320,10 @@
     let editIndex = -1;      // -1 = thêm mới
     let draftItems = [];     // bản nháp sản phẩm trong modal
 
+    // KẾT NỐI SERVER ADMIN (lưu file vào source)
+    const API_URL = (window.ADMIN_CONFIG && window.ADMIN_CONFIG.apiUrl) || 'http://localhost:8120';
+    const ADMIN_PASS = (window.ADMIN_CONFIG && window.ADMIN_CONFIG.pass) || '';
+
     // ================= LOAD / SAVE =================
     function loadLooks() {
       try {
@@ -356,7 +340,7 @@
         if (!silent) toast('Đã lưu vào trình duyệt ✅');
         render();
       } catch (e) {
-        toast('Lưu thất bại — bộ nhớ đầy (~5MB). Bấm "Dọn ảnh nặng → file" trong phần Thư mục lưu dữ liệu, hoặc dùng ảnh URL.', true);
+        toast('Lưu thất bại — bộ nhớ đầy (~5MB). Hãy dùng ảnh URL thay vì tải ảnh từ máy.', true);
       }
       scheduleFsSave();   // tự lưu bản sao vào thư mục người dùng đã chọn
     }
@@ -654,19 +638,11 @@
     // Lưu ảnh/nhạc dạng dataURL thành FILE trong thư mục đã chọn → trả về đường dẫn tương đối
     // (bộ nhớ trình duyệt chỉ giữ tên file — không còn lỗi vượt giới hạn 5MB)
     async function saveDataToFile(dataURL, baseName) {
-      if (!dirHandle) return null;
+      // Ghi file ảnh/nhạc vào thư mục chọn mẫu qua server ADMIN.bat
       try {
-        if (await dirHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') return null;
-        const m = /^data:([a-z]+\/[a-z0-9.+-]+);/i.exec(dataURL || '');
-        if (!m) return null;
-        const ext = m[1].split('/')[1].replace('jpeg', 'jpg').replace('mpeg', 'mp3');
-        const name = baseName + '-' + Date.now() + '.' + ext;
-        const blob = await (await fetch(dataURL)).blob();
-        const fh = await dirHandle.getFileHandle(name, { create: true });
-        const w = await fh.createWritable();
-        await w.write(blob);
-        await w.close();
-        return name;
+        const res = await fetch(API_URL + '/', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ pass: ADMIN_PASS, action: 'chonmau.file', name: baseName, dataUrl: dataURL }) });
+        const j = await res.json();
+        return j.ok ? j.name : null;
       } catch (e) { return null; }
     }
 
@@ -800,17 +776,20 @@
 
     // ================= QUẢN LÝ NỀN MẪU =================
     const DEFAULT_BGS = [
-      { k:'noir',   n:'Noir original',  css:'linear-gradient(180deg,#12141c 0%,#0a0b0e 100%)' },
-      { k:'pump',   n:'Hồng sunset',    css:'linear-gradient(160deg,#2a1019 0%,#7c2d4e 55%,#b45331 130%)' },
-      { k:'sage',   n:'Rêu trầm',       css:'linear-gradient(160deg,#101b14 0%,#24402e 60%,#37553f 125%)' },
-      { k:'velvet', n:'Đỏ đô nhung',    css:'linear-gradient(160deg,#1b0f14 0%,#52212e 60%,#7f2d3b 125%)' },
-      { k:'coffee', n:'Cà phê',         css:'linear-gradient(160deg,#18120c 0%,#4a3220 60%,#785430 125%)' },
-      { k:'ocean',  n:'Biển đêm',       css:'linear-gradient(160deg,#0b1220 0%,#16304d 60%,#1d5e6e 125%)' },
-      { k:'violet', n:'Sương tím',      css:'linear-gradient(160deg,#150e21 0%,#372157 60%,#57328a 125%)' },
-      { k:'stripe', n:'Kẻ mờ',          css:'repeating-linear-gradient(115deg,#101218 0 26px,#171b24 26px 52px)' },
+      { k:'bg-0', n:'bg 0', img:'../images/bg%200.jpg', css:'url("../images/bg%200.jpg") center/cover no-repeat' },
+      { k:'bg-1', n:'bg 1', img:'../images/bg%201.jpg', css:'url("../images/bg%201.jpg") center/cover no-repeat' },
+      { k:'bg-2', n:'bg 2', img:'../images/bg%202.jpg', css:'url("../images/bg%202.jpg") center/cover no-repeat' },
+      { k:'bg-3', n:'bg 3', img:'../images/bg%203.jpg', css:'url("../images/bg%203.jpg") center/cover no-repeat' },
+      { k:'bg-4', n:'bg 4', img:'../images/bg%204.jpg', css:'url("../images/bg%204.jpg") center/cover no-repeat' },
+      { k:'bg-5', n:'bg 5', img:'../images/bg%205.jpg', css:'url("../images/bg%205.jpg") center/cover no-repeat' },
+      { k:'bg-6', n:'bg 6', img:'../images/bg%206.jpg', css:'url("../images/bg%206.jpg") center/cover no-repeat' },
+      { k:'bg-7', n:'bg 7', img:'../images/bg%207.jpg', css:'url("../images/bg%207.jpg") center/cover no-repeat' },
+      { k:'bg-8', n:'bg 8', img:'../images/bg%208.jpg', css:'url("../images/bg%208.jpg") center/cover no-repeat' },
+      { k:'bg-9', n:'bg 9', img:'../images/bg%209.jpg', css:'url("../images/bg%209.jpg") center/cover no-repeat' },
+      { k:'bg-10', n:'bg 10', img:'../images/bg%2010.jpg', css:'url("../images/bg%2010.jpg") center/cover no-repeat' },
     ];
 
-    const BGS_KEY = 'trylook-bgs';
+    const BGS_KEY = 'trylook-bgs-2';
     let bgs = loadBgs();
 
     function loadBgs() {
@@ -824,13 +803,14 @@
     }
 
     // ghi localStorage (không vẽ lại — dùng khi đang gõ, giữ focus ô nhập)
+    function scheduleFsSave() { /* đã bỏ lưu vào source theo yêu cầu */ }
     function persistBgs() {
       try {
         localStorage.setItem(BGS_KEY, JSON.stringify(bgs));
         const el = document.getElementById('bg-status');
         if (el) el.textContent = 'Đã tự lưu ✓ ' + new Date().toLocaleTimeString().slice(0, 5);
       } catch (e) {
-        toast('LỖI LƯU NỀN (bộ nhớ đầy): bấm "Dọn ảnh nặng → file" trong phần Thư mục, hoặc dùng Ảnh URL thay vì tải file', true);
+        toast('LỖI LƯU NỀN (bộ nhớ đầy): dùng Ảnh URL thay vì tải file từ máy', true);
       }
       scheduleFsSave();
     }
@@ -851,7 +831,7 @@
     function renderBgs() {
       const box = document.getElementById('bg-list');
       let curK = 'noir';
-      try { curK = localStorage.getItem('trylook-bg') || 'noir'; } catch (e) {}
+      try { curK = localStorage.getItem('trylook-bg') || 'bg-0'; } catch (e) {}
       box.innerHTML = '';
       bgs.forEach((bg, i) => {
         const row = document.createElement('div');
@@ -932,8 +912,8 @@
     }
 
     function resetBgs() {
-      if (!confirm('Khôi phục 8 nền mẫu gốc?')) return;
-      bgs = JSON.parse(JSON.stringify(DEFAULT_BGS)).map(b => ({ ...b, img: '' }));
+      if (!confirm('Khôi phục 11 nền mặc định (bg 0 → bg 10)?')) return;
+      bgs = JSON.parse(JSON.stringify(DEFAULT_BGS));
       saveBgs();
     }
 
@@ -1071,66 +1051,7 @@
     let menuTimer = null;
     function renderMenuManagerSafe() { try { renderMenuManager(); } catch (e) {} }
 
-    // ============ DỌN ẢNH NẶNG: chuyển dataURL thành FILE trong thư mục ============
-    // (giải cứu khi bộ nhớ trình duyệt đầy — lỗi "Lưu thất bại — vượt giới hạn bộ nhớ")
-    async function migrateHeavyImages() {
-      if (!dirHandle) { toast('Hãy bấm "Chọn thư mục" trước!', true); return; }
-      if (await dirHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
-        toast('Chưa có quyền ghi thư mục — bấm lại "Chọn thư mục"', true); return;
-      }
-      const HEAVY = 100000;   // dataURL > 100KB coi là nặng
-      const isHeavy = (s) => typeof s === 'string' && s.indexOf('data:') === 0 && s.length > HEAVY;
-      let n = 0;
-      const conv = async (val, base) => {
-        if (!isHeavy(val)) return val;
-        const p = await saveDataToFile(val, base);
-        if (p) { n++; return p; }
-        return val;
-      };
-      // nền mẫu (ảnh + css url data)
-      for (const bg of bgs) {
-        if (isHeavy(bg.img)) {
-          const p = await saveDataToFile(bg.img, 'trylook-bg');
-          if (p) { bg.img = p; bg.css = 'url("' + p + '") center/cover no-repeat'; n++; }
-        }
-      }
-      // sản phẩm: ảnh model + mặt sau + từng món
-      for (const l of looks) {
-        l.modelImage = await conv(l.modelImage, 'trylook-model');
-        l.modelImageBack = await conv(l.modelImageBack, 'trylook-model');
-        for (const it of (l.items || [])) it.image = await conv(it.image, 'trylook-item');
-      }
-      // nhạc nền
-      if (isHeavy(music.url)) {
-        const p = await saveDataToFile(music.url, 'trylook-nhac');
-        if (p) { music.url = p; n++; renderMusicUI(); persistMusic(); }
-      }
-      persistBgs();
-      persist();
-      toast(n ? ('Đã chuyển ' + n + ' ảnh/nhạc nặng thành FILE trong thư mục ✓ — bộ nhớ còn trống') : 'Không có ảnh nặng nào cần dọn', n === 0);
-    }
-
-    // ================= ĐỒNG BỘ GOOGLE SHEET =================
-    const SHEET_DEFAULT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWm2p0bF1cb1jjEdiol9BUZzVnH53XEvwpj9DW9QfOmgmbgj9VIX-QqoXXA6QCP-YvPQQQDGOaVrEW/pub';
-
-    function parseCSV(text) {
-      const rows = [];
-      let row = [], cell = '', q = false;
-      for (let i = 0; i < text.length; i++) {
-        const c = text[i], n = text[i + 1];
-        if (q) {
-          if (c === '"' && n === '"') { cell += '"'; i++; }
-          else if (c === '"') q = false;
-          else cell += c;
-        } else if (c === '"') q = true;
-        else if (c === ',') { row.push(cell); cell = ''; }
-        else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
-        else if (c !== '\r') cell += c;
-      }
-      if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
-      return rows;
-    }
-
+// ================= ĐỒNG BỘ SẢN PHẨM TỪ WEB CHÍNH =================
     const driveThumb = (u) => {
       const m = String(u).match(/drive\.google\.com\/file\/d\/([\w-]+)/);
       return m ? 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w800' : String(u).trim();
@@ -1140,294 +1061,165 @@
       return isNaN(n) ? 0 : n;
     };
 
-    async function syncSheet() {
-      const statusEl = document.getElementById('sheet-status');
-      const url = (document.getElementById('sheet-url').value.trim() || SHEET_DEFAULT_URL);
-      const csvUrl = url.includes('output=csv') ? url : (url.replace(/[?#].*$/, '').replace(/\/pubhtml$/, '/pub') + '?output=csv');
-      try {
-        statusEl.textContent = 'Đang tải sheet...';
-        const res = await fetch(csvUrl);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const csv = await res.text();
-        const grid = parseCSV(csv);
-        const header = (grid[0] || []).map(h => h.trim());
-        const col = (name) => header.findIndex(h => h.toLowerCase() === name.toLowerCase());
-        const cId = col('id'), cName = col('name'), cCat = col('category'), cSub = col('subCategory'),
-          cPrice = col('price'), cImg = col('image'), cSku = col('SKU'), cV1 = col('variant1'), cV2 = col('variant2'),
-          cWeb = col('GIÁ BÁN TRÊN WED'), cOld = col('oldPrice');
-        if (cId < 0 || cName < 0) throw new Error('Sheet thiếu cột id / name');
+    // Lõi đồng bộ: nhận bảng (header + rows giống như sheet) → gom theo SKU → dựng/cập nhật thẻ
+    function dongBoTuBang(header, rows, statusEl) {
+      const col = (name) => header.findIndex(h => String(h).trim().toLowerCase() === name.toLowerCase());
+      const cId = col('id'), cName = col('name'), cCat = col('category'), cSub = col('subCategory'),
+        cPrice = col('price'), cImg = col('image'), cSku = col('SKU'), cV1 = col('variant1'), cV2 = col('variant2'),
+        cOld = col('oldPrice'), cSpecs = col('specs'), cStock = col('stock'), cBadge = col('badge');
+      if (cId < 0 || cName < 0) throw new Error('Thiếu cột id / name');
 
-        // nhóm: SKU giống nhau (cột L) → 1 thẻ. Dòng SKU trống gom theo TÊN liền nhau:
-        // tên trống = dòng tiếp nối của dòng trên; gặp tên mới = mở thẻ mới
-        const groups = new Map();
-        const normName = (s) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
-        let openKey = null, openName = '';
-        (grid.slice(1)).forEach(r => {
-          const id = (r[cId] || '').trim();
-          const sku = (cSku >= 0 ? (r[cSku] || '').trim() : '');
-          if (!id && !sku) return;
-          const nm = normName(r[cName]);
-          let key;
-          if (sku) { key = 'S:' + sku; openKey = null; openName = ''; }
-          else if (nm) {
-            if (openKey && openName === nm) key = openKey;
-            else { openKey = 'N:' + nm; openName = nm; key = openKey; }
-          } else {
-            if (!openKey) { openKey = 'I:' + id; openName = ''; }  // dòng trống sau SKU: mở thẻ riêng rồi tiếp nối
-            key = openKey;
-          }
-          if (!groups.has(key)) groups.set(key, []);
-          groups.get(key).push(r);
-        });
-
-        let added = 0, updated = 0, variants = 0, nextNum = looks.length;
-        groups.forEach((g, sku) => {
-          variants += g.length;
-          const first = g[0];
-          const get = (r, c, d) => (c >= 0 ? (r[c] || '').trim() : d);
-          const set = new Set();
-          // ảnh: gom thứ tự xuất hiện trong nhóm → [0]=mặt trước, [1]=mặt sau
-          g.forEach(r => String(r[cImg] || '').split(',').map(s => s.trim()).filter(Boolean)
-            .forEach(u => { const t = driveThumb(u); if (/drive\.google|http/.test(t) && !set.has(t)) set.add(t); }));
-          const imgs = [...set];
-          const front = imgs[0] || '';
-          const back = imgs[1] && imgs[1] !== imgs[0] ? imgs[1] : '';
-          // nhóm SKU thật (bỏ tiền tố S: / N: / I: của key)
-          const realSku = sku.startsWith('S:') ? sku.slice(2) : (sku.startsWith('I:') ? sku.slice(2) : '');
-          const cSpecs = col('specs'), cStock = col('stock'), cBadge = col('badge');
-          const vLabel = (r) => [get(r, cV1), get(r, cV2)].filter(Boolean).join(' / ');
-          // PHÂN LOẠI = cột M (variant1); trống mới lùi về tên dòng; trùng nhãn → thêm đuôi id
-          const idsInGroup = g.map(x => get(x, cId)).filter(Boolean).sort();
-          let commonPrefix = '';
-          if (idsInGroup.length >= 2) {
-            commonPrefix = idsInGroup[0];
-            for (const s of idsInGroup) { let i = 0; while (i < commonPrefix.length && commonPrefix[i] === s[i]) i++; commonPrefix = commonPrefix.slice(0, i); if (!commonPrefix) break; }
-          }
-          const rawLabels = g.map(r => vLabel(r) || get(r, cName) || get(r, cId) || '');
-          // trùng nhãn → gắn đuôi id khử tiền tố chung (VD 3SND3A15W → D3A15W)
-          const labelCnt = new Map();
-          rawLabels.forEach(lb => labelCnt.set(lb, (labelCnt.get(lb) || 0) + 1));
-          const label = (r, idx) => {
-            let lb = rawLabels[idx] || '';
-            if (labelCnt.get(lb) > 1) {
-              const idFull = get(r, cId) || '';
-              const tail = commonPrefix && idFull.indexOf(commonPrefix) === 0 ? idFull.slice(commonPrefix.length) : idFull;
-              lb = (lb ? lb + ' · ' : '') + (tail || idFull || ('VT' + (idx + 1)));
-            }
-            return lb;
-          };
-          const sheetItems = g.map((r, i) => ({
-            id: 'it-' + get(r, cId) || 'it-' + sku + '-' + (i + 1),
-            name: label(r, i),
-            category: get(r, cSub) || get(r, cCat) || 'Sản phẩm chính',
-            price: parseVND(get(r, cWeb) || get(r, cPrice)) || parseVND(get(r, cPrice)),
-            oldPrice: parseVND(get(r, cOld)),
-            image: front || driveThumb(get(r, cImg)) || '',
-            sizes: [label(r, i)],
-            selectedSize: label(r, i),
-            selected: i === 0,
-            role: 'main',   // biến thể cùng mã = 1 sản phẩm; "mua kèm" do admin tự thêm
-            fromSheet: true,
-            ma: get(r, cId) || '',   // cột A — mã riêng của từng biến thể (cột M)
-            sku: realSku || get(r, cId) || '',
-            fullName: get(r, cName) || '',
-            sub: get(r, cSub) || '',
-            specs: get(r, cSpecs) || '',
-            stock: get(r, cStock) || '',
-            badge: get(r, cBadge) || ''
-          }));
-          // giữ id cũ cho nhóm SKU (tiền tố S:) để món đã set tay không mất khi đồng bộ lại
-          const lookId = 'lp-' + String(sku).replace(/^S:/, '').replace(/[^A-Za-z0-9_-]/g, '_');
-          const oldIdx = looks.findIndex(l => l.id === lookId);
-          // giữ các món "mua kèm" đặt tay của admin (không đến từ sheet)
-          const userItems = oldIdx >= 0 ? (looks[oldIdx].items || []).filter(it => !it.fromSheet) : [];
-          const look = {
-            id: lookId,
-            number: '',
-            category: get(first, cCat) || 'LiOA',
-            subCategory: get(first, cSub) || '',   // cột D — cấp phân loại cho menu cửa hàng
-            ma: get(first, cId) || '',             // cột A — mã sản phẩm
-            mode: detectImgMode(front),   // tự nhận diện PNG trong suốt
-            title: get(first, cName) || realSku || get(first, cId) || 'Sản phẩm',
-            modelImage: front,
-            modelImageBack: back,
-            items: [...sheetItems, ...userItems]
-          };
-          if (oldIdx >= 0) { looks[oldIdx] = look; updated++; }
-          else { looks.push(look); added++; }
-        });
-
-        // đánh số lại
-        looks.forEach((l, i) => { if (l.fromSheet !== false) l.number = ''; });
-        persist();
-        lucide.createIcons();
-        statusEl.textContent = `Đồng bộ xong: ${groups.size} nhóm SKU / ${variants} biến thể (mới ${added}, cập nhật ${updated})`;
-        renderMenuManagerSafe();
-        toast(`Đã đồng bộ ${groups.size} sản phẩm (${variants} biến thể) từ Google Sheet`);
-      } catch (err) {
-        statusEl.textContent = 'Lỗi: ' + err.message;
-        toast('Đồng bộ sheet thất bại — ' + err.message, true);
-      }
-    }
-
-    // ================= THƯ MỤC LƯU TRỮ (File System Access API) =================
-    let dirHandle = null, fsSaveTimer = null;
-    const IDB_NAME = 'trylook-fs';
-    function idbOpen() {
-      return new Promise((res, rej) => {
-        const rq = indexedDB.open(IDB_NAME, 1);
-        rq.onupgradeneeded = () => rq.result.createObjectStore('kv');
-        rq.onsuccess = () => res(rq.result);
-        rq.onerror = () => rej(rq.error);
+      // nhóm: SKU giống nhau → 1 thẻ; SKU trống gom theo tên liền nhau
+      const groups = new Map();
+      const normName = (s2) => String(s2 || '').toLowerCase().replace(/\s+/g, ' ').trim();
+      let openKey = null, openName = '';
+      rows.forEach(r => {
+        const id = (r[cId] || '').trim();
+        const sku = (cSku >= 0 ? (r[cSku] || '').trim() : '');
+        if (!id && !sku) return;
+        const nm = normName(r[cName]);
+        let key;
+        if (sku) { key = 'S:' + sku; openKey = null; openName = ''; }
+        else if (nm) {
+          if (openKey && openName === nm) key = openKey;
+          else { openKey = 'N:' + nm; openName = nm; key = openKey; }
+        } else {
+          if (!openKey) { openKey = 'I:' + id; openName = ''; }
+          key = openKey;
+        }
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(r);
       });
-    }
-    async function idbSet(k, v) { const db = await idbOpen(); return new Promise((res, rej) => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
-    async function idbGet(k) { const db = await idbOpen(); return new Promise((res, rej) => { const tx = db.transaction('kv', 'readonly'); const rq = tx.objectStore('kv').get(k); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); }); }
 
-    async function fsStatus(txt) { document.getElementById('fs-status').textContent = txt; }
-
-    async function pickFolder() {
-      if (!window.showDirectoryPicker) { fsStatus('Trình duyệt không hỗ trợ — dùng Chrome/Edge mới nhất'); return; }
-      try {
-        dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-        await idbSet('dir', dirHandle);
-        await fsStatus('Đã chọn: ' + dirHandle.name + ' — tự lưu khi có thay đổi ✓');
-        await fsSave();
-      } catch (e) { /* người dùng hủy hộp thoại */ }
-    }
-
-    async function initFolder() {
-      if (!window.showDirectoryPicker) { var el = document.getElementById('fs-status'); if (el) el.textContent = 'Trình duyệt không hỗ trợ lưu thư mục (cần Chrome/Edge)'; return; }
-      try { dirHandle = await idbGet('dir'); } catch (e) { return; }
-      if (!dirHandle) { fsStatus('Chưa chọn thư mục'); return; }
-      const perm = await dirHandle.queryPermission({ mode: 'readwrite' });
-      if (perm === 'granted') {
-        fsStatus('Đã kết nối ' + dirHandle.name + ' — tự lưu ✓');
-        await restoreFromFolder();
-      }
-      else fsStatus('Thư mục cũ ' + dirHandle.name + ' — bấm "Chọn thư mục" để cấp quyền lại');
-    }
-
-    // CỨU DỮ LIỆU: bộ nhớ trình duyệt rỗng (bị xóa / mở nhầm nguồn khác) → nạp lại từ file thư mục đã chọn
-    async function restoreFromFolder() {
-      try {
-        if (!dirHandle) return;
-        if (await dirHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') return;
-        const readJson = async (name) => {
-          try {
-            const fh = await dirHandle.getFileHandle(name);
-            const f = await fh.getFile();
-            return JSON.parse(await f.text());
-          } catch (e) { return null; }
+      let added = 0, updated = 0, variants = 0;
+      groups.forEach((g, sku) => {
+        variants += g.length;
+        const first = g[0];
+        const get = (r, c, d) => (c >= 0 ? (r[c] || '').trim() : d);
+        const set = new Set();
+        g.forEach(r => String(r[cImg] || '').split(',').map(x => x.trim()).filter(Boolean)
+          .forEach(u => { const t = driveThumb(u); if (/drive\.google|http/.test(t) && !set.has(t)) set.add(t); }));
+        const imgs = [...set];
+        const front = imgs[0] || '';
+        const back = imgs[1] && imgs[1] !== imgs[0] ? imgs[1] : '';
+        const realSku = sku.startsWith('S:') ? sku.slice(2) : (sku.startsWith('I:') ? sku.slice(2) : '');
+        const vLabel = (r) => [get(r, cV1), get(r, cV2)].filter(Boolean).join(' / ');
+        const idsInGroup = g.map(x => get(x, cId)).filter(Boolean).sort();
+        let commonPrefix = '';
+        if (idsInGroup.length >= 2) {
+          commonPrefix = idsInGroup[0];
+          for (const ss of idsInGroup) { let i = 0; while (i < commonPrefix.length && commonPrefix[i] === ss[i]) i++; commonPrefix = commonPrefix.slice(0, i); if (!commonPrefix) break; }
+        }
+        const rawLabels = g.map(r => vLabel(r) || get(r, cName) || get(r, cId) || '');
+        const labelCnt = new Map();
+        rawLabels.forEach(lb => labelCnt.set(lb, (labelCnt.get(lb) || 0) + 1));
+        const label = (r, idx) => {
+          let lb = rawLabels[idx] || '';
+          if (labelCnt.get(lb) > 1) {
+            const idFull = get(r, cId) || '';
+            const tail = commonPrefix && idFull.indexOf(commonPrefix) === 0 ? idFull.slice(commonPrefix.length) : idFull;
+            lb = (lb ? lb + ' · ' : '') + (tail || idFull || ('VT' + (idx + 1)));
+          }
+          return lb;
         };
-        // nền mẫu bị mất → khôi phục từ trylook-bgs.json
-        if (!localStorage.getItem('trylook-bgs')) {
-          const arr = await readJson('trylook-bgs.json');
-          if (Array.isArray(arr) && arr.length) {
-            localStorage.setItem('trylook-bgs', JSON.stringify(arr));
-            bgs = loadBgs();
-            renderBgs();
-            fsStatus('Đã khôi phục ' + arr.length + ' nền từ "' + dirHandle.name + '" ✓');
-          }
-        }
-        // dữ liệu sản phẩm bị mất → khôi phục từ trylook-data.json
+        const sheetItems = g.map((r, i) => ({
+          id: 'it-' + get(r, cId) || 'it-' + sku + '-' + (i + 1),
+          name: label(r, i),
+          category: get(r, cSub) || get(r, cCat) || 'Sản phẩm chính',
+          price: parseVND(get(r, cPrice)) || 0,
+          oldPrice: parseVND(get(r, cOld)),
+          image: front || driveThumb(get(r, cImg)) || '',
+          sizes: [label(r, i)],
+          selectedSize: label(r, i),
+          selected: i === 0,
+          role: 'main',
+          fromSheet: true,
+          ma: get(r, cId) || '',
+          sku: realSku || get(r, cId) || '',
+          fullName: get(r, cName) || '',
+          sub: get(r, cSub) || '',
+          specs: get(r, cSpecs) || '',
+          stock: get(r, cStock) || '',
+          badge: get(r, cBadge) || ''
+        }));
+        const lookId = 'lp-' + String(sku).replace(/^S:/, '').replace(/[^A-Za-z0-9_-]/g, '_');
+        const oldIdx = looks.findIndex(l => l.id === lookId);
+        const userItems = oldIdx >= 0 ? (looks[oldIdx].items || []).filter(it => !it.fromSheet) : [];
+        const look = {
+          id: lookId,
+          number: '',
+          category: get(first, cCat) || 'LiOA',
+          subCategory: get(first, cSub) || '',
+          ma: get(first, cId) || '',
+          mode: detectImgMode(front),
+          title: get(first, cName) || realSku || get(first, cId) || 'Sản phẩm',
+          modelImage: front,
+          modelImageBack: back,
+          items: [...sheetItems, ...userItems]
+        };
+        if (oldIdx >= 0) { looks[oldIdx] = look; updated++; }
+        else { looks.push(look); added++; }
+      });
+
+      looks.forEach((l, i) => { if (l.fromSheet !== false) l.number = ''; });
+      persist();
+      lucide.createIcons();
+      statusEl.textContent = 'Đồng bộ xong: ' + groups.size + ' sản phẩm / ' + variants + ' biến thể (mới ' + added + ', cập nhật ' + updated + ')';
+      toast('Đã đồng bộ ' + groups.size + ' sản phẩm (' + variants + ' biến thể) từ web chính');
+    }
+
+    // Đồng bộ từ source web chính: data/products.json (admin web chính cập nhật từ Google Sheet vào đây)
+    async function syncTuWebChinh() {
+      const statusEl = document.getElementById('sheet-status');
+      try {
+        statusEl.textContent = 'Đang tải sản phẩm web chính...';
+        const res = await fetch('../data/products.json?v=' + Date.now());
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const ps = await res.json();
+        const header = ['id', 'name', 'category', 'subCategory', 'price', 'image', 'SKU', 'variant1', 'variant2', 'specs', 'stock', 'badge', 'oldPrice'];
+        const rows = ps.map(p => [
+          p.id || '', p.name || '', p.category || '',
+          (String(p.subCategory || '').trim() + (p.childCategory ? '/' + String(p.childCategory).trim() : '')).trim(),
+          String(p.price || ''),
+          ((Array.isArray(p.images) ? p.images.join(',') : '') || p.image || ''),
+          p.sku || p.skuGroup || '', p.variant1 || '', p.variant2 || '',
+          p.specs || '', p.stock || '', p.badge || '', String(p.oldPrice || '')
+        ]);
+        dongBoTuBang(header, rows, statusEl);
+      } catch (e) {
+        statusEl.textContent = 'Lỗi: ' + e.message;
+        toast('Đồng bộ từ web chính thất bại — ' + e.message, true);
+      }
+    }
+
+    // CỨU DỮ LIỆU: bộ nhớ trình duyệt rỗng → nạp lại từ file source
+    async function khoiPhucTuSource() {
+      try {
         if (!localStorage.getItem(LS_KEY)) {
-          const o = await readJson('trylook-data.json');
-          if (o && Array.isArray(o.looks) && o.looks.length) {
-            localStorage.setItem(LS_KEY, JSON.stringify(o));
-            looks = o.looks;
-            renumber();
-            render();
-            fsStatus('Đã khôi phục ' + o.looks.length + ' sản phẩm từ "' + dirHandle.name + '" ✓');
+          const res = await fetch('trylook-data.json?v=' + Date.now());
+          if (res.ok) {
+            const o = await res.json();
+            if (o && Array.isArray(o.looks) && o.looks.length) {
+              localStorage.setItem(LS_KEY, JSON.stringify(o));
+              looks = o.looks;
+              renumber();
+              render();
+              toast('Đã khôi phục ' + o.looks.length + ' sản phẩm từ source ✓');
+            }
           }
         }
-        // cấu hình nhạc bị mất → khôi phục từ cau-hinh.json
-        if (!localStorage.getItem('trylook-music')) {
-          const cfg = await readJson('cau-hinh.json');
-          if (cfg && cfg.nhac && cfg.nhac.url) {
-            try {
-              localStorage.setItem('trylook-music', JSON.stringify(cfg.nhac));
-              music = loadMusic();
-              renderMusicUI();
-              fsStatus('Đã khôi phục nhạc nền từ "' + dirHandle.name + '" ✓');
-            } catch (e) {}
-          }
-        }
-        // menu ẩn/hiện bị mất → khôi phục từ cau-hinh.json
-        if (!localStorage.getItem('trylook-menu')) {
-          const cfg2 = await readJson('cau-hinh.json');
-          if (cfg2 && Array.isArray(cfg2.menuAn)) {
-            try {
-              localStorage.setItem('trylook-menu', JSON.stringify(cfg2.menuAn));
-              renderMenuManagerSafe();
-              fsStatus('Đã khôi phục cài đặt menu từ "' + dirHandle.name + '" ✓');
-            } catch (e) {}
+        if (!localStorage.getItem(BGS_KEY)) {
+          const res2 = await fetch('trylook-bgs.json?v=' + Date.now());
+          if (res2.ok) {
+            const arr = await res2.json();
+            if (Array.isArray(arr) && arr.length) {
+              localStorage.setItem(BGS_KEY, JSON.stringify(arr));
+              bgs = loadBgs();
+              renderBgs();
+            }
           }
         }
       } catch (e) {}
-    }
-
-    function scheduleFsSave() {
-      if (!dirHandle) return;
-      clearTimeout(fsSaveTimer);
-      fsSaveTimer = setTimeout(() => fsSave(), 1200);
-    }
-
-    async function fsSave(manual) {
-      if (!dirHandle) { if (manual) fsStatus('Chưa chọn thư mục'); return; }
-      try {
-        if (await dirHandle.queryPermission({ mode: 'readwrite' }) !== 'granted') {
-          if (manual) fsStatus('Chưa có quyền ghi — bấm lại "Chọn thư mục"');
-          return;
-        }
-        const put = async (name, data) => {
-          const fh = await dirHandle.getFileHandle(name, { create: true });
-          const w = await fh.createWritable();
-          await w.write(data); await w.close();
-        };
-        // CHỐT CHẶN MẤT DỮ LIỆU: nếu bộ nhớ đang chỉ còn mẫu demo (≤ 6 sp) mà file
-        // trong thư mục có NHIỀU sản phẩm hơn → KHÔNG ghi đè, khôi phục lại vào bộ nhớ
-        const curLooks = Array.isArray(looks) ? looks.length : 0;
-        let folderLooks = 0;
-        try {
-          const old = await readJson('trylook-data.json');
-          if (old && Array.isArray(old.looks)) folderLooks = old.looks.length;
-        } catch (e) {}
-        if (curLooks <= 6 && folderLooks > curLooks) {
-          try {
-            const good = await readJson('trylook-data.json');
-            if (good && Array.isArray(good.looks) && good.looks.length) {
-              try { localStorage.setItem('trylook-data', JSON.stringify(good)); } catch (e) {}
-              looks = good.looks;
-              render();
-              fsStatus('Bộ nhớ chỉ có mẫu demo — đã KHÔI PHỤC ' + good.looks.length + ' sản phẩm từ thư mục (không ghi đè)');
-            }
-          } catch (e) {}
-        } else {
-          // giữ lại bản cũ làm backup khi bản mới ít sản phẩm hơn hẳn
-          try {
-            if (folderLooks > curLooks) {
-              const prev = await readJson('trylook-data.json');
-              if (prev) await put('trylook-data-backup.json', JSON.stringify(prev));
-            }
-          } catch (e) {}
-          await put('trylook-data.json', JSON.stringify({ version: 1, savedAt: new Date().toISOString(), looks }, null, 2));
-        }
-        await put('trylook-bgs.json', JSON.stringify(bgs || []));
-        // cấu hình: nền đang dùng + NGÀY/ĐÊM + NHẠC NỀN — tất cả lưu vào thư mục
-        let nhac = null;
-        try { nhac = JSON.parse(localStorage.getItem('trylook-music') || 'null'); } catch (e) { nhac = null; }
-        await put('cau-hinh.json', JSON.stringify({
-          nen: localStorage.getItem('trylook-bg') || 'noir',
-          cheDoNang: (localStorage.getItem('trylook-day') || '0') === '1',
-          nhac: nhac,
-          menuAn: (JSON.parse(localStorage.getItem('trylook-menu') || '[]') || []),
-          savedAt: new Date().toISOString()
-        }, null, 2));
-        await fsStatus('Đã lưu thư mục "' + dirHandle.name + '" lúc ' + new Date().toLocaleTimeString().slice(0, 5) + ' ✓');
-      } catch (e) {
-        if (manual) toast('Lưu vào thư mục thất bại: ' + e.message, true);
-      }
     }
 
     // ================= INIT =================
@@ -1436,18 +1228,12 @@
       render();
       renderBgs();
       renderMenuManagerSafe();
-      initFolder();
+      khoiPhucTuSource();
 
       // ô tìm kiếm sản phẩm
       const si = document.getElementById('look-search');
       if (si) si.addEventListener('input', () => { adminQuery = si.value; adminPage = 1; render(); });
 
-      // nhớ link Google Sheet qua các lần mở lại
-      const su = document.getElementById('sheet-url');
-      if (su) {
-        try { const saved = localStorage.getItem('trylook-sheet-url'); if (saved) su.value = saved; } catch (e) {}
-        su.addEventListener('change', () => { try { localStorage.setItem('trylook-sheet-url', su.value); } catch (e) {} });
-      }
     });
   </script>
 </body>

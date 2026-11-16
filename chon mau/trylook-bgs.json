@@ -1,1 +1,68 @@
-[{"k":"noir","n":"Noir original","css":"linear-gradient(180deg,#12141c 0%,#0a0b0e 100%)","img":""},{"k":"pump","n":"Hồng sunset","css":"linear-gradient(160deg,#2a1019 0%,#7c2d4e 55%,#b45331 130%)","img":""},{"k":"sage","n":"Rêu trầm","css":"linear-gradient(160deg,#101b14 0%,#24402e 60%,#37553f 125%)","img":""},{"k":"velvet","n":"Đỏ đô nhung","css":"linear-gradient(160deg,#1b0f14 0%,#52212e 60%,#7f2d3b 125%)","img":""},{"k":"coffee","n":"Cà phê","css":"linear-gradient(160deg,#18120c 0%,#4a3220 60%,#785430 125%)","img":""},{"k":"ocean","n":"Biển đêm","css":"linear-gradient(160deg,#0b1220 0%,#16304d 60%,#1d5e6e 125%)","img":""},{"k":"violet","n":"Sương tím","css":"linear-gradient(160deg,#150e21 0%,#372157 60%,#57328a 125%)","img":""},{"k":"stripe","n":"Kẻ mờ","css":"repeating-linear-gradient(115deg,#101218 0 26px,#171b24 26px 52px)","img":""}]
+[
+  {
+    "k": "bg-0",
+    "n": "bg 0",
+    "img": "../images/bg%200.jpg",
+    "css": "url(\"../images/bg%200.jpg\") center/cover no-repeat"
+  },
+  {
+    "k": "bg-1",
+    "n": "bg 1",
+    "img": "../images/bg%201.jpg",
+    "css": "url(\"../images/bg%201.jpg\") center/cover no-repeat"
+  },
+  {
+    "k": "bg-2",
+    "n": "bg 2",
+    "img": "../images/bg%202.jpg",
+    "css": "url(\"../images/bg%202.jpg\") center/cover no-repeat"
+  },
+  {
+    "k": "bg-3",
+    "n": "bg 3",
+    "img": "../images/bg%203.jpg",
+    "css": "url(\"../images/bg%203.jpg\") center/cover no-repeat"
+  },
+  {
+    "k": "bg-4",
+    "n": "bg 4",
+    "img": "../images/bg%204.jpg",
+    "css": "url(\"../images/bg%204.jpg\") center/cover no-repeat"
+  },
+  {
+    "k": "bg-5",
+    "n": "bg 5",
+    "img": "../images/bg%205.jpg",
+    "css": "url(\"../images/bg%205.jpg\") center/cover no-repeat"
+  },
+  {
+    "k": "bg-6",
+    "n": "bg 6",
+    "img": "../images/bg%206.jpg",
+    "css": "url(\"../images/bg%206.jpg\") center/cover no-repeat"
+  },
+  {
+    "k": "bg-7",
+    "n": "bg 7",
+    "img": "../images/bg%207.jpg",
+    "css": "url(\"../images/bg%207.jpg\") center/cover no-repeat"
+  },
+  {
+    "k": "bg-8",
+    "n": "bg 8",
+    "img": "../images/bg%208.jpg",
+    "css": "url(\"../images/bg%208.jpg\") center/cover no-repeat"
+  },
+  {
+    "k": "bg-9",
+    "n": "bg 9",
+    "img": "../images/bg%209.jpg",
+    "css": "url(\"../images/bg%209.jpg\") center/cover no-repeat"
+  },
+  {
+    "k": "bg-10",
+    "n": "bg 10",
+    "img": "../images/bg%2010.jpg",
+    "css": "url(\"../images/bg%2010.jpg\") center/cover no-repeat"
+  }
+]

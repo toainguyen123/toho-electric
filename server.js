@@ -363,6 +363,17 @@ const server = http.createServer((req, res) => {
         writeProducts(list);
         return json(res, 200, { ok: true, msg: `Đã xóa sản phẩm ${body.id}`, count: list.length });
       }
+      case 'chonmau.file': {
+        // Ghi 1 file (ảnh/nhạc dataURL) vào thư mục chon mau/
+        const m = /^data:([\w.+-]+\/[\w.+-]+);base64,(.+)$/.exec(String(body.dataUrl || ''));
+        if (!m) return json(res, 400, { ok: false, error: 'dataUrl không hợp lệ' });
+        const ext = m[1].split('/')[1].replace('jpeg', 'jpg').replace('mpeg', 'mp3');
+        const name = String(body.name || 'file').replace(/[^\w.-]/g, '_').slice(0, 60) + '-' + Date.now() + '.' + ext;
+        try {
+          fs.writeFileSync(path.join(ROOT, 'chon mau', name), Buffer.from(m[2], 'base64'));
+          return json(res, 200, { ok: true, name });
+        } catch (e) { return json(res, 500, { ok: false, error: e.message }); }
+      }
       case 'policy.save': {
         const title = String(body.title || '').trim().toUpperCase();
         if (!title) return json(res, 400, { ok: false, error: 'Thiếu tiêu đề bài viết' });

@@ -8,6 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../data/products.js?v=241114"></script>
   <!-- Custom Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -583,7 +584,7 @@
       <!-- Top Title Bar inside Canvas -->
       <div class="w-full flex justify-between items-start z-10 pointer-events-none">
         <div>
-          <span class="text-xs uppercase tracking-widest text-gray-400 font-semibold block mb-1 day-dark-text">Trải nghiệm phối đồ tương tác</span>
+          <span class="text-xs uppercase tracking-widest text-gray-400 font-semibold block mb-1 day-dark-text">Trải Nghiệm Phối Tương Tác</span>
           <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white tracking-tight day-dark-text">Chọn mẫu<span class="text-amber-400">.</span></h1>
         </div>
         
@@ -987,10 +988,10 @@
         }
       }
       // NỀN MẪU + NỀN ĐANG DÙNG + NHẠC: chỉ nạp khi bộ nhớ đang trống
-      if (!localStorage.getItem('trylook-bgs')) {
+      if (!localStorage.getItem('trylook-bgs-2')) {
         const bgs = await fetchFolderJson('trylook-bgs.json');
         if (Array.isArray(bgs) && bgs.length) {
-          try { localStorage.setItem('trylook-bgs', JSON.stringify(bgs)); } catch (e) {}
+          try { localStorage.setItem('trylook-bgs-2', JSON.stringify(bgs)); } catch (e) {}
         }
       }
       // NỀN MẪU + NỀN ĐANG DÙNG + NHẠC + MENU ẨN + NGÀY/ĐÊM: nạp từ thư mục khi bộ nhớ trống
@@ -1042,6 +1043,7 @@
       lucide.createIcons();
       initDragEvents();
       ALL_LOOKS = LOOKBOOK_DATA.slice();
+      dongBoGiaTuWebChinh();
       renderCategoryNav();
       buildLookbook();
       positionCards();
@@ -1053,7 +1055,7 @@
         const savedBag = JSON.parse(sessionStorage.getItem('trylook-bag') || '[]');
         if (Array.isArray(savedBag) && savedBag.length) { shoppingBag = savedBag; updateCartBadge(); }
       } catch (e) {}
-      try { applyStageBg(localStorage.getItem('trylook-bg') || 'noir'); } catch (e) {}
+      try { applyStageBg(localStorage.getItem('trylook-bg') || 'bg-0'); } catch (e) {}
       initDayNightSwitch();
       initMusic();
       // LINK PHÂN LOẠI: abc.com/Công Suất Nhỏ 1100W (5A) → hiện đúng sản phẩm của link
@@ -1063,6 +1065,35 @@
         if (exists) setSubCategory(seg);
       }
     });
+
+    // ------------------------------------------------------------------
+    // ĐỒNG BỘ THEO WEB CHÍNH: giá / tên / thông số luôn lấy mới nhất theo
+    // data/products.js (nơi admin web chính cập nhật từ Google Sheet)
+    // ------------------------------------------------------------------
+    function dongBoGiaTuWebChinh() {
+      try {
+        const ps = window.PRODUCTS_DATA || [];
+        if (!ps.length) return;
+        const map = {};
+        ps.forEach(p => { map[String(p.id || '').toUpperCase()] = p; });
+        ALL_LOOKS.forEach(look => {
+          const p = map[String(look.ma || '').toUpperCase()];
+          if (p) {
+            if (p.name) look.title = p.name;
+            if (!look.modelImage && p.image) look.modelImage = p.image;
+          }
+          (look.items || []).forEach(it => {
+            const q = map[String(it.ma || '').toUpperCase()];
+            if (!q) return;
+            const giaMoi = Number(String(q.price || '').replace(/[^\d]/g, ''));
+            if (giaMoi > 0) it.price = giaMoi;
+            if (q.oldPrice) it.oldPrice = Number(String(q.oldPrice).replace(/[^\d]/g, '')) || 0;
+            if (q.name) it.fullName = q.name;
+            if (q.specs) it.specs = q.specs;
+          });
+        });
+      } catch (e) { /* bỏ qua */ }
+    }
 
     // ------------------------------------------------------------------
     // MENU PHÂN LOẠI — hiển thị đúng THEO SUBCATEGORY (cột D) trên sheets,
@@ -1618,7 +1649,6 @@
           <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-4 mb-2">Phân loại / Kích thước:</div>
           <div class="flex flex-wrap gap-1.5">${pills}</div>
           ${item.fullName && item.fullName !== activeLook.title ? `<div class="text-[11px] text-gray-500 mt-2.5 leading-snug">${escHTML(item.fullName)}</div>` : ''}
-          ${item.specs ? `<details class="spec-fold mt-3 pt-3 border-t border-white/10"><summary>Thông số</summary><div class="mt-2 text-[11px] text-gray-300 leading-relaxed" style="white-space:pre-line">${escHTML(item.specs)}</div></details>` : ''}
         `;
         itemsListContainer.appendChild(block);
       }
@@ -1898,21 +1928,24 @@
     // THAY ĐỔI HÌNH NỀN (nút trong thẻ đang chọn)
     // ------------------------------------------------------------------
     const DEFAULT_BG_PRESETS = [
-      { k:'noir',   n:'Noir original',  css:'linear-gradient(180deg,#12141c 0%,#0a0b0e 100%)' },
-      { k:'pump',   n:'Hồng sunset',    css:'linear-gradient(160deg,#2a1019 0%,#7c2d4e 55%,#b45331 130%)' },
-      { k:'sage',   n:'Rêu trầm',       css:'linear-gradient(160deg,#101b14 0%,#24402e 60%,#37553f 125%)' },
-      { k:'velvet', n:'Đỏ đô nhung',    css:'linear-gradient(160deg,#1b0f14 0%,#52212e 60%,#7f2d3b 125%)' },
-      { k:'coffee', n:'Cà phê',         css:'linear-gradient(160deg,#18120c 0%,#4a3220 60%,#785430 125%)' },
-      { k:'ocean',  n:'Biển đêm',       css:'linear-gradient(160deg,#0b1220 0%,#16304d 60%,#1d5e6e 125%)' },
-      { k:'violet', n:'Sương tím',      css:'linear-gradient(160deg,#150e21 0%,#372157 60%,#57328a 125%)' },
-      { k:'stripe', n:'Kẻ mờ',          css:'repeating-linear-gradient(115deg,#101218 0 26px,#171b24 26px 52px)' },
+      { k:'bg-0', n:'bg 0', css:'url("../images/bg%200.jpg") center/cover no-repeat' },
+      { k:'bg-1', n:'bg 1', css:'url("../images/bg%201.jpg") center/cover no-repeat' },
+      { k:'bg-2', n:'bg 2', css:'url("../images/bg%202.jpg") center/cover no-repeat' },
+      { k:'bg-3', n:'bg 3', css:'url("../images/bg%203.jpg") center/cover no-repeat' },
+      { k:'bg-4', n:'bg 4', css:'url("../images/bg%204.jpg") center/cover no-repeat' },
+      { k:'bg-5', n:'bg 5', css:'url("../images/bg%205.jpg") center/cover no-repeat' },
+      { k:'bg-6', n:'bg 6', css:'url("../images/bg%206.jpg") center/cover no-repeat' },
+      { k:'bg-7', n:'bg 7', css:'url("../images/bg%207.jpg") center/cover no-repeat' },
+      { k:'bg-8', n:'bg 8', css:'url("../images/bg%208.jpg") center/cover no-repeat' },
+      { k:'bg-9', n:'bg 9', css:'url("../images/bg%209.jpg") center/cover no-repeat' },
+      { k:'bg-10', n:'bg 10', css:'url("../images/bg%2010.jpg") center/cover no-repeat' },
     ];
 
     // Danh sách nền được quản lý từ trang ADMIN (localStorage 'trylook-bgs')
     // nạp LẠI khi admin sửa → tab cửa hàng đang mở cũng cập nhật (storage event)
     let BG_PRESETS = (function () {
       try {
-        const list = JSON.parse(localStorage.getItem('trylook-bgs') || 'null');
+        const list = JSON.parse(localStorage.getItem('trylook-bgs-2') || 'null');
         if (Array.isArray(list) && list.length) {
           return list
             .filter(p => p && p.css)
@@ -1924,7 +1957,7 @@
 
     function loadBgPresets() {
       try {
-        const list = JSON.parse(localStorage.getItem('trylook-bgs') || 'null');
+        const list = JSON.parse(localStorage.getItem('trylook-bgs-2') || 'null');
         if (Array.isArray(list) && list.length) {
           BG_PRESETS = list
             .filter(p => p && p.css)
@@ -2116,14 +2149,14 @@
 
     // trang ADMIN sửa nền / nhạc / dữ liệu → cửa hàng cập nhật ngay (không cần tải lại)
     window.addEventListener('storage', (e) => {
-      if (e.key === 'trylook-bgs') {
+      if (e.key === 'trylook-bgs-2') {
         loadBgPresets();
         buildBgPop();   // dựng lại chip luôn (kể cả khi popup ẩn — mở là thấy mới)
-        try { applyStageBg(localStorage.getItem('trylook-bg') || 'noir'); } catch (err) {}
+        try { applyStageBg(localStorage.getItem('trylook-bg') || 'bg-0'); } catch (err) {}
       }
       if (e.key === 'trylook-bg') {
         // admin bấm "Dùng nền này" → cửa hàng đổi nền ngay
-        try { applyStageBg(e.newValue || 'noir'); } catch (err) {}
+        try { applyStageBg(e.newValue || 'bg-0'); } catch (err) {}
       }
       if (e.key === 'trylook-music') initMusic();
       if (e.key === 'trylook-menu') renderCategoryNav();   // admin ẩn/hiện danh mục → menu web cập nhật ngay

@@ -2,10 +2,17 @@
   "nen": "noir",
   "cheDoNang": false,
   "nhac": {
-    "url": "",
-    "volume": 60,
-    "autoplay": true
+    "volume": 0,
+    "autoplay": true,
+    "url": "AMV%20-%20%E6%9D%8E%E7%BE%B2%E6%89%BF%E8%BF%9B%E8%A1%8C%E6%9B%B2(%E5%91%BD%E8%8B%A6%E6%98%AF%E7%A7%8D%E5%A4%A9%E8%B5%8B)%20L%C3%BD%20T%C3%A2y%20Th%C3%A0nh%20(Cu%E1%BB%99c%20s%E1%BB%91ng%20kh%C3%B3%20kh%C4%83n%20l%C3%A0%20m%E1%BB%99t%20m%C3%B3n%20qu%C3%A0)%20%23xuantinhmedia.mp3"
   },
-  "menuAn": [],
-  "savedAt": "2026-11-13T01:48:20.838Z"
+  "menuAn": [
+    "PHÍCH CẮM",
+    "CHIA 3 NGÃ",
+    "1 PHA",
+    "3 PHA",
+    "ĐUI ĐÈN",
+    "Ổ NỐI"
+  ],
+  "savedAt": "2026-11-16T14:08:40.309Z"
 }

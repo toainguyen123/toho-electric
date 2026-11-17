@@ -102,6 +102,24 @@
       background: transparent; border-color: transparent;
       box-shadow: none !important; backdrop-filter: none !important;
     }
+
+    /* THẺ TRONG SUỐT HOÀN TOÀN: bỏ hẳn nền kính mờ + viền + bóng hộp (cả ngày/đêm, cả hover) */
+    .look-card,
+    .day-mode .look-card {
+      background: transparent !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+    .look-card:hover {
+      background: transparent !important;
+      border-color: transparent !important;
+    }
+    /* chữ chân thẻ nằm trực tiếp trên nền phông → thêm bóng chữ cho dễ đọc */
+    .look-card .card-foot, .look-card .card-foot h3, .look-card .card-foot span {
+      text-shadow: 0 1px 10px rgba(0, 0, 0, .65), 0 0 2px rgba(0, 0, 0, .5);
+    }
     .look-card.mode-png img { object-fit: contain !important; filter: drop-shadow(0 16px 26px rgba(0,0,0,.45)); transform: scale(1.08); }
     .look-card.mode-png .vignette { display: none; }
 

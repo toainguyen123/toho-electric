@@ -536,9 +536,12 @@
 
   <!-- ================= TOP NAVIGATION BAR ================= -->
   <header class="w-full h-16 border-b border-white/10 px-6 lg:px-12 flex items-center justify-between glass-panel sticky top-0 z-50">
-    <!-- Brand Logo -->
+    <!-- Brand Logo — bấm vào quay về trang chủ -->
     <div class="flex items-center gap-3">
-      <span class="font-bold tracking-widest text-lg uppercase text-white">TOHO ELECTRIC<span class="text-gray-400 font-normal"> VN</span></span>
+      <a href="../index.html" title="Về trang chủ TOHO ELECTRIC" class="flex items-center gap-2 hover:opacity-80 transition cursor-pointer">
+        <i data-lucide="zap" class="w-6 h-6 text-amber-400"></i>
+        <span class="font-bold tracking-widest text-lg uppercase text-white">TOHO ELECTRIC<span class="text-gray-400 font-normal"> VN</span></span>
+      </a>
     </div>
 
     <!-- CATEGORY NAV — menu ngành hàng (dựng động từ dữ liệu) -->
@@ -1485,6 +1488,17 @@
 
         cardEl.dataset.showing = 'front';
 
+        // dò ảnh trong suốt ngay khi ảnh tải xong (không tốn thêm yêu cầu mạng)
+        // + tự thử lại ảnh lỗi (Google chặn tạm / mạng chập chờn)
+        const fImgEl = cardEl.querySelector('[data-face=front] img');
+        if (fImgEl) {
+          fImgEl.addEventListener('load', () => {
+            const lk = LOOKBOOK_DATA[+cardEl.dataset.index];
+            if (lk) doProbeTuAnh(fImgEl, lk);
+          });
+          fImgEl.addEventListener('error', () => xuLyLoiAnh(fImgEl));
+        }
+
         // Pagination Dot
         const dot = document.createElement('button');
         dot.className = `w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentLookIndex ? 'w-8 bg-white' : 'bg-white/30 hover:bg-white/60'}`;
@@ -1568,45 +1582,68 @@
       if (card) card.classList.add('mode-png');
     }
 
-    async function doMotSticker(look) {
-      const url = String(look.modelImage || '').trim();
+    // NẠP ẢNH: bật CORS cho ảnh Google (để dò trong suốt KHÔNG phải tải lại lần 2)
+    // → một ảnh chỉ tải đúng 1 lần, tránh bị Google chặn "quá nhiều yêu cầu" (lỗi 429)
+    function ganSrcAnh(elem, url) {
+      if (!elem || !url) return;
+      // đường dẫn kiểu "images/..." của web chính → trỏ đúng sang thư mục gốc
+      if (/^images\//i.test(url)) url = '../' + url;
+      if (elem.getAttribute('src') === url) return;
+      if (/googleusercontent|drive\.google/.test(url)) {
+        if (elem.getAttribute('crossorigin') !== 'anonymous') elem.crossOrigin = 'anonymous';
+      } else if (elem.hasAttribute('crossorigin')) {
+        elem.removeAttribute('crossorigin');
+      }
+      elem.dataset.soLanThu = '0';
+      elem.setAttribute('src', url);
+    }
+
+    // Ảnh lỗi (mạng / Google chặn tạm) → tự thử lại vài lần, rồi chịu
+    function xuLyLoiAnh(elem) {
+      if (!elem) return;
+      const url = elem.getAttribute('src') || '';
+      if (!url) return;
+      const n = +(elem.dataset.soLanThu || 0);
+      if (n >= 3) return;                     // thử tối đa 3 lần
+      elem.dataset.soLanThu = String(n + 1);
+      if (elem.hasAttribute('crossorigin') && n === 0) {
+        // lần 1: bỏ CORS tải lại ngay (máy chủ không cho CORS)
+        elem.removeAttribute('crossorigin');
+        setTimeout(() => { elem.src = url; }, 400);
+      } else {
+        // lần 2, 3: chờ Google hết chặn tạm rồi tải lại
+        const cho = n === 1 ? 2500 : 10000;
+        setTimeout(() => { elem.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'r=' + Date.now(); }, cho);
+      }
+    }
+
+    // Dò trong suốt NGAY TRÊN ẢNH ĐÃ TẢI (không tải thêm) — kết quả nhớ theo URL
+    function doProbeTuAnh(imgEl, look) {
+      const url = String(look.modelImage || '');
       if (!url || look.mode === 'png') return;
+      if (PNG_DA_DO.has(url)) { if (PNG_DA_DO.get(url)) apDungSticker(look); return; }
       try {
-        const res = await fetch(url, { mode: 'cors' });
-        if (res.ok) {
-          const bmp = await createImageBitmap(await res.blob());
-          const N = 40;
-          const c = document.createElement('canvas');
-          c.width = N; c.height = N;
-          const ctx = c.getContext('2d');
-          ctx.drawImage(bmp, 0, 0, N, N);
-          const d = ctx.getImageData(0, 0, N, N).data;
-          let trong = 0;
-          for (let i = 3; i < d.length; i += 4) if (d[i] < 10) trong++;
-          PNG_DA_DO.set(url, trong > (d.length / 4) * 0.02);   // ≥2% pixel trong suốt → là hình dán
-        } else {
-          PNG_DA_DO.set(url, false);
-        }
+        const N = 40;
+        const c = document.createElement('canvas');
+        c.width = N; c.height = N;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(imgEl, 0, 0, N, N);
+        const d = ctx.getImageData(0, 0, N, N).data;
+        let trong = 0;
+        for (let i = 3; i < d.length; i += 4) if (d[i] < 10) trong++;
+        PNG_DA_DO.set(url, trong > (d.length / 4) * 0.02);   // ≥2% pixel trong suốt → là hình dán
       } catch (e) {
-        PNG_DA_DO.set(url, false);   // không dò được → giữ kiểu cũ
+        PNG_DA_DO.set(url, false);   // ảnh không đọc được điểm ảnh (thiếu CORS) → giữ kiểu cũ
       }
       if (PNG_DA_DO.get(url)) apDungSticker(look);
     }
 
     function doStickerChoTheGan() {
-      // thẻ vừa dựng lại vẫn dán đúng kiểu đã dò
+      // thẻ vừa dựng lại vẫn dán đúng kiểu đã dò trước đó (không tải mạng)
       LOOKBOOK_DATA.forEach(l => {
         const u = String(l.modelImage || '');
         if (u && l.mode !== 'png' && PNG_DA_DO.get(u) === true) apDungSticker(l);
       });
-      // dò mới cho các thẻ gần (±2 quanh thẻ đang xem)
-      const canDo = [];
-      for (let k = -2; k <= 2; k++) {
-        const idx = (currentLookIndex + k + LOOKBOOK_DATA.length) % LOOKBOOK_DATA.length;
-        const l = LOOKBOOK_DATA[idx];
-        if (l && l.modelImage && l.mode !== 'png' && !PNG_DA_DO.has(String(l.modelImage))) canDo.push(l);
-      }
-      canDo.slice(0, 5).forEach(l => doMotSticker(l));
     }
 
     function updateAppView() {
@@ -1641,13 +1678,11 @@
         if (!hasImg && !look.modelImage) return;
         const near = Math.abs(idx - currentLookIndex) <= IMG_WINDOW || (idx + LOOKBOOK_DATA.length - currentLookIndex) % LOOKBOOK_DATA.length <= IMG_WINDOW || (currentLookIndex + LOOKBOOK_DATA.length - idx) % LOOKBOOK_DATA.length <= IMG_WINDOW;
         if (near) {
-          if (fImg && look.modelImage && fImg.getAttribute('src') !== look.modelImage) {
-            fImg.setAttribute('src', look.modelImage);
-          }
+          if (fImg && look.modelImage) ganSrcAnh(fImg, look.modelImage);
           // ảnh mặt sau chỉ giữ nếu thẻ đang bị lật
           if (bImg) {
             const wantBack = cardEl.classList.contains('is-flipped');
-            if (wantBack && look.modelImageBack && bImg.getAttribute('src') !== look.modelImageBack) bImg.setAttribute('src', look.modelImageBack);
+            if (wantBack && look.modelImageBack) ganSrcAnh(bImg, look.modelImageBack);
             else if (!wantBack && bImg.hasAttribute('src')) bImg.removeAttribute('src');
           }
         } else if (hasImg) {

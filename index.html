@@ -90,6 +90,9 @@
             to   { transform: translateX(-50%); }
         }
         .flash-marquee-track:hover { animation-play-state: paused !important; }
+
+        /* Bấm ô KHUYẾN MÃI FLASHSALE → khu Flash Sale sáng lên nhắc mắt 1 nhịp */
+        .flash-highlight { box-shadow: 0 0 0 3px rgba(168, 85, 247, .8), 0 0 34px rgba(168, 85, 247, .55) !important; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased relative selection:bg-red-500 selection:text-white">
@@ -330,7 +333,7 @@
                     <div onclick="openPcBuilderModal()" class="glass-card p-3 rounded-2xl text-center text-xs font-bold shadow-sm hover:border-starRed transition cursor-pointer flex items-center justify-center">
                         <i class="fa-solid fa-sliders text-starRed mr-2 text-sm"></i> TÍNH TOÁN CÔNG SUẤT
                     </div>
-                    <div class="glass-card p-3 rounded-2xl text-center text-xs font-bold shadow-sm hover:border-starRed transition cursor-pointer flex items-center justify-center">
+                    <div onclick="goFlashSale()" class="glass-card p-3 rounded-2xl text-center text-xs font-bold shadow-sm hover:border-starRed transition cursor-pointer flex items-center justify-center">
                         <i class="fa-solid fa-bolt text-starRed mr-2 text-sm"></i> KHUYẾN MÃI FLASHSALE
                     </div>
                     <div onclick="goWarranty()" class="glass-card p-3 rounded-2xl text-center text-xs font-bold shadow-sm hover:border-starRed transition cursor-pointer flex items-center justify-center">
@@ -365,7 +368,7 @@
             </section>
 
             <!-- FLASH SALE -->
-            <section id="flashSaleSection" class="bg-gradient-to-r from-purple-900/90 via-slate-900 to-slate-950 rounded-3xl p-5 border border-purple-500/20 shadow-2xl backdrop-blur-xl space-y-4 text-white">
+            <section id="flashSaleSection" class="bg-gradient-to-r from-purple-900/90 via-slate-900 to-slate-950 rounded-3xl p-5 border border-purple-500/20 shadow-2xl backdrop-blur-xl space-y-4 text-white transition-all duration-500">
                 <div class="flex flex-wrap items-center justify-between border-b border-purple-500/20 pb-3.5 gap-2">
                     <div class="flex items-center space-x-3">
                         <span class="bg-gradient-to-r from-amber-400 to-red-500 text-slate-950 font-black text-xs px-3.5 py-1.5 rounded-xl uppercase shadow-lg flex items-center font-heading tracking-wide">

@@ -625,6 +625,19 @@ function goWarranty() {
     window.location.href = '/bao-hanh/';
 }
 
+// Bấm ô KHUYẾN MÃI FLASHSALE → cuộn tới khu Flash Sale (nếu đang có sản phẩm sale)
+function goFlashSale() {
+    const flashSection = document.getElementById('flashSaleSection');
+    if (flashSection && !flashSection.classList.contains('hidden')) {
+        flashSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        flashSection.classList.add('flash-highlight');
+        setTimeout(() => flashSection.classList.remove('flash-highlight'), 1800);
+    } else {
+        if (typeof showToast === 'function') showToast('Hiện chưa có sản phẩm Flash Sale nào — quay lại sau nhé!', 'info');
+        else alert('Hiện chưa có sản phẩm Flash Sale nào!');
+    }
+}
+
 function initFlashSaleTimer() {
     // Thời lượng đếm ngược đọc từ cấu hình admin (Hệ thống > Flash Sale), mặc định 12h45'30"
     const cfg = window.SITE_SETTINGS || {};

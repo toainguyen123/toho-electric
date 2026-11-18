@@ -121,7 +121,8 @@
       text-shadow: 0 1px 10px rgba(0, 0, 0, .65), 0 0 2px rgba(0, 0, 0, .5);
     }
     .look-card.mode-png img { object-fit: contain !important; filter: drop-shadow(0 16px 26px rgba(0,0,0,.45)); transform: scale(1.08); }
-    .look-card.mode-png .vignette { display: none; }
+    /* BỎ LỚP PHỦ TỐI (viền đen mờ kiểu cũ) trên MỌI thẻ — ảnh hiển thị nguyên bản trên nền phông */
+    .look-card .vignette { display: none !important; }
 
     /* ==== CÔNG TẮC NGÀY/ĐÊM (Galahhad switch) ==== */
     .theme-switch {
@@ -1068,6 +1069,7 @@
       renderRightPanel();
       buildBgPop();
       auditPngLooks();
+      doStickerChoTheGan();   // dò ảnh PNG trong suốt ngay từ lần tải đầu
       // PHỤC HỒI GIỎ TẠM nếu khách bấm xem chi tiết rồi quay lại trang chọn mẫu
       try {
         const savedBag = JSON.parse(sessionStorage.getItem('trylook-bag') || '[]');
@@ -1551,6 +1553,62 @@
       updateAppView();
     }
 
+    // ------------------------------------------------------------------
+    // TỰ DÒ ẢNH PNG TRONG SUỐT: ảnh trong suốt thật → hiển thị kiểu "dán nổi"
+    // (ảnh chiếm vừa đủ, bỏ khung — nền phông hiện xuyên qua). Ảnh có nền đặc
+    // (ảnh chụp) giữ nguyên kiểu phóng to lấp khung.
+    // Dò 1 lần cho mỗi URL rồi nhớ lại, chỉ dò các thẻ gần thẻ đang xem.
+    // ------------------------------------------------------------------
+    const PNG_DA_DO = new Map();   // url ảnh → true (trong suốt) / false (đặc)
+
+    function apDungSticker(look) {
+      look.mode = 'png';
+      const idx = LOOKBOOK_DATA.indexOf(look);
+      const card = document.querySelector('.look-card[data-index="' + idx + '"]');
+      if (card) card.classList.add('mode-png');
+    }
+
+    async function doMotSticker(look) {
+      const url = String(look.modelImage || '').trim();
+      if (!url || look.mode === 'png') return;
+      try {
+        const res = await fetch(url, { mode: 'cors' });
+        if (res.ok) {
+          const bmp = await createImageBitmap(await res.blob());
+          const N = 40;
+          const c = document.createElement('canvas');
+          c.width = N; c.height = N;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(bmp, 0, 0, N, N);
+          const d = ctx.getImageData(0, 0, N, N).data;
+          let trong = 0;
+          for (let i = 3; i < d.length; i += 4) if (d[i] < 10) trong++;
+          PNG_DA_DO.set(url, trong > (d.length / 4) * 0.02);   // ≥2% pixel trong suốt → là hình dán
+        } else {
+          PNG_DA_DO.set(url, false);
+        }
+      } catch (e) {
+        PNG_DA_DO.set(url, false);   // không dò được → giữ kiểu cũ
+      }
+      if (PNG_DA_DO.get(url)) apDungSticker(look);
+    }
+
+    function doStickerChoTheGan() {
+      // thẻ vừa dựng lại vẫn dán đúng kiểu đã dò
+      LOOKBOOK_DATA.forEach(l => {
+        const u = String(l.modelImage || '');
+        if (u && l.mode !== 'png' && PNG_DA_DO.get(u) === true) apDungSticker(l);
+      });
+      // dò mới cho các thẻ gần (±2 quanh thẻ đang xem)
+      const canDo = [];
+      for (let k = -2; k <= 2; k++) {
+        const idx = (currentLookIndex + k + LOOKBOOK_DATA.length) % LOOKBOOK_DATA.length;
+        const l = LOOKBOOK_DATA[idx];
+        if (l && l.modelImage && l.mode !== 'png' && !PNG_DA_DO.has(String(l.modelImage))) canDo.push(l);
+      }
+      canDo.slice(0, 5).forEach(l => doMotSticker(l));
+    }
+
     function updateAppView() {
       positionCards();
       renderRightPanel();
@@ -1564,6 +1622,7 @@
         if (bi) bi.removeAttribute('src');
       });
       updateImgWindow();   // chỉ giữ ảnh của các thẻ gần thẻ đang xem → đỡ nghẽn
+      doStickerChoTheGan();   // dò/áp hình dán trong suốt cho các thẻ gần
     }
 
     // ------------------------------------------------------------------

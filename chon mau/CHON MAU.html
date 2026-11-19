@@ -424,6 +424,22 @@
     }
     .flip-face.flip-back { transform: rotateY(180deg); }
 
+    /* Ảnh hiện ngay khi tải xong — không bao giờ thấy biểu tượng ảnh vỡ */
+    .flip-front img, .flip-back img { opacity: 0; }
+    .flip-front img.da-tai, .flip-back img.da-tai { opacity: 1; }
+    .flip-back img.da-tai + .back-loading { display: none; }
+    .back-loading {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      gap: 8px; font-size: 13px; letter-spacing: .05em; color: rgba(255,255,255,.8);
+      text-align: center; padding: 0 16px; pointer-events: none;
+    }
+    .back-loading::before {
+      content: ''; width: 14px; height: 14px; border-radius: 50%; flex: none;
+      border: 2px solid rgba(255,255,255,.25); border-top-color: #fbbf24;
+      animation: quay-tai .8s linear infinite;
+    }
+    @keyframes quay-tai { to { transform: rotate(360deg); } }
+
     /* Popup chọn nền (mở LÊN TRÊN nút — tránh bị cắt bởi overflow-hidden ở dưới) */
     #bg-pop {
       position: absolute; bottom: calc(100% + 10px); left: 50%; z-index: 40;
@@ -1478,6 +1494,7 @@
             ${hasBack ? `
             <div class="flip-face flip-back rounded-2xl overflow-hidden pointer-events-none" data-face="back">
               <img alt="Mặt sau ${look.title}" draggable="false" class="w-full h-full object-cover object-center">
+              <span class="back-loading">Đang tải mặt sau…</span>
               <div class="vignette absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10 pointer-events-none"></div>
             </div>` : ''}
           </div>
@@ -1493,10 +1510,16 @@
         const fImgEl = cardEl.querySelector('[data-face=front] img');
         if (fImgEl) {
           fImgEl.addEventListener('load', () => {
+            fImgEl.classList.add('da-tai');
             const lk = LOOKBOOK_DATA[+cardEl.dataset.index];
             if (lk) doProbeTuAnh(fImgEl, lk);
           });
-          fImgEl.addEventListener('error', () => xuLyLoiAnh(fImgEl));
+          fImgEl.addEventListener('error', () => { fImgEl.classList.remove('da-tai'); xuLyLoiAnh(fImgEl); });
+        }
+        const bImgEl = cardEl.querySelector('[data-face=back] img');
+        if (bImgEl) {
+          bImgEl.addEventListener('load', () => bImgEl.classList.add('da-tai'));
+          bImgEl.addEventListener('error', () => { bImgEl.classList.remove('da-tai'); xuLyLoiAnh(bImgEl); });
         }
 
         // Pagination Dot
@@ -1527,7 +1550,7 @@
       if (tag) tag.textContent = flipped ? 'Mặt sau' : 'Mặt trước';
       // ảnh mặt sau chỉ nạp khi cần (tiết kiệm bộ nhớ)
       const backImg = cardEl.querySelector('[data-face="back"] img');
-      if (backImg && !backImg.hasAttribute('src')) backImg.setAttribute('src', look.modelImageBack);
+      if (backImg && flipped) ganSrcAnh(backImg, look.modelImageBack);
     }
 
     // Chỉ cập nhật class vị trí (kết hợp CSS transition => trượt mượt)
@@ -1588,7 +1611,14 @@
       if (!elem || !url) return;
       // đường dẫn kiểu "images/..." của web chính → trỏ đúng sang thư mục gốc
       if (/^images\//i.test(url)) url = '../' + url;
-      if (elem.getAttribute('src') === url) return;
+      if (elem.getAttribute('src') === url) {
+        if (elem.classList.contains('da-tai') || !elem.complete) return;   // đã tải được / đang tải
+        if (elem.naturalWidth > 0) return;
+        // ảnh này từng lỗi → cho thử lại khi quay lại thẻ
+        elem.dataset.soLanThu = '0';
+        elem.setAttribute('src', url + (url.indexOf('?') >= 0 ? '&' : '?') + 'r=' + Date.now());
+        return;
+      }
       if (/googleusercontent|drive\.google/.test(url)) {
         if (elem.getAttribute('crossorigin') !== 'anonymous') elem.crossOrigin = 'anonymous';
       } else if (elem.hasAttribute('crossorigin')) {
@@ -1604,7 +1634,20 @@
       const url = elem.getAttribute('src') || '';
       if (!url) return;
       const n = +(elem.dataset.soLanThu || 0);
-      if (n >= 3) return;                     // thử tối đa 3 lần
+      if (n >= 3) {
+        // ảnh MẶT SAU lỗi hẳn → tự trả thẻ về mặt trước để khách không bị kẹt hình vỡ
+        if (elem.closest && elem.closest('[data-face=back]')) {
+          const card = elem.closest('.look-card');
+          if (card) {
+            card.classList.remove('is-flipped');
+            card.dataset.showing = 'front';
+            const tg = card.querySelector('.face-tag');
+            if (tg) tg.textContent = 'Mặt trước';
+          }
+          if (typeof showToast === 'function') showToast('Ảnh mặt sau đang lỗi tải — đã trả về mặt trước, thử lại sau nhé!', 'info');
+        }
+        return;                               // thử tối đa 3 lần
+      }
       elem.dataset.soLanThu = String(n + 1);
       if (elem.hasAttribute('crossorigin') && n === 0) {
         // lần 1: bỏ CORS tải lại ngay (máy chủ không cho CORS)

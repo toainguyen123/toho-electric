@@ -424,6 +424,11 @@
     }
     .flip-face.flip-back { transform: rotateY(180deg); }
 
+    /* transition mượt cho hiệu ứng lật */
+    .flip-face { transition: filter .24s ease, opacity .24s ease; }
+    /* blur nhẹ mặt trước trong lúc lật sang mặt sau (chuyển qua nhẹ nhàng) */
+    .look-card.is-flipping .flip-front { filter: blur(5px); opacity: .45; }
+
     /* Ảnh hiện ngay khi tải xong — không bao giờ thấy biểu tượng ảnh vỡ */
     .flip-front img, .flip-back img { opacity: 0; }
     .flip-front img.da-tai, .flip-back img.da-tai { opacity: 1; }
@@ -1544,6 +1549,7 @@
       const cardEl = document.querySelector(`.look-card[data-index="${index}"]`);
       const look = LOOKBOOK_DATA[index];
       if (!cardEl || !look || !look.modelImageBack || !look.modelImage) return;
+      cardEl.classList.add('is-flipping');
       const flipped = cardEl.classList.toggle('is-flipped');
       cardEl.dataset.showing = flipped ? 'back' : 'front';
       const tag = cardEl.querySelector('.face-tag');   // nhãn đứng im, không xoay theo ảnh
@@ -1551,6 +1557,10 @@
       // ảnh mặt sau chỉ nạp khi cần (tiết kiệm bộ nhớ)
       const backImg = cardEl.querySelector('[data-face="back"] img');
       if (backImg && flipped) ganSrcAnh(backImg, look.modelImageBack);
+      // xoá class lật sau khi chuyển xong
+      const boLop = () => cardEl.classList.remove('is-flipping');
+      cardEl.addEventListener('transitionend', boLop, { once: true });
+      setTimeout(boLop, 900);   // phòng tránh transitionend không bắn
     }
 
     // Chỉ cập nhật class vị trí (kết hợp CSS transition => trượt mượt)

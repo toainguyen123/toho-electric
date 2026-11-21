@@ -42,6 +42,8 @@
     .btn-ghost:hover { background: rgba(255,255,255,0.12); color: #fff; }
     .btn-danger { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
     .btn-danger:hover { background: rgba(239,68,68,0.25); color: #fff; }
+    /* Hàng sản phẩm đã ẩn khỏi web */
+    .look-row.look-hidden { opacity: .62; filter: grayscale(.35); }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
@@ -380,7 +382,7 @@
         const look = looks[i];
         const total = look.items.reduce((s, it) => s + (+it.price || 0), 0);
         const card = document.createElement('div');
-        card.className = 'look-row flex items-center gap-3 p-2.5 fade-in';
+        card.className = 'look-row flex items-center gap-3 p-2.5 fade-in' + (look.hidden ? ' look-hidden' : '');
         card.innerHTML = `
           <img src="${look.modelImage}" onerror="this.removeAttribute('src');this.style.opacity=.15" class="w-12 h-16 object-cover rounded-lg border border-white/10 bg-black/40 shrink-0">
           <div class="min-w-0 flex-1">
@@ -390,9 +392,11 @@
             </div>
             <h3 class="font-bold text-[12px] mt-0.5 truncate text-white">${esc(look.title)}</h3>
             <div class="text-[10px] text-gray-400 mt-0.5 truncate">${look.items.length} món · Tổng ${Math.round(total).toLocaleString('vi-VN')}đ · ${esc(look.items.map(it => it.name).join(', '))}</div>
+            ${look.hidden ? '<div class="text-[9px] text-amber-400 font-bold uppercase mt-0.5 truncate">ĐÃ ẨN KHỎI WEB</div>' : ''}
           </div>
           <div class="flex gap-1 shrink-0">
             <button onclick="openEditor(${i})" class="btn btn-ghost !py-1 !px-2 !text-[10px]"><i data-lucide="pencil" class="w-3 h-3"></i></button>
+            <button onclick="toggleHidden(${i})" class="btn btn-ghost !py-1 !px-2 !text-[10px] ${look.hidden ? 'bg-amber-500/25 text-amber-400 border border-amber-500/40' : ''}" title="${look.hidden ? 'Hiện lại lên web' : 'Ẩn khỏi trang chọn mẫu'}"><i data-lucide="${look.hidden ? 'eye-off' : 'eye-slash'}" class="w-3 h-3"></i></button>
             <button onclick="moveLook(${i},-1)" class="btn btn-ghost !py-1 !px-1.5" title="Lên trên"><i data-lucide="arrow-up" class="w-3 h-3"></i></button>
             <button onclick="moveLook(${i},1)" class="btn btn-ghost !py-1 !px-1.5" title="Xuống dưới"><i data-lucide="arrow-down" class="w-3 h-3"></i></button>
             <button onclick="removeLook(${i})" class="btn btn-danger !py-1 !px-2"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
@@ -701,6 +705,7 @@
         title,
         modelImage: document.getElementById('ed-model').value.trim(),
         modelImageBack: document.getElementById('ed-model-back').value.trim(),
+        hidden: looks[editIndex]?.hidden ?? false,
         items: draftItems.map(it => ({ ...it, selectedSize: (it.sizes && it.sizes[0]) || 'M' }))
       };
 
@@ -708,8 +713,13 @@
       else looks.push(look);
       draftItems = [];
 
-      persist();   // render + toast
+      persist();
       showModal(false);
+    }
+
+    function toggleHidden(i) {
+      looks[i].hidden = !looks[i].hidden;
+      persist();
     }
 
     function removeLook(i) {

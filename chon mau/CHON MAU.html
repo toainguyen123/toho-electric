@@ -968,6 +968,7 @@
               badge: l.badge || '',
               subCategory: l.subCategory || '',
               ma: l.ma || '',
+              hidden: !!l.hidden,
               items: l.items.map(it => ({
                 id: it.id || ('item-' + Math.random().toString(36).slice(2)),
                 name: it.name || 'Item',
@@ -990,8 +991,9 @@
               }))
             }));
           if (clean.length) {
-            clean.forEach((l, i) => { if (!l.number) l.number = String(i + 1).padStart(2, '0'); });
-            LOOKBOOK_DATA.splice(0, LOOKBOOK_DATA.length, ...clean);
+            const hien = clean.filter(l => l.hidden !== true);   // lọc bỏ sản phẩm đã ẩn ở admin
+            hien.forEach((l, i) => { if (!l.number) l.number = String(i + 1).padStart(2, '0'); });
+            LOOKBOOK_DATA.splice(0, LOOKBOOK_DATA.length, ...hien);
           }
         }
       } catch (e) {}

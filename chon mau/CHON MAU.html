@@ -481,9 +481,19 @@
     .bg-chip.chip-on { border-color: #fbbf24; box-shadow: 0 0 0 1px #fbbf24, 0 10px 22px -12px rgba(0,0,0,.7); }
     .bg-title { width: 100%; text-align: center; font-size: 10px; letter-spacing: .18em;
       text-transform: uppercase; color: rgba(255,255,255,.45); margin-bottom: 2px; font-weight: 600; }
-  </style>
+  .watermark {
+  position: fixed; inset: 0; z-index: 40; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  font: 800 120px 'Segoe UI', system-ui, sans-serif;
+  color: rgba(255,255,255,0.05);
+  user-select: none; -webkit-user-select: none;
+  transform: rotate(-22deg);
+  white-space: nowrap;
+}
+.watermark::before { content: "TOHO ELECTRIC VN"; letter-spacing: 12px; }
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-white selection:text-black">
+  <div class="watermark" aria-hidden="true"></div>
 
   <!-- NHẠC NỀN: nút bật/tắt nổi góc trái — cấu hình trong trang ADMIN -->
   <audio id="store-bgm" loop preload="auto"></audio>
